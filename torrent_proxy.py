@@ -7,7 +7,6 @@ class Peer:
 
     @staticmethod
     def join_file(fileList, filePath):
-
         with open(filePath, "wb") as saveFile:
             for f in fileList:
                 data = open(f, "rb").read()
@@ -18,7 +17,6 @@ class Peer:
 class Seed:
     @staticmethod
     def divide_file(filePath, chunkSize):
-
         readDataSize = 0
         fileList = []
         i = 0
@@ -27,7 +25,6 @@ class Seed:
         contentLength = os.path.getsize(filePath)
 
         while readDataSize < contentLength:
-
             f.seek(readDataSize)
 
             data = f.read(chunkSize)
@@ -51,7 +48,7 @@ if __name__ == '__main__':
 
     torrent_file = open("ubuntu-20.04.3-desktop-amd64.iso.torrent", "rb").read()
     decodedFile = bencodepy.decode(torrent_file)
-    print(decodedFile)
+    print(decodedFile.encode())
 
-    fileList = seed.divide_file("testPicture.jpg", 1024)
-    peer.join_file(fileList, "join_testPicture.jpg")
+    fileList = seed.divide_file("ubuntu-ja-20.04.1-desktop-amd64.iso", 256)
+    # peer.join_file(fileList, "join_testPicture.jpg")
