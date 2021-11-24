@@ -72,11 +72,11 @@ if __name__ == '__main__':
     for i in range(0, len(peersBytesDict)):
         b = peersBytesDict[i]
         ip = \
-            str(int.from_bytes(b[0:1], 'little')) + "." + \
-            str(int.from_bytes(b[1:2], 'little')) + "." + \
-            str(int.from_bytes(b[2:3], 'little')) + "." + \
-            str(int.from_bytes(b[3:4], 'little'))
-        port = int.from_bytes(b[4:6], 'little')
+            str(int.from_bytes(b[0:1], 'big')) + "." + \
+            str(int.from_bytes(b[1:2], 'big')) + "." + \
+            str(int.from_bytes(b[2:3], 'big')) + "." + \
+            str(int.from_bytes(b[3:4], 'big'))
+        port = int.from_bytes(b[4:6], 'big')
         addr = [ip, port]
         peers.append(addr)
     print('peer list: ')
@@ -84,17 +84,64 @@ if __name__ == '__main__':
     print('\n')
 
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    addr = ('localhost', 18785)
+    addr = (peers[0][0], peers[0][1])
     print('connecting to ' + str(addr) + '\n')
     sock.connect(addr)
 
-    data = b'\x13' + b'Bittorrent protocol' + b'\00\00\00\00\00\00\00\00' + \
+    data = b'\x13' + b'BitTorrent protocol' + b'\00\00\00\00\00\00\00\00' + \
            info_hash + b'-qB4250-dYUl8lqi!FJ8'
 
     print('send data (binary) ...')
-    print('\033[42m' + data.hex() + '\033[0m')
+    print('\033[42m' + data.hex() + '\033[0m' + '\n')
 
     sock.sendall(data)
-    message = sock.recv(1024)
-    print('receive data')
-    print(message.decode('utf-8'))
+    m = sock.recv(1024)
+    print('receive data ...')
+    print(m)
+
+    messageLength = 13
+    messageID = 6
+    index = 9101
+    begin = 0
+    length = 16 * 1024
+
+    while True:
+        message = sock.recv(32 * 1024)
+        if message != 0:
+            m_length = int.from_bytes(message[0:3], 'big')
+            t_id = int.from_bytes(message[3:4], 'big')
+            if t_id == 0:
+                pass
+            if t_id == 1:
+                data = messageLength.to_bytes(4, 'big')
+                data += messageID.to_bytes(1, 'big')
+                data += index.to_bytes(4, 'big')
+                data += begin.to_bytes(4, 'big')
+                data += length.to_bytes(4, 'big')
+
+                sock.sendall(data)
+                pass
+            if t_id == 2:
+                pass
+            if t_id == 3:
+                pass
+            if t_id == 4:
+                pass
+            if t_id == 5:
+                data = messageLength.to_bytes(4, 'big')
+                data += messageID.to_bytes(1, 'big')
+                data += index.to_bytes(4, 'big')
+                data += begin.to_bytes(4, 'big')
+                data += length.to_bytes(4, 'big')
+
+                sock.sendall(data)
+                pass
+            if t_id == 6:
+                pass
+            if t_id == 7:
+                print(message)
+                pass
+            if t_id == 8:
+                pass
+            if t_id == 9:
+                pass
