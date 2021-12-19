@@ -32,7 +32,7 @@ def requestURL(info_hash=None, peer_id=None, port=None, uploaded=None, downloade
 
 
 if __name__ == '__main__':
-
+'''
     torrentFile = open(sys.argv[1], "rb")
     bc = bencodepy.Bencode(
         encoding='utf-8',
@@ -44,7 +44,7 @@ if __name__ == '__main__':
     piecesDict = infoDict['pieces']
 
     pieces = [piecesDict[i:i + 20] for i in range(0, len(piecesDict), 20)]
-
+'''
     info_hash = hashlib.sha1(bencodepy.encode(infoDict)).digest()
     print('\033[32m' + 'Hash of Torrent: ' + '\033[0m' + info_hash.hex())
 
@@ -63,8 +63,8 @@ if __name__ == '__main__':
 
     print('\nwaiting to receive peer info ...\n')
 
-    response = requests.get(url)
-    resDict = bc.decode(response.content)
+   # response = requests.get(url)
+   # resDict = bc.decode(response.content)
 
     peersBytes = bytes(resDict['peers'])
     peersBytesDict = [peersBytes[i:i + 6] for i in range(0, len(peersBytes), 6)]
