@@ -6,7 +6,7 @@ import bencodepy
 
 import cefpyco
 
-CEFORE_DIR = os.path.abspath("../cefore")
+CEFORE_DIR = os.path.abspath("cefore")
 bc = bencodepy.Bencode(
     encoding='utf-8',
     encoding_fallback='all',

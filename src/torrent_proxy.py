@@ -2,7 +2,7 @@ import os.path
 import cefpyco
 
 
-CEFORE_DIR = os.path.abspath("../cefore")
+CEFORE_DIR = os.path.abspath("cefore")
 peer_d: dict = {}
 
 
