@@ -2,7 +2,9 @@ import argparse
 import hashlib
 import socket
 import sys
+import threading
 import urllib.parse
+import cefpyco
 
 import bencodepy
 import requests
@@ -40,9 +42,6 @@ def makeRequestURL(info_hash=None, port=None, uploaded=None, downloaded=None,
     return url
 
 
-
-
-
 def handShake(peer, info_hash) -> socket:
     data = b'\x13' + b'BitTorrent protocol' + b'\00\00\00\00\00\00\00\00' + \
            info_hash + peer_id.encode('utf-8')
@@ -58,10 +57,11 @@ def handShake(peer, info_hash) -> socket:
 
 class P2P:
 
-    def __init__(self, sock: socket):
+    def __init__(self, ip, port):
+        self.addr = (ip, port)
         self.sock = sock
 
-        self.choke_state: bool = False   # True  -> choke
+        self.choke_state: bool = False  # True  -> choke
         self.choked_state: bool = False  # False -> unchoke
 
         self.interested_state: bool = False
@@ -128,19 +128,30 @@ class P2P:
 
         self.sock.sendall(data)
 
+    def handle(self):
+
 
 class BitTorrent:
 
     def __init__(self, torrent_file):
+        # torrent file information
         self.torrent_file = torrent_file
         self.torrent_dict: dict = bc.decode(self.torrent_file)
         self.info_dict: dict = self.torrent_dict['info']
+        self.length = self.info_dict['length']
+        self.piece_length = self.info_dict['piece length']
+        self.piece_num: int = self.length // self.piece_length
         self.pieces_dict: dict = self.info_dict['pieces']
+        # hash of piece
         self.pieces = [self.pieces_dict[i:i + 20] for i in range(0, len(self.pieces_dict), 20)]
 
+        # analyze info
         self.info_hash = hashlib.sha1(bencodepy.encode(self.info_dict)).digest()
         self.tracker_addr = self.torrent_dict['announce'].replace("https", "http")
         self.peer_list = []
+
+        # piece info
+        self.downloaded_piece = []
 
     def getPeerList(self):
         url = makeRequestURL(
@@ -170,14 +181,36 @@ class BitTorrent:
             addr = [ip, port]
             self.peer_list.append(addr)
 
-        return self.peer_list
+        return self.peer_list, len(self.peer_list)
 
-    def handle(self, peer, info_hash):
-        sock = handShake(peer, info_hash)
-        p2p = P2P(sock)
-        p2p.requestPiece()
+    def handshake(self, sock: socket):
+        data = b'\x13' + b'BitTorrent protocol' + b'\00\00\00\00\00\00\00\00' + \
+               self.info_hash + peer_id.encode('utf-8')
+        sock.sendall(data)
+
+    def listener(self):
+        pass
 
 
+    def thread(self, addr):
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.connect(addr)
+        self.handshake(sock)
+        #
+
+    def download(self):
+        self.getPeerList()
+        peer_num = len(self.peer_list)
+        p2p = []
+        for i in range(peer_num):
+            p2p[i] = P2P(self.peer_list[i][0], self.peer_list[i][1])
+            # threadに処理を投げる
+
+
+# ICNのピース紹介の方法
+# ICNノードの紹介方法
+# 一般ピアの恩恵
+# ピースの優先順位
 def main():
     if len(sys.argv) != 2:
         print("Usage: {} <server port>".format(sys.argv[0]))
