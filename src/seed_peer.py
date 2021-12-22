@@ -67,9 +67,9 @@ def main():
     torrent_dict = bc.decode(torrent_file)
     info_dict: dict = torrent_dict['info']
     global length, piece_length, piece_num
-    length: int = info_dict['length']
-    piece_length: int = info_dict['piece length']
-    piece_num: int = length // piece_length
+    length = info_dict['length']
+    piece_length = info_dict['piece length']
+    piece_num = length // piece_length
     global info_hash
     info_hash = hashlib.sha1(bencodepy.encode(info_dict)).digest()
 
