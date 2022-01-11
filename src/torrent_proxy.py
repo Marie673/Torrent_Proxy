@@ -26,7 +26,7 @@ def listener(handle: cefpyco.CefpycoHandle):
 
         if info.is_interest:
             print("receive interest")
-            if prefix[2] == 'I have piece':
+            if prefix[2] == 'havePiece':
                 print("add new peer")
                 info_hash = prefix[3]
                 uuid = prefix[4]

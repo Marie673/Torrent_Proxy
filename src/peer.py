@@ -38,7 +38,7 @@ def main():
         open(file_path, "wb")
 
         for i in range(piece_num):
-            handle.send_interest("ccnx:/BitTorrent/" + repr(info_hash), i)
+            handle.send_interest("ccnx:/BitTorrent/" + str(info_hash.hex()), i)
             info = handle.receive()
             prefix = info.name.split('/')
 

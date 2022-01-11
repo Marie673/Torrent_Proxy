@@ -36,13 +36,14 @@ def sendData(handle: cefpyco.CefpycoHandle):
         for i in range(piece_num):
             source_file.seek(read_data_size)
             data = source_file.read(piece_length)
-            handle.send_data("ccnx:/BitTorrent/" + repr(info_hash), data, i)
+            handle.send_data("ccnx:/BitTorrent/" + str(info_hash.hex()), data, i)
 
             read_data_size = read_data_size + piece_length
 
 
 def listener(handle: cefpyco.CefpycoHandle):
-    reg = "ccnx:/BitTorrent/" + uuid + "/" + repr(info_hash)
+    reg = "ccnx:/BitTorrent/" + uuid + "/" + str(info_hash.hex())
+    print(reg)
     handle.register(reg)
     print("start listening")
     while True:
@@ -74,7 +75,10 @@ def main():
     info_hash = hashlib.sha1(bencodepy.encode(info_dict)).digest()
 
     with cefpyco.create_handle(enable_log=False, ceforedir=CEFORE_DIR) as handle:
-        handle.send_interest("ccnx:/BitTorrent/I have piece/" + repr(info_hash) + "/" + uuid)
+        interest = "ccnx:/BitTorrent/havePiece/" + str(info_hash.hex()) + "/" + uuid
+
+        print(interest)
+        handle.send_interest(interest, 0)
         listener(handle)
 
 
