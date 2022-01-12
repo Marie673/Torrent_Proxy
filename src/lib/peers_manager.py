@@ -65,6 +65,7 @@ class PeersManager(Thread):
                 cpt += 1
         return cpt
 
+
     @staticmethod
     def _read_from_socket(sock):
         data = b''
@@ -138,7 +139,7 @@ class PeersManager(Thread):
 
             self.peers.remove(peer)
 
-        # for rarest_piece in self.rarest_pieces.rarest_pieces:
+        #for rarest_piece in self.rarest_pieces.rarest_pieces:
         #    if peer in rarest_piece["peers"]:
         #        rarest_piece["peers"].remove(peer)
 

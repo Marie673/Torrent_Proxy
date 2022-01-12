@@ -56,13 +56,14 @@ class Piece(object):
 
     def set_to_full(self):
         data = self._merge_blocks()
-
         if not self._valid_blocks(data):
             self._init_blocks()
             return False
 
         self.is_full = True
         self.raw_data = data
+        # ここでファイルに書き込み
+        # この部分をDataのプッシュに割り当て
         self._write_piece_on_disk()
         pub.sendMessage('PiecesManager.PieceCompleted', piece_index=self.piece_index)
 
