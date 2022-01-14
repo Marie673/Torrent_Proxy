@@ -2,7 +2,6 @@ import hashlib
 import math
 import time
 import logging
-
 from pubsub import pub
 from block import Block, BLOCK_SIZE, State
 
@@ -64,7 +63,7 @@ class Piece(object):
         self.raw_data = data
         # ここでファイルに書き込み
         # この部分をDataのプッシュに割り当て
-        self._write_piece_on_disk()
+        # PieceManager.update_bitfieldにて実行
         pub.sendMessage('PiecesManager.PieceCompleted', piece_index=self.piece_index)
 
         return True
