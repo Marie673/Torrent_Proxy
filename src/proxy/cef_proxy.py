@@ -12,6 +12,7 @@ class Cef(Thread):
         self.message = []
         self.torrent: dict = {}
         self.is_active = True
+
         pub.subscribe(self.send_data, 'Cef.SendPiece')
 
     def run(self):
