@@ -1,3 +1,0 @@
-#ccnx:/example udp 10.0.1.1
-ccnx:/ubuntu tcp 192.168.10.100
-ccnx: tcp 192.168.10.103
