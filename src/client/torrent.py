@@ -8,6 +8,7 @@ import os
 
 class Torrent(object):
     def __init__(self):
+        self.path = ''
         self.torrent_file = {}
         self.total_length: int = 0
         self.piece_length: int = 0
@@ -19,6 +20,7 @@ class Torrent(object):
         self.number_of_pieces: int = 0
 
     def load_from_path(self, path):
+        self.path = path
         with open(path, 'rb') as file:
             contents = bdecode(file)
 

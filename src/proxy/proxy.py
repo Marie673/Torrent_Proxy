@@ -48,8 +48,8 @@ class Cef(Thread):
 
     def _process_new_message(self, info):
         name = info.name.split('/')
-        if not name[0] == 'ccnx:' or not name[1]:
-            logging.error('Not supported protocol: {}/{}'.format(name[0], name[0]))
+        if not name[0] == 'ccnx:' or not name[1] == 'BitTorrent':
+            logging.error('Not supported protocol: {}/{}'.format(name[0], name[1]))
             return
 
         if info.is_interest:
@@ -58,18 +58,18 @@ class Cef(Thread):
             message_id = name[3]
 
             # request message
-            if message_id == 6:
+            if message_id == '6' or message_id == 'request':
                 index = name[4]
                 download_piece(info_hash, index)
 
             # torrentファイル取得のためのInterest送信
             if message_id == 'torrent':
                 peer = name[4]
-                interest = 'ccnx:/' + peer + '/BitTorrent/torrent_file' + info_hash
+                interest = 'ccnx:/' + peer + '/BitTorrent/torrent/' + info_hash
                 self.handle.send_interest(interest)
 
         if info.is_data:
-            if name[2] == 'BitTorrent' and name[3] == 'torrent_file':
+            if name[2] == 'BitTorrent' and name[3] == 'torrent':
                 info_hash = name[4]
                 torrent_info = TorrentCef().load_from_bytes(info.payload)
 
