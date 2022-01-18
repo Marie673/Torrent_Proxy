@@ -11,7 +11,7 @@ class Cef(object):
 
         self.handle = cefpyco.CefpycoHandle()
         self.handle.begin()
-        self.handle.register('ccnx:/BitTorrent')
+        self.handle.register('ccnx:/')
 
     def send_interest(self, name, chunk_num=0):
         self.handle.send_interest(name, chunk_num)

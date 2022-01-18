@@ -20,9 +20,6 @@ class PiecesManager(object):
         pub.subscribe(self.update_bitfield, 'PiecesManager.PieceCompleted')
 
     def update_bitfield(self, piece_index):
-        # ceforeのData送信追加部分
-        name = 'ccnx:/BitTorrent/' + self.torrent.info_hash + '/6/' + str(piece_index)
-        pub.sendMessage('Cef.SendPiece', data=name, payload=self.pieces[piece_index].raw_data)
         self.bitfield[piece_index] = 1
 
     def receive_block_piece(self, piece):
