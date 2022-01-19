@@ -24,7 +24,7 @@ class P2P(Thread):
         Thread.__init__(self)
         self.socket: socket.socket = None
         self.ip = '127.0.0.1'
-        self.port = 80000
+        self.port = 10000
 
     def connect(self):
         try:
