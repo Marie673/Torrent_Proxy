@@ -36,6 +36,7 @@ class Run(object):
         self.handle.send_interest(interest)
 
         while not self.pieces_manager.all_pieces_completed():
+            logging.debug('start request pieces')
             for piece in self.pieces_manager.pieces:
                 index = piece.piece_index
 
