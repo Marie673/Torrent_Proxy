@@ -5,9 +5,8 @@ import cefore_handle
 from threading import Thread
 
 
-class CefManager(Thread):
+class CefManager(object):
     def __init__(self):
-        Thread.__init__(self)
         self.cef = cefore_handle.Cef()
 
         self.is_active = True

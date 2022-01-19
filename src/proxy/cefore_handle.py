@@ -35,10 +35,11 @@ class Cef(object):
         info_hash = prefix[2]
         index = prefix[4]
 
-        runner: downloader.Run = self.runners[info_hash]
-        if runner.pieces_manager.bitfield[index]:
-            piece = runner.pieces_manager.pieces[index]
-            self.send_data(info.name, piece)
+        if info_hash in self.runners.values():
+            runner: downloader.Run = self.runners[info_hash]
+            if runner.pieces_manager.bitfield[index]:
+                piece = runner.pieces_manager.pieces[index]
+                self.send_data(info.name, piece)
 
     def handle_piece(self, info: cefpyco.core.CcnPacketInfo):
         prefix = info.name.split('/')
