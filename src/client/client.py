@@ -21,6 +21,7 @@ class Run(object):
 
     def __init__(self, torrent_file_path):
         self.torrent = torrent.Torrent().load_from_path(torrent_file_path)
+        self.info_hash = str(self.torrent.info_hash.hex())
         self.pieces_manager = pieces_manager.PiecesManager(self.torrent)
         self.cef_manager = cefore_manager.CefManager(self.torrent)
         self.handle = self.cef_manager.cef.handle
@@ -30,7 +31,7 @@ class Run(object):
         logging.info("PiecesManager Started")
 
     def start(self):
-        interest = [PROTOCOL, str(self.torrent.info_hash.hex()), 'torrent', UUID]
+        interest = [PROTOCOL, self.info_hash, 'torrent', UUID]
         interest = '/'.join(interest)
         logging.debug('send Interest: {}'.format(interest))
         self.handle.send_interest(interest)
@@ -49,7 +50,7 @@ class Run(object):
                 if not data:
                     continue
 
-                interest = '/'.join([PROTOCOL, self.torrent.info_hash, 'request', index])
+                interest = '/'.join([PROTOCOL, self.info_hash, 'request', index])
                 self.handle.send_interest(interest)
 
             self.display_progression()
@@ -102,7 +103,10 @@ def main():
     path = os.path.abspath(path)
 
     run = Run(path)
-    run.start()
+    try:
+        run.start()
+    except KeyboardInterrupt:
+        sys.exit(0)
 
 
 if __name__ == '__main__':
