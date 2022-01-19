@@ -17,6 +17,7 @@ class CefManager(Thread):
         self.is_active = True
 
     def run(self):
+        logging.debug('cefore receiver start')
         while self.is_active:
             info = self.cef.handle.receive()
             if info.is_succeeded:
