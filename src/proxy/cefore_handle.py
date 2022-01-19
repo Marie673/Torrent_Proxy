@@ -42,7 +42,7 @@ class Cef(object):
         index = prefix[4]
 
         """実験用"""
-        if info_hash not in self.runners.values():
+        if info_hash not in self.runners.values() and index == '0':
             runner = downloader.Run()
             self.runners[info_hash] = runner
         """"""
