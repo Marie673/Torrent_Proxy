@@ -30,7 +30,7 @@ class Run(object):
         logging.info("PiecesManager Started")
 
     def start(self):
-        interest = [PROTOCOL, self.torrent.info_hash, 'torrent', UUID]
+        interest = [PROTOCOL, str(self.torrent.info_hash.hex()), 'torrent', UUID]
         interest = '/'.join(interest)
         logging.debug('send Interest: {}'.format(interest))
         self.handle.send_interest(interest)
