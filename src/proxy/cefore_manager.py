@@ -13,6 +13,7 @@ class CefManager(Thread):
         self.is_active = True
 
     def run(self):
+        logging.debug('Start cef manager')
         while self.is_active:
             info = self.cef.handle.receive()
             if info.is_succeeded:
