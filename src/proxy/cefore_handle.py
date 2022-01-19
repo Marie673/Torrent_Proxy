@@ -13,6 +13,11 @@ class Cef(object):
         self.handle.begin()
         self.handle.register('ccnx:/BitTorrent')
 
+        """
+        実験用
+        """
+
+
     def send_interest(self, name, chunk_num=0):
         self.handle.send_interest(name, chunk_num)
         logging.debug('Send interest: {}'.format(name))
@@ -35,6 +40,12 @@ class Cef(object):
         prefix = info.name.split('/')
         info_hash = prefix[2]
         index = prefix[4]
+
+        """実験用"""
+        if info_hash not in self.runners.values():
+            runner = downloader.Run()
+            self.runners[info_hash] = runner
+        """"""
 
         if info_hash in self.runners.values():
             runner: downloader.Run = self.runners[info_hash]

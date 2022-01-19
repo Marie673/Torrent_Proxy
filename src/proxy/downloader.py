@@ -9,12 +9,15 @@ import os
 import message
 
 
+PATH = "/home/marie673/Project/Torrent_proxy/test/ubuntu-20.04.3-desktop-amd64.iso.torrent"
+
+
 class Run(object):
     percentage_completed = -1
     last_log_line = ""
 
-    def __init__(self, torrent_bytes):
-        self.torrent = torrent.Torrent().load_from_bytes(torrent_bytes)
+    def __init__(self, torrent_file=PATH):
+        self.torrent = torrent.Torrent().load_from_path(torrent_file)
         self.tracker = tracker.Tracker(self.torrent)
 
         self.pieces_manager = pieces_manager.PiecesManager(self.torrent)

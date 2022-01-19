@@ -39,6 +39,30 @@ class Torrent(object):
 
         return self
 
+    def load_from_path(self, path):
+        logging.debug('start load_from_path')
+        self.path = path
+        with open(path, 'rb') as file:
+            contents = bdecode(file)
+
+        self.torrent_file = contents
+        self.piece_length = self.torrent_file['info']['piece length']
+        self.pieces = self.torrent_file['info']['pieces']
+        raw_info_hash = bencode(self.torrent_file['info'])
+        self.info_hash = hashlib.sha1(raw_info_hash).digest()
+        self.peer_id = self.generate_peer_id()
+        self.announce_list = self.get_trackers()
+        self.init_files()
+        self.number_of_pieces = math.ceil(self.total_length / self.piece_length)
+        logging.debug(self.file_names)
+
+        assert(self.total_length > 0)
+        assert(len(self.file_names) > 0)
+
+        logging.debug('Success load torrent file')
+
+        return self
+
     def init_files(self):
         root = self.torrent_file['info']['name']
 
