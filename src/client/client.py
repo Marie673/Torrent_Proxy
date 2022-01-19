@@ -50,7 +50,8 @@ class Run(object):
                 if not data:
                     continue
 
-                interest = '/'.join([PROTOCOL, self.info_hash, 'request', index])
+                interest = '/'.join([PROTOCOL, self.info_hash, 'request', str(index)])
+                logging.debug('send Interest: {}'.format(interest))
                 self.handle.send_interest(interest)
 
             self.display_progression()
