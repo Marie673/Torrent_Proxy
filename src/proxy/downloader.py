@@ -7,16 +7,18 @@ import tracker
 import logging
 import os
 import message
+from threading import Thread
 
 
 PATH = "/home/marie673/Project/Torrent_proxy/test/ubuntu-20.04.3-desktop-amd64.iso.torrent"
 
 
-class Run(object):
+class Run(Thread):
     percentage_completed = -1
     last_log_line = ""
 
     def __init__(self, torrent_file=PATH):
+        Thread.__init__(self)
         self.torrent = torrent.Torrent().load_from_path(torrent_file)
         self.tracker = tracker.Tracker(self.torrent)
 
@@ -27,7 +29,7 @@ class Run(object):
         logging.info("PeersManager Started")
         logging.info("PiecesManager Started")
 
-    def start(self):
+    def run(self):
         peers_dict = self.tracker.get_peers_from_trackers()
         self.peers_manager.add_peers(peers_dict.values())
 

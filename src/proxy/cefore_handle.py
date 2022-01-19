@@ -46,6 +46,7 @@ class Cef(object):
             logging.debug('create instance: {}'.format(info_hash))
             runner = downloader.Run()
             self.runners[info_hash] = runner
+            self.runners[info_hash].start()
         """"""
 
         if info_hash in self.runners.values():
