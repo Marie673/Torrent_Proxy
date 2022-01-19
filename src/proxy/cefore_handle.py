@@ -23,6 +23,7 @@ class Cef(object):
 
     def is_torrent(self, info: cefpyco.core.CcnPacketInfo):
         d = downloader.Run(info.payload)
+        print(d)
         runner = downloader.Run(d)
         name = info.name.split('/')
         info_hash = name[4]
