@@ -22,7 +22,7 @@ class CefManager(object):
         prefix = info.name.split('/')
 
         if info.is_interest:
-            logging.debug('Received Interest')
+            # logging.debug('Received Interest')
 
             if prefix[3] == 'request' or prefix[3] == '6':
                 self.cef.handle_request(info)
