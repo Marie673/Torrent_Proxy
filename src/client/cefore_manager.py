@@ -27,7 +27,7 @@ class CefManager(Thread):
         prefix = info.name.split('/')
 
         if info.is_interest:
-            logging.debug('Received Interest')
+            logging.debug('\033[32m' + 'Received Interest' + '\033[0m')
 
             if prefix[3] == 'torrent':
                 self.cef.handle_torrent(info)
