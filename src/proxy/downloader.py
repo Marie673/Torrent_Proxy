@@ -10,7 +10,7 @@ import message
 from threading import Thread
 
 
-PATH = "/home/marie673/Project/Torrent_proxy/test/ubuntu-20.04.3-desktop-amd64.iso.torrent"
+PATH = "/home/marie/Torrent_proxy/test/ubuntu-20.04.3-desktop-amd64.iso.torrent"
 
 
 class Run(Thread):
