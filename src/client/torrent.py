@@ -39,6 +39,8 @@ class Torrent(object):
         assert(self.total_length > 0)
         assert(len(self.file_names) > 0)
 
+        logging.debug('Success load torrent file')
+
         return self
 
     def init_files(self):
