@@ -9,4 +9,4 @@ client_sock, client_addr = socket.accept()
 while True:
     data = input()
 
-    client_sock.sendall(data)
+    client_sock.sendall(data.encode())
