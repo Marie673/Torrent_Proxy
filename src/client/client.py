@@ -35,6 +35,7 @@ class Run(object):
         interest = '/'.join(interest)
         logging.debug('send Interest: {}'.format(interest))
         self.handle.send_interest(interest)
+        time.sleep(1)
 
         while not self.pieces_manager.all_pieces_completed():
             logging.debug('start request pieces')
