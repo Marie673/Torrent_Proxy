@@ -45,6 +45,7 @@ class Cef(object):
         if info_hash not in self.runners.values() and index == '0':
             logging.debug('create instance: {}'.format(info_hash))
             runner = downloader.Run()
+            runner.peers_manager.start()
             self.runners[info_hash] = runner
             self.runners[info_hash].start()
         """"""

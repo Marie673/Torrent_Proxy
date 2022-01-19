@@ -25,7 +25,7 @@ class Run(Thread):
         self.pieces_manager = pieces_manager.PiecesManager(self.torrent)
         self.peers_manager = peers_manager.PeersManager(self.torrent, self.pieces_manager)
 
-        self.peers_manager.start()
+        # self.peers_manager.start()
         logging.info("PeersManager Started")
         logging.info("PiecesManager Started")
 

@@ -59,7 +59,7 @@ class Run(object):
                 time.sleep(0.1)
 
             self.display_progression()
-            time.sleep(0.1)
+            time.sleep(3)
 
         logging.info("File(s) downloaded successfully.")
         self.display_progression()
