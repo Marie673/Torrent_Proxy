@@ -20,6 +20,7 @@ class Torrent(object):
         self.number_of_pieces: int = 0
 
     def load_from_path(self, path):
+        logging.debug('start load_from_path')
         self.path = path
         with open(path, 'rb') as file:
             contents = bdecode(file)

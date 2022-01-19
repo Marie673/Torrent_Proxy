@@ -1,6 +1,6 @@
 import logging
 
-import cefpyco.core
+import cefpyco
 
 import cefore_handle
 import torrent
