@@ -51,4 +51,5 @@ class Cef(object):
         prefix = info.name.split('/')
         uuid = prefix[4]
         interest = '/'.join(['ccnx:', uuid, 'BitTorrent', 'torrent'])
+        logging.debug('send Interest: {}'.format(interest))
         self.send_interest(interest)
