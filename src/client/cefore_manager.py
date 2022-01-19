@@ -19,7 +19,6 @@ class CefManager(Thread):
     def run(self):
         logging.debug('cefore receiver start')
         while self.is_active:
-            print("listening")
             info = self.cef.handle.receive()
             if info.is_succeeded:
                 self._process_new_message(info)
