@@ -43,6 +43,7 @@ class Cef(object):
 
         """実験用"""
         if info_hash not in self.runners.values() and index == '0':
+            logging.debug('create instance: {}'.format(info_hash))
             runner = downloader.Run()
             self.runners[info_hash] = runner
         """"""
