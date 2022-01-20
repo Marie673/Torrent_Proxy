@@ -62,10 +62,10 @@ class Cef(object):
             bitfield = m_list[BITFIELD]
             pieces  = m_list[PIECES]
             print(bitfield)
-            if bitfield[int(index)]:
+            """if bitfield[int(index)]:
                 piece = pieces[int(index)]
                 self.send_data(info.name, piece)
-
+"""
     def handle_piece(self, info: cefpyco.core.CcnPacketInfo):
         prefix = info.name.split('/')
         index = prefix[4]
