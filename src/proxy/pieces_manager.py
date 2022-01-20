@@ -31,7 +31,6 @@ class PiecesManager(object):
         bitfield = self.m_dict['bitfield']
         bitfield[piece_index] = True
         self.m_dict['bitfield'] = bitfield
-        print(self.m_dict['bitfield'])
         pieces = self.m_dict['pieces']
         pieces[piece_index] = self.pieces[piece_index].raw_data
         self.m_dict['pieces'] = pieces

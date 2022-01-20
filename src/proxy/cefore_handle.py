@@ -3,7 +3,7 @@ import downloader
 import cefpyco
 import logging
 from pubsub import pub
-from multiprocessing import Manager
+from multiprocessing import Manager, Process
 
 
 class Cef(object):
@@ -45,20 +45,29 @@ class Cef(object):
         """実験用"""
         if info_hash not in self.runners.values() and index == '0':
             logging.debug('create instance: {}'.format(info_hash))
-            info = Manager().dict()
-            self.data[info_hash] = info
-            run_process = downloader.Run(info)
+            m_dict = Manager().dict()
+            self.data[info_hash] = m_dict
+            run_process = downloader.Run(m_dict)
             run_process.start()
             logging.debug('downloader started')
         """"""
 
         if info_hash in self.data:
-            info = self.data[info_hash]
-            bitfield = info['bitfield']
-            pieces  = info['pieces']
+            m_dict = self.data[info_hash]
+            send_process = Process(target=self.send_piece, args=(m_dict, info.name, int(index)))
+            send_process.start()
+            """bitfield = m_dict['bitfield']
+            pieces  = m_dict['pieces']
             if bitfield[int(index)]:
                 piece = pieces[int(index)]
                 self.send_data(info.name, piece)
+            """
+    def send_piece(self, m_dict, name, index: int):
+        bitfield = m_dict['bitfield']
+        pieces = m_dict['pieces']
+        if bitfield[index]:
+            piece = pieces[index]
+            self.send_data(name, piece)
 
     def handle_piece(self, info: cefpyco.core.CcnPacketInfo):
         prefix = info.name.split('/')
