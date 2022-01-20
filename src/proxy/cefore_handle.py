@@ -48,6 +48,7 @@ class Cef(object):
             m_dict = Manager().dict()
             self.data[info_hash] = m_dict
             run_process = downloader.Run(m_dict)
+            self.runners[info_hash] = run_process
             run_process.start()
             logging.debug('downloader started')
         """"""
