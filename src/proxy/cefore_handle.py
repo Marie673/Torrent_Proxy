@@ -61,7 +61,6 @@ class Cef(object):
             print(runner.pieces_manager.pieces[0].piece_index)
             m_list = self.runners[info_hash].m_list
             bitfield = m_list[BITFIELD]
-            print(bitfield)
             pieces  = m_list[PIECES]
             if bitfield[int(index)]:
                 piece = pieces[int(index)]
