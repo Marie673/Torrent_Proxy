@@ -7,16 +7,18 @@ import tracker
 import logging
 import os
 import message
+from multiprocessing import Process
 
 
 PATH = "/home/marie/Torrent_Proxy/test/testPicture.jpg.torrent"
 
 
-class Run(object):
+class Run(Process):
     percentage_completed = -1
     last_log_line = ""
 
     def __init__(self, m_list, torrent_file=PATH):
+        Process.__init__(self)
         self.torrent = torrent.Torrent().load_from_path(torrent_file)
         self.tracker = tracker.Tracker(self.torrent)
 

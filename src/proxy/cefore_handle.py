@@ -2,11 +2,8 @@ import downloader
 
 import cefpyco
 import logging
-import threading
 from pubsub import pub
-from multiprocessing import Process, Manager
-import bitstring
-from piece import Piece
+from multiprocessing import Manager
 
 
 class Cef(object):
@@ -50,8 +47,7 @@ class Cef(object):
             logging.debug('create instance: {}'.format(info_hash))
             info = Manager().list()
             self.data[info_hash] = info
-            runner = downloader.Run(info)
-            run_process = Process(target=runner.run())
+            run_process = downloader.Run(info)
             run_process.start()
             logging.debug('downloader started')
         """"""
@@ -61,7 +57,6 @@ class Cef(object):
             data = self.data[info_hash]
             bitfield = data[0]
             pieces  = data[1]
-            print(bitfield)
             if bitfield[int(index)]:
                 piece = pieces[int(index)]
                 self.send_data(info.name, piece)
