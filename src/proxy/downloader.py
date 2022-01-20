@@ -17,12 +17,12 @@ class Run(Process):
     percentage_completed = -1
     last_log_line = ""
 
-    def __init__(self, m_list, torrent_file=PATH):
+    def __init__(self, m_dict, torrent_file=PATH):
         Process.__init__(self)
         self.torrent = torrent.Torrent().load_from_path(torrent_file)
         self.tracker = tracker.Tracker(self.torrent)
 
-        self.pieces_manager = pieces_manager.PiecesManager(self.torrent, m_list)
+        self.pieces_manager = pieces_manager.PiecesManager(self.torrent, m_dict)
         self.peers_manager = peers_manager.PeersManager(self.torrent, self.pieces_manager)
 
         logging.info("PiecesManager Started")

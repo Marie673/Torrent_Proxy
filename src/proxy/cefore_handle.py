@@ -45,7 +45,7 @@ class Cef(object):
         """実験用"""
         if info_hash not in self.runners.values() and index == '0':
             logging.debug('create instance: {}'.format(info_hash))
-            info = Manager().list()
+            info = Manager().dict()
             self.data[info_hash] = info
             run_process = downloader.Run(info)
             run_process.start()
@@ -53,9 +53,9 @@ class Cef(object):
         """"""
 
         if info_hash in self.data:
-            data = self.data[info_hash]
-            bitfield = data[0]
-            pieces  = data[1]
+            info = self.data[info_hash]
+            bitfield = info['bitfield']
+            pieces  = info['pieces']
             if bitfield[int(index)]:
                 piece = pieces[int(index)]
                 self.send_data(info.name, piece)
