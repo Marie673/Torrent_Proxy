@@ -56,7 +56,6 @@ class Run(object):
                 interest = '/'.join([PROTOCOL, self.info_hash, 'request', str(index)])
                 # logging.debug('send Interest: {}'.format(interest))
                 self.handle.send_interest(interest)
-                time.sleep(0.1)
 
             self.display_progression()
             time.sleep(3)
