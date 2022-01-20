@@ -5,6 +5,7 @@ import logging
 import threading
 from pubsub import pub
 from multiprocessing import Process, Manager
+import bitstring
 
 
 class Cef(object):
