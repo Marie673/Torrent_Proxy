@@ -20,7 +20,7 @@ class Run(Process):
     last_log_line = ""
 
 
-    def __init__(self, m_list, torrent_file=PATH):
+    def __init__(self, m_list: list, torrent_file=PATH):
         Process.__init__(self)
         self.torrent = torrent.Torrent().load_from_path(torrent_file)
         self.tracker = tracker.Tracker(self.torrent)
@@ -31,8 +31,8 @@ class Run(Process):
         self.m_list = m_list
         bitfield = [False for _ in range(self.pieces_manager.number_of_pieces)]
         pieces = [b'' for _ in range(self.pieces_manager.number_of_pieces)]
-        self.m_list[BITFIELD] = bitfield
-        self.m_list[PIECES] = pieces
+        self.m_list.append(bitfield)
+        self.m_list.append(pieces)
 
         logging.info("PiecesManager Started")
 
