@@ -6,6 +6,7 @@ import threading
 from pubsub import pub
 from multiprocessing import Process, Manager
 import bitstring
+from piece import Piece
 
 
 class Cef(object):
@@ -57,6 +58,9 @@ class Cef(object):
 
         if info_hash in self.data:
             data = self.data[info_hash]
+            bitfield: bitstring.BitArry = data[0]
+            pieces: Piece
+            pieces:  = data[1]
             if data[0][index]:
                 piece = data[1][index]
                 self.send_data(info.name, piece)

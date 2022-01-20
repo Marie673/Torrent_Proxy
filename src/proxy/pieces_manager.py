@@ -9,9 +9,13 @@ class PiecesManager(object):
         self.number_of_pieces = int(torrent.number_of_pieces)
         self.bitfield = bitstring.BitArray(self.number_of_pieces)
         self.pieces = self._generate_pieces()
+
         self.m_list = m_list
-        self.m_list.append(self.bitfield)
-        self.m_list.append(self.pieces)
+        bitfield = [False for _ in range(self.number_of_pieces)]
+        pieces = [b'' for _ in range(self.number_of_pieces)]
+        self.m_list.append(bitfield)
+        self.m_list.append(pieces)
+
         self.files = self._load_files()
         self.complete_pieces = 0
 
@@ -24,8 +28,8 @@ class PiecesManager(object):
 
     def update_bitfield(self, piece_index):
         self.bitfield[piece_index] = 1
-        self.m_list[0] = self.bitfield
-        self.m_list[1] = self.pieces
+        self.m_list[0][piece_index] = self.bitfield[piece_index]
+        self.m_list[1][piece_index] = self.pieces[piece_index].raw_data
 
     def receive_block_piece(self, piece):
         piece_index, piece_offset, piece_data = piece
