@@ -9,7 +9,7 @@ import os
 import message
 
 
-PATH = "/home/marie/Torrent_Proxy/test/ubuntu-20.04.3-desktop-amd64.iso.torrent"
+PATH = "/home/marie/Torrent_Proxy/test/testPicture.jpg.torrent"
 
 
 class Run(object):
