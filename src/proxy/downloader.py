@@ -23,7 +23,7 @@ class Run(object):
         self.pieces_manager = pieces_manager.PiecesManager(self.torrent, m_list)
         self.peers_manager = peers_manager.PeersManager(self.torrent, self.pieces_manager)
 
-        # self.peers_manager.start()
+        self.peers_manager.start()
         logging.info("PeersManager Started")
         logging.info("PiecesManager Started")
 
