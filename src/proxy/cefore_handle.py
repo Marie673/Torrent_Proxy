@@ -62,7 +62,7 @@ class Cef(object):
             m_list = self.data[info_hash]
             bitfield = m_list[BITFIELD]
             pieces  = m_list[PIECES]
-            print(bitfield)
+            print(bitfield[0])
             """if bitfield[int(index)]:
                 piece = pieces[int(index)]
                 self.send_data(info.name, piece)
