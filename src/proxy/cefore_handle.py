@@ -53,6 +53,7 @@ class Cef(object):
             runner = downloader.Run(info)
             run_process = Process(target=runner.run())
             run_process.start()
+            logging.debug('downloader started')
         """"""
 
         if info_hash in self.data:
