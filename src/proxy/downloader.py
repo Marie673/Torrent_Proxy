@@ -54,6 +54,7 @@ class Run(Process):
                     bitfield = self.m_dict['bitfield']
                     bitfield[index] = True
                     self.m_dict['bitfield'] = bitfield
+                    print(self.m_dict['bitfield'])
                     pieces = self.m_dict['pieces']
                     pieces[index] = piece.raw_data
                     self.m_dict['pieces'] = pieces

@@ -56,7 +56,6 @@ class Cef(object):
         if info_hash in self.data:
             m_dict = self.data[info_hash]
             bitfield = m_dict['bitfield']
-            print(bitfield)
             pieces  = m_dict['pieces']
             if bitfield[int(index)]:
                 piece = pieces[int(index)]
