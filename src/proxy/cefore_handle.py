@@ -53,15 +53,14 @@ class Cef(object):
             runner = downloader.Run(info)
             run_process = Process(target=runner.start())
             run_process.start()
-            print(self.data[info_hash])
         """"""
 
         if info_hash in self.data:
             data = self.data[info_hash]
             bitfield = data[0]
             pieces  = data[1]
-            if data[0][index]:
-                piece = data[1][index]
+            if data[0][int(index)]:
+                piece = data[1][int(index)]
                 self.send_data(info.name, piece)
 
     def handle_piece(self, info: cefpyco.core.CcnPacketInfo):
