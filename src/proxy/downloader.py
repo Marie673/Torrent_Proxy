@@ -63,7 +63,7 @@ class Run(object):
 
         logging.info("File(s) downloaded successfully.")
         self.display_progression()
-
+        time.sleep(120)
         # self._exit_threads()
 
     def display_progression(self):
