@@ -10,12 +10,6 @@ class PiecesManager(object):
         self.bitfield = bitstring.BitArray(self.number_of_pieces)
         self.pieces = self._generate_pieces()
 
-        self.m_dict = m_dict
-        bitfield = [False for _ in range(self.number_of_pieces)]
-        pieces = [b'' for _ in range(self.number_of_pieces)]
-        self.m_dict['bitfield'] = bitfield
-        self.m_dict['pieces'] = pieces
-
         self.files = self._load_files()
         self.complete_pieces = 0
 
@@ -28,12 +22,6 @@ class PiecesManager(object):
 
     def update_bitfield(self, piece_index):
         self.bitfield[piece_index] = 1
-        bitfield = self.m_dict['bitfield']
-        bitfield[piece_index] = True
-        self.m_dict['bitfield'] = bitfield
-        pieces = self.m_dict['pieces']
-        pieces[piece_index] = self.pieces[piece_index].raw_data
-        self.m_dict['pieces'] = pieces
 
     def receive_block_piece(self, piece):
         piece_index, piece_offset, piece_data = piece

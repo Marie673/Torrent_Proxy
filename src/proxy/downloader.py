@@ -21,6 +21,7 @@ class Run(Process):
         Process.__init__(self)
         self.torrent = torrent.Torrent().load_from_path(torrent_file)
         self.tracker = tracker.Tracker(self.torrent)
+        self.m_dict = m_dict
 
         self.pieces_manager = pieces_manager.PiecesManager(self.torrent, m_dict)
         self.peers_manager = peers_manager.PeersManager(self.torrent, self.pieces_manager)
@@ -33,6 +34,11 @@ class Run(Process):
         peers_dict = self.tracker.get_peers_from_trackers()
         self.peers_manager.add_peers(peers_dict.values())
 
+        bitfield = [False for _ in range(self.pieces_manager.number_of_pieces)]
+        pieces = [b'' for _ in range(self.pieces_manager.number_of_pieces)]
+        self.m_dict['bitfield'] = bitfield
+        self.m_dict['pieces'] = pieces
+
         while not self.pieces_manager.all_pieces_completed():
             if not self.peers_manager.has_unchoked_peers():
                 time.sleep(1)
@@ -43,6 +49,12 @@ class Run(Process):
                 index = piece.piece_index
 
                 if self.pieces_manager.pieces[index].is_full:
+                    bitfield = self.m_dict['bitfield']
+                    bitfield[index] = True
+                    self.m_dict['bitfield'] = bitfield
+                    pieces = self.m_dict['pieces']
+                    pieces[index] = piece.raw_data
+                    self.m_dict['pieces'] = pieces
                     continue
 
                 peer = self.peers_manager.get_random_peer_having_piece(index)
