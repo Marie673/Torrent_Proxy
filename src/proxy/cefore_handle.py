@@ -59,8 +59,8 @@ class Cef(object):
             data = self.data[info_hash]
             bitfield = data[0]
             pieces  = data[1]
-            if data[0][int(index)]:
-                piece = data[1][int(index)]
+            if bitfield[int(index)]:
+                piece = pieces[int(index)]
                 self.send_data(info.name, piece)
 
     def handle_piece(self, info: cefpyco.core.CcnPacketInfo):
