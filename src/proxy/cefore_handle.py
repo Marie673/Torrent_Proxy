@@ -42,21 +42,24 @@ class Cef(object):
         info_hash = prefix[2]
         index = prefix[4]
 
+        BITFIELD = 0
+        PIECES = 1
         """実験用"""
-        if info_hash not in self.runners.values() and index == '0':
+        if info_hash not in self.runners and index == '0':
             logging.debug('create instance: {}'.format(info_hash))
-            m_dict = Manager().dict()
-            self.data[info_hash] = m_dict
-            run_process = downloader.Run(m_dict)
+            m_list = Manager().list()
+            run_process = downloader.Run(m_list)
+            self.data[info_hash] = m_list
             self.runners[info_hash] = run_process
             run_process.start()
             logging.debug('downloader started')
         """"""
 
         if info_hash in self.data:
-            m_dict = self.data[info_hash]
-            bitfield = m_dict['bitfield']
-            pieces  = m_dict['pieces']
+            m_list = self.data[info_hash]
+            bitfield = m_list[BITFIELD]
+            pieces  = m_list[PIECES]
+            print(bitfield)
             if bitfield[int(index)]:
                 piece = pieces[int(index)]
                 self.send_data(info.name, piece)

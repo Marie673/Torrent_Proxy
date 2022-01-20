@@ -11,13 +11,16 @@ from multiprocessing import Process
 
 
 PATH = "/home/marie/Torrent_Proxy/test/testPicture.jpg.torrent"
+BITFIELD = 0
+PIECES = 1
 
 
 class Run(Process):
     percentage_completed = -1
     last_log_line = ""
 
-    def __init__(self, m_dict, torrent_file=PATH):
+
+    def __init__(self, m_list, torrent_file=PATH):
         Process.__init__(self)
         self.torrent = torrent.Torrent().load_from_path(torrent_file)
         self.tracker = tracker.Tracker(self.torrent)
@@ -25,11 +28,11 @@ class Run(Process):
         self.pieces_manager = pieces_manager.PiecesManager(self.torrent, m_dict)
         self.peers_manager = peers_manager.PeersManager(self.torrent, self.pieces_manager)
 
-        self.m_dict = m_dict
+        self.m_list = m_list
         bitfield = [False for _ in range(self.pieces_manager.number_of_pieces)]
         pieces = [b'' for _ in range(self.pieces_manager.number_of_pieces)]
-        self.m_dict['bitfield'] = bitfield
-        self.m_dict['pieces'] = pieces
+        self.m_list[BITFIELD] = bitfield
+        self.m_list[PIECES] = pieces
 
         logging.info("PiecesManager Started")
 
@@ -51,13 +54,8 @@ class Run(Process):
                 index = piece.piece_index
 
                 if self.pieces_manager.pieces[index].is_full:
-                    bitfield = self.m_dict['bitfield']
-                    bitfield[index] = True
-                    self.m_dict['bitfield'] = bitfield
-                    print(self.m_dict['bitfield'])
-                    pieces = self.m_dict['pieces']
-                    pieces[index] = piece.raw_data
-                    self.m_dict['pieces'] = pieces
+                    self.m_list[BITFIELD][index] = True
+                    self.m_list[PIECES][index] = piece.raw_data
                     continue
 
                 peer = self.peers_manager.get_random_peer_having_piece(index)
