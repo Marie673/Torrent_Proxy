@@ -48,8 +48,8 @@ class Cef(object):
         if info_hash not in self.runners and index == '0':
             logging.debug('create instance: {}'.format(info_hash))
             with Manager() as manager:
-                bitfield = Manager().list()
-                pieces = Manager().list()
+                bitfield = manager.list()
+                pieces = manager.list()
                 m_list = [bitfield, pieces]
                 run_process = downloader.Run(bitfield, pieces)
                 self.data[info_hash] = m_list
