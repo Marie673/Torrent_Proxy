@@ -59,6 +59,7 @@ class Cef(object):
         if info_hash in self.data:
             m_list = self.runners[info_hash].m_list
             bitfield = m_list[BITFIELD]
+            print(bitfield)
             pieces  = m_list[PIECES]
             if bitfield[int(index)]:
                 piece = pieces[int(index)]
