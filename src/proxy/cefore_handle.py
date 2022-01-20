@@ -53,12 +53,11 @@ class Cef(object):
             self.data[info_hash] = m_list
             self.runners[info_hash] = run_process
             run_process.start()
-            print(run_process.m_list[0])
             logging.debug('downloader started')
         """"""
 
         if info_hash in self.data:
-            m_list = self.data[info_hash]
+            m_list = self.runners[info_hash].m_list
             bitfield = m_list[BITFIELD]
             pieces  = m_list[PIECES]
             if bitfield[int(index)]:
