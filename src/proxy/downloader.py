@@ -32,7 +32,7 @@ class Run(Process):
         bitfield = [False for _ in range(self.pieces_manager.number_of_pieces)]
         pieces = [b'' for _ in range(self.pieces_manager.number_of_pieces)]
         self.m_list[BITFIELD] = bitfield
-        self.m_list[PIECES] = PIECES
+        self.m_list[PIECES] = pieces
 
         logging.info("PiecesManager Started")
 
