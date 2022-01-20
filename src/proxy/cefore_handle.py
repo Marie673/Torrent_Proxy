@@ -49,8 +49,8 @@ class Cef(object):
             logging.debug('create instance: {}'.format(info_hash))
             bitfield = Manager().list()
             pieces = Manager().list()
-            m_list= [bitfield, pieces]
-            run_process = downloader.Run(m_list)
+            m_list = [bitfield, pieces]
+            run_process = downloader.Run(bitfield, pieces)
             self.data[info_hash] = m_list
             self.runners[info_hash] = run_process
             run_process.start()

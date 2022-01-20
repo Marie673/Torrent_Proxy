@@ -20,7 +20,7 @@ class Run(Process):
     last_log_line = ""
 
 
-    def __init__(self, m_list, torrent_file=PATH):
+    def __init__(self, m_bitfield, m_pieces, torrent_file=PATH):
         Process.__init__(self)
         self.torrent = torrent.Torrent().load_from_path(torrent_file)
         self.tracker = tracker.Tracker(self.torrent)
@@ -28,11 +28,12 @@ class Run(Process):
         self.pieces_manager = pieces_manager.PiecesManager(self.torrent)
         self.peers_manager = peers_manager.PeersManager(self.torrent, self.pieces_manager)
 
-        self.m_list = m_list
+        self.m_bitfield = m_bitfield
+        self.m_pieces = m_pieces
         bitfield = [False for _ in range(self.pieces_manager.number_of_pieces)]
         pieces = [b'' for _ in range(self.pieces_manager.number_of_pieces)]
-        self.m_list[BITFIELD] = bitfield
-        self.m_list[PIECES] = pieces
+        self.m_bitfield = bitfield
+        self.m_pieces = pieces
 
         logging.info("PiecesManager Started")
 
@@ -54,9 +55,8 @@ class Run(Process):
                 index = piece.piece_index
 
                 if self.pieces_manager.pieces[index].is_full:
-                    self.m_list[BITFIELD][index] = True
-                    self.m_list[PIECES][index] = piece.raw_data
-                    print(self.m_list[BITFIELD])
+                    self.m_bitfield[index] = True
+                    self.m_pieces[index] = piece.raw_data
                     continue
 
                 peer = self.peers_manager.get_random_peer_having_piece(index)
