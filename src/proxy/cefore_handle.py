@@ -54,9 +54,9 @@ class Cef(object):
         """"""
 
         if info_hash in self.dict:
-            list = dict[info_hash]
-            if list[0][index]:
-                piece = list[1][index]
+            data = dict[info_hash]
+            if data[0][index]:
+                piece = data[1][index]
                 self.send_data(info.name, piece)
 
     def handle_piece(self, info: cefpyco.core.CcnPacketInfo):
