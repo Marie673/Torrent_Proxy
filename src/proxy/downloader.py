@@ -56,6 +56,7 @@ class Run(Process):
                 if self.pieces_manager.pieces[index].is_full:
                     self.m_list[BITFIELD][index] = True
                     self.m_list[PIECES][index] = piece.raw_data
+                    print(self.m_list[BITFIELD])
                     continue
 
                 peer = self.peers_manager.get_random_peer_having_piece(index)
