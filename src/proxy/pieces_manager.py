@@ -4,11 +4,13 @@ from pubsub import pub
 
 
 class PiecesManager(object):
-    def __init__(self, torrent):
+    def __init__(self, torrent, m_list: list):
         self.torrent = torrent
         self.number_of_pieces = int(torrent.number_of_pieces)
         self.bitfield = bitstring.BitArray(self.number_of_pieces)
         self.pieces = self._generate_pieces()
+        self.m_list = m_list
+        self.m_list = [self.bitfield, self.pieces]
         self.files = self._load_files()
         self.complete_pieces = 0
 
@@ -21,6 +23,8 @@ class PiecesManager(object):
 
     def update_bitfield(self, piece_index):
         self.bitfield[piece_index] = 1
+        self.m_list[0] = self.bitfield
+        self.m_list[1] = self.pieces
 
     def receive_block_piece(self, piece):
         piece_index, piece_offset, piece_data = piece

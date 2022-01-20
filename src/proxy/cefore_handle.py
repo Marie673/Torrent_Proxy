@@ -4,6 +4,7 @@ import cefpyco
 import logging
 import threading
 from pubsub import pub
+from multiprocessing import Process, Manager
 
 
 class Cef(object):
@@ -13,6 +14,7 @@ class Cef(object):
         self.handle.begin()
         self.handle.register('ccnx:/BitTorrent')
 
+        self.dict = {}
         """
         実験用
         """
@@ -44,19 +46,18 @@ class Cef(object):
         """実験用"""
         if info_hash not in self.runners.values() and index == '0':
             logging.debug('create instance: {}'.format(info_hash))
-            runner = downloader.Run()
-            runner.peers_manager.start()
-            self.runners[info_hash] = runner
-            self.runners[info_hash].start()
+            info = Manager().list()
+            self.dict[info_hash] = info
+            runner = downloader.Run(info)
+            run_process = Process(target=runner.start())
+            run_process.start()
         """"""
 
-        if info_hash in self.runners.values():
-            runner: downloader.Run = self.runners[info_hash]
-            """
-            if runner.pieces_manager.bitfield[index]:
-                piece = runner.pieces_manager.pieces[index]
+        if info_hash in self.dict:
+            list = dict[info_hash]
+            if list[0][index]:
+                piece = list[1][index]
                 self.send_data(info.name, piece)
-                """
 
     def handle_piece(self, info: cefpyco.core.CcnPacketInfo):
         prefix = info.name.split('/')

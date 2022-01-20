@@ -8,6 +8,7 @@ import logging
 import os
 import message
 from threading import Thread
+from multiprocessing import Manager
 
 
 PATH = "/home/marie/Torrent_Proxy/test/ubuntu-20.04.3-desktop-amd64.iso.torrent"
@@ -17,12 +18,12 @@ class Run(Thread):
     percentage_completed = -1
     last_log_line = ""
 
-    def __init__(self, torrent_file=PATH):
+    def __init__(self, m_list, torrent_file=PATH):
         Thread.__init__(self)
         self.torrent = torrent.Torrent().load_from_path(torrent_file)
         self.tracker = tracker.Tracker(self.torrent)
 
-        self.pieces_manager = pieces_manager.PiecesManager(self.torrent)
+        self.pieces_manager = pieces_manager.PiecesManager(self.torrent, m_list)
         self.peers_manager = peers_manager.PeersManager(self.torrent, self.pieces_manager)
 
         # self.peers_manager.start()
