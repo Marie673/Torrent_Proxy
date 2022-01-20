@@ -55,21 +55,11 @@ class Cef(object):
 
         if info_hash in self.data:
             m_dict = self.data[info_hash]
-            send_process = Process(target=self.send_piece, args=(m_dict, info.name, int(index)))
-            send_process.start()
-            """bitfield = m_dict['bitfield']
+            bitfield = m_dict['bitfield']
             pieces  = m_dict['pieces']
             if bitfield[int(index)]:
                 piece = pieces[int(index)]
                 self.send_data(info.name, piece)
-            """
-    def send_piece(self, m_dict, name, index: int):
-        bitfield = m_dict['bitfield']
-        print(bitfield)
-        pieces = m_dict['pieces']
-        if bitfield[index]:
-            piece = pieces[index]
-            self.send_data(name, piece)
 
     def handle_piece(self, info: cefpyco.core.CcnPacketInfo):
         prefix = info.name.split('/')
