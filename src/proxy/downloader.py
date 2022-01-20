@@ -23,11 +23,11 @@ class Run(object):
         self.pieces_manager = pieces_manager.PiecesManager(self.torrent, m_list)
         self.peers_manager = peers_manager.PeersManager(self.torrent, self.pieces_manager)
 
-        self.peers_manager.start()
-        logging.info("PeersManager Started")
         logging.info("PiecesManager Started")
 
     def run(self):
+        self.peers_manager.start()
+        logging.info("PeersManager Started")
         peers_dict = self.tracker.get_peers_from_trackers()
         self.peers_manager.add_peers(peers_dict.values())
 
