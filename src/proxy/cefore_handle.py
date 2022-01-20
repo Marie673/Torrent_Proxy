@@ -38,7 +38,7 @@ class Cef(object):
         info_hash = name[4]
         self.runners[info_hash] = runner
 
-        threading.Thread(target=runner.start).start()
+        # threading.Thread(target=runner.start).start()
 
     def handle_request(self, info: cefpyco.core.CcnPacketInfo):
         prefix = info.name.split('/')
@@ -51,7 +51,7 @@ class Cef(object):
             info = Manager().list()
             self.data[info_hash] = info
             runner = downloader.Run(info)
-            run_process = Process(target=runner.start())
+            run_process = Process(target=runner.run())
             run_process.start()
         """"""
 
