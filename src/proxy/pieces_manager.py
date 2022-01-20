@@ -10,7 +10,8 @@ class PiecesManager(object):
         self.bitfield = bitstring.BitArray(self.number_of_pieces)
         self.pieces = self._generate_pieces()
         self.m_list = m_list
-        self.m_list = [self.bitfield, self.pieces]
+        self.m_list.append(self.bitfield)
+        self.m_list.append(self.pieces)
         self.files = self._load_files()
         self.complete_pieces = 0
 
