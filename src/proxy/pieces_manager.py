@@ -29,6 +29,7 @@ class PiecesManager(object):
     def update_bitfield(self, piece_index):
         self.bitfield[piece_index] = 1
         self.m_list[0][piece_index] = True
+        print(self.m_list[0])
         self.m_list[1][piece_index] = self.pieces[piece_index].raw_data
 
     def receive_block_piece(self, piece):
