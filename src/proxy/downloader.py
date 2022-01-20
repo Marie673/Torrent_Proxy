@@ -7,18 +7,16 @@ import tracker
 import logging
 import os
 import message
-from threading import Thread
 
 
 PATH = "/home/marie/Torrent_Proxy/test/ubuntu-20.04.3-desktop-amd64.iso.torrent"
 
 
-class Run(Thread):
+class Run(object):
     percentage_completed = -1
     last_log_line = ""
 
     def __init__(self, m_list, torrent_file=PATH):
-        Thread.__init__(self)
         self.torrent = torrent.Torrent().load_from_path(torrent_file)
         self.tracker = tracker.Tracker(self.torrent)
 
