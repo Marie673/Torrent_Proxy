@@ -53,10 +53,10 @@ class Cef(object):
         """"""
 
         if info_hash in self.data:
-            logging.debug('search piece')
             data = self.data[info_hash]
             bitfield = data[0]
             pieces  = data[1]
+            print(bitfield)
             if bitfield[int(index)]:
                 piece = pieces[int(index)]
                 self.send_data(info.name, piece)
