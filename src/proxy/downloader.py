@@ -30,7 +30,7 @@ class Run(Process):
 
         self.m_bitfield = m_bitfield
         self.m_pieces = m_pieces
-        bitfield = [False for _ in range(self.pieces_manager.number_of_pieces)]
+        bitfield = [0 for _ in range(self.pieces_manager.number_of_pieces)]
         pieces = [b'' for _ in range(self.pieces_manager.number_of_pieces)]
         self.m_bitfield = bitfield
         self.m_pieces = pieces
@@ -55,7 +55,7 @@ class Run(Process):
                 index = piece.piece_index
 
                 if self.pieces_manager.pieces[index].is_full:
-                    self.m_bitfield[index] = True
+                    self.m_bitfield[index] = 1
                     self.m_pieces[index] = piece.raw_data
                     continue
 
