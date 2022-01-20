@@ -14,7 +14,7 @@ class Cef(object):
         self.handle.begin()
         self.handle.register('ccnx:/BitTorrent')
 
-        self.dict = {}
+        self.data = {}
         """
         実験用
         """
@@ -47,14 +47,14 @@ class Cef(object):
         if info_hash not in self.runners.values() and index == '0':
             logging.debug('create instance: {}'.format(info_hash))
             info = Manager().list()
-            self.dict[info_hash] = info
+            self.data[info_hash] = info
             runner = downloader.Run(info)
             run_process = Process(target=runner.start())
             run_process.start()
         """"""
 
-        if info_hash in self.dict:
-            data = dict[info_hash]
+        if info_hash in self.data:
+            data = self.data[info_hash]
             if data[0][index]:
                 piece = data[1][index]
                 self.send_data(info.name, piece)
