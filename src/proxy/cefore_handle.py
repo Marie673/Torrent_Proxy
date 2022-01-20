@@ -58,9 +58,8 @@ class Cef(object):
 
         if info_hash in self.data:
             data = self.data[info_hash]
-            bitfield: bitstring.BitArry = data[0]
-            pieces: Piece
-            pieces:  = data[1]
+            bitfield = data[0]
+            pieces  = data[1]
             if data[0][index]:
                 piece = data[1][index]
                 self.send_data(info.name, piece)
