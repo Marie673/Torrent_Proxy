@@ -65,6 +65,7 @@ class Cef(object):
             """
     def send_piece(self, m_dict, name, index: int):
         bitfield = m_dict['bitfield']
+        print(bitfield)
         pieces = m_dict['pieces']
         if bitfield[index]:
             piece = pieces[index]
