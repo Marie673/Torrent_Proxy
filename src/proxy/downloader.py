@@ -7,7 +7,7 @@ import tracker
 import logging
 import os
 import message
-from multiprocessing import Process
+from multiprocessing import Process, Manager
 
 
 PATH = "/home/marie/Torrent_Proxy/test/testPicture.jpg.torrent"
@@ -28,6 +28,8 @@ class Run(Process):
         self.pieces_manager = pieces_manager.PiecesManager(self.torrent)
         self.peers_manager = peers_manager.PeersManager(self.torrent, self.pieces_manager)
 
+        manager = Manager()
+        self.m_list = manager.list()
         self.m_list = m_list
         bitfield = [0 for _ in range(self.pieces_manager.number_of_pieces)]
         pieces = [b'' for _ in range(self.pieces_manager.number_of_pieces)]
