@@ -8,7 +8,6 @@ import logging
 import os
 import message
 from threading import Thread
-from multiprocessing import Manager
 
 
 PATH = "/home/marie/Torrent_Proxy/test/ubuntu-20.04.3-desktop-amd64.iso.torrent"
