@@ -64,7 +64,7 @@ class Run(object):
         logging.info("File(s) downloaded successfully.")
         self.display_progression()
 
-        self._exit_threads()
+        # self._exit_threads()
 
     def display_progression(self):
         new_progression = 0
