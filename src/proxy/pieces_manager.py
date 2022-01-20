@@ -4,7 +4,7 @@ from pubsub import pub
 
 
 class PiecesManager(object):
-    def __init__(self, torrent, m_dict: dict):
+    def __init__(self, torrent):
         self.torrent = torrent
         self.number_of_pieces = int(torrent.number_of_pieces)
         self.bitfield = bitstring.BitArray(self.number_of_pieces)

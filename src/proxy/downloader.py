@@ -25,7 +25,7 @@ class Run(Process):
         self.torrent = torrent.Torrent().load_from_path(torrent_file)
         self.tracker = tracker.Tracker(self.torrent)
 
-        self.pieces_manager = pieces_manager.PiecesManager(self.torrent, m_dict)
+        self.pieces_manager = pieces_manager.PiecesManager(self.torrent)
         self.peers_manager = peers_manager.PeersManager(self.torrent, self.pieces_manager)
 
         self.m_list = m_list
