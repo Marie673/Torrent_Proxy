@@ -31,6 +31,9 @@ class Tracker(object):
         self.dict_sock_addr = {}
 
     def get_peers_from_trackers(self):
+        s = SockAddr("10.0.0.1", 53117)
+        self.dict_sock_addr[s.__hash__()] = s
+        """ 実験用につきコメント化 ↑実験用
         for i, tracker in enumerate(self.torrent.announce_list):
             if len(self.dict_sock_addr) >= MAX_PEERS_TRY_CONNECT:
                 break
@@ -51,6 +54,7 @@ class Tracker(object):
 
             else:
                 logging.error("unknown scheme for: %s " % tracker_url)
+        """
 
         self.try_peer_connect()
 
