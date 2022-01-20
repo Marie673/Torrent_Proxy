@@ -53,6 +53,7 @@ class Cef(object):
             self.data[info_hash] = m_list
             self.runners[info_hash] = run_process
             run_process.start()
+            print(run_process.m_list[0])
             logging.debug('downloader started')
         """"""
 
@@ -60,11 +61,10 @@ class Cef(object):
             m_list = self.data[info_hash]
             bitfield = m_list[BITFIELD]
             pieces  = m_list[PIECES]
-            print(bitfield)
-            """if bitfield[int(index)]:
+            if bitfield[int(index)]:
                 piece = pieces[int(index)]
                 self.send_data(info.name, piece)
-"""
+
     def handle_piece(self, info: cefpyco.core.CcnPacketInfo):
         prefix = info.name.split('/')
         index = prefix[4]
