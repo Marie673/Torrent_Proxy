@@ -26,8 +26,6 @@ class Cef(object):
         index = int(prefix[4])
         chunk_num = info.chunk_num
         offset = chunk_num * 1024
-        print(offset)
-
 
         pub.sendMessage('PiecesManager.Piece', piece=(index, offset, info.payload))
 
