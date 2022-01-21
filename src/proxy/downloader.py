@@ -83,6 +83,7 @@ class Run(Process):
 
         print(self.m_list[BITFIELD])
         for index in range(self.pieces_manager.number_of_pieces):
+            print(index)
             if not self.m_list[BITFIELD][index]:
                 self.m_list[BITFIELD][index] = True
                 pieces = self.m_list[PIECES]
