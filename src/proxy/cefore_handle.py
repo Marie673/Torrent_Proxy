@@ -16,7 +16,6 @@ class Cef(object):
         self.handle.begin()
         self.handle.register('ccnx:/BitTorrent')
 
-        self.data = {}
         """
         実験用
         """
@@ -63,12 +62,11 @@ class Cef(object):
             logging.debug('downloader started')
         """"""
 
-        if info_hash in self.data:
+        if info_hash in self.pieces:
             runner = self.runners[info_hash]
-            m_list = self.runners[info_hash].m_list
+            m_list = self.pieces[info_hash].m_list
             bitfield = m_list[BITFIELD]
             pieces  = m_list[PIECES]
-            print(bitfield)
             if index == '0':
                 print(runner.pieces_manager.pieces[0].is_full)
                 print(bitfield)
