@@ -43,6 +43,8 @@ class Run(object):
             logging.debug('start request pieces')
             for piece in self.pieces_manager.pieces:
                 index = piece.piece_index
+                if index != 0:
+                    continue
 
                 if self.pieces_manager.pieces[index].is_full:
                     continue
