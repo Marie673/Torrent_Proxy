@@ -64,7 +64,7 @@ class Cef(object):
 
         if info_hash in self.pieces:
             runner = self.runners[info_hash]
-            m_list = self.pieces[info_hash].m_list
+            m_list = self.pieces[info_hash]
             bitfield = m_list[BITFIELD]
             pieces  = m_list[PIECES]
             if index == '0':
