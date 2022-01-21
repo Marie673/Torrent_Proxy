@@ -26,7 +26,7 @@ class Cef(object):
         logging.debug('Send interest: {}'.format(name))
 
     def send_data(self, name, payload, chunk_num=-1):
-        self.handle.send_data(name, payload, chunk_num)
+        self.handle.send_data(name, payload, 0)
         logging.debug('Send data: {}'.format(name))
 
     def is_torrent(self, info: cefpyco.core.CcnPacketInfo):
@@ -67,9 +67,7 @@ class Cef(object):
             m_list = self.pieces[info_hash]
             bitfield = m_list[BITFIELD]
             pieces  = m_list[PIECES]
-            if index == '0':
-                print(runner.pieces_manager.pieces[0].is_full)
-                print(bitfield)
+
             if bitfield[int(index)]:
                 piece = pieces[int(index)]
                 self.send_data(info.name, piece)
