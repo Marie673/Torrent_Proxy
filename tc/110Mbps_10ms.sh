@@ -5,9 +5,10 @@ RATE=110
 CONFIG_HZ=250
 # shellcheck disable=SC2099
 # shellcheck disable=SC1116
-BURST=((RATE*1000000)/8)/CONFIG_HZ
+# shellcheck disable=SC2206
+BURST=((${RATE}*1000000)/8)/${CONFIG_HZ}
 # shellcheck disable=SC2125
-LIMIT=BURST*2
+LIMIT=${BURST}*2
 
 DELAY=10
 
