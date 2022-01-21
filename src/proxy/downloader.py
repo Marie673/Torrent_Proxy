@@ -29,7 +29,7 @@ class Run(Process):
         self.peers_manager = peers_manager.PeersManager(self.torrent, self.pieces_manager)
 
         self.m_list = m_list
-        bitfield = [0 for _ in range(self.pieces_manager.number_of_pieces)]
+        bitfield = [False for _ in range(self.pieces_manager.number_of_pieces)]
         pieces = [b'' for _ in range(self.pieces_manager.number_of_pieces)]
         self.m_list[0] = bitfield
         self.m_list[1] = pieces
@@ -49,8 +49,6 @@ class Run(Process):
                 time.sleep(1)
                 logging.info("No unchocked peers")
                 continue
-
-
 
             for piece in self.pieces_manager.pieces:
                 index = piece.piece_index

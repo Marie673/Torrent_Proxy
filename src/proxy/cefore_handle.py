@@ -60,18 +60,18 @@ class Cef(object):
             self.pieces[info_hash] = m_list
             self.runners[info_hash] = run_process
 
-            time.sleep(5)
-            print(m_list[0])
             logging.debug('downloader started')
         """"""
 
         if info_hash in self.data:
             runner = self.runners[info_hash]
-            if index == '0':
-                print(runner.pieces_manager.pieces[0].is_full)
             m_list = self.runners[info_hash].m_list
             bitfield = m_list[BITFIELD]
             pieces  = m_list[PIECES]
+
+            if index == '0':
+                print(runner.pieces_manager.pieces[0].is_full)
+                print(bitfield)
             if bitfield[int(index)]:
                 piece = pieces[int(index)]
                 self.send_data(info.name, piece)
