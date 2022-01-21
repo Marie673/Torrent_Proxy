@@ -3,6 +3,7 @@ import torrent
 import cefpyco
 import logging
 from pubsub import pub
+import block
 
 
 class Cef(object):
@@ -25,7 +26,7 @@ class Cef(object):
         prefix = info.name.split('/')
         index = int(prefix[4])
         chunk_num = info.chunk_num
-        offset = chunk_num * 1024
+        offset = chunk_num * block.BLOCK_SIZE
 
         pub.sendMessage('PiecesManager.Piece', piece=(index, offset, info.payload))
 
