@@ -8,13 +8,14 @@ import logging
 import os
 import message
 
+PATH = "/home/marie/Torrent_Proxy/test/testPicture.jpg.torrent"
 
 class Run(object):
     percentage_completed = -1
     last_log_line = ""
 
     def __init__(self):
-        self.torrent = torrent.Torrent().load_from_path("/home/marie673/Project/Torrent_proxy/test/ubuntu-20.04.3-desktop-amd64.iso.torrent")
+        self.torrent = torrent.Torrent().load_from_path(PATH)
         self.tracker = tracker.Tracker(self.torrent)
 
         self.pieces_manager = pieces_manager.PiecesManager(self.torrent)
