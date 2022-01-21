@@ -5,7 +5,8 @@ import downloader
 import cefpyco
 import logging
 from pubsub import pub
-from multiprocessing import Manager, Process
+import multiprocessing
+from multiprocessing import Manager, Process, Queue
 
 
 class Cef(object):
@@ -19,8 +20,7 @@ class Cef(object):
         """
         実験用
         """
-        self.manager = Manager()
-
+        self.pieces = {}
 
     def send_interest(self, name, chunk_num=0):
         self.handle.send_interest(name, chunk_num)
@@ -50,12 +50,16 @@ class Cef(object):
         """実験用"""
         if info_hash not in self.runners and index == '0':
             logging.debug('create instance: {}'.format(info_hash))
+
             manager = Manager()
-            m_list = manager.list()
+            m_list = manager.list([manager.list(), manager.list()])
+
             run_process = downloader.Run(m_list)
-            self.data[info_hash] = m_list
-            self.runners[info_hash] = run_process
             run_process.start()
+
+            self.pieces[info_hash] = m_list
+            self.runners[info_hash] = run_process
+
             time.sleep(5)
             print(m_list[0])
             logging.debug('downloader started')
