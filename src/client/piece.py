@@ -62,8 +62,6 @@ class Piece(object):
 
         self.is_full = True
         self.raw_data = data
-        # ここでファイルに書き込み
-        # この部分をDataのプッシュに割り当て
         self._write_piece_on_disk()
         pub.sendMessage('PiecesManager.PieceCompleted', piece_index=self.piece_index)
 
