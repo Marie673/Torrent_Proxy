@@ -6,8 +6,9 @@ from threading import Thread
 
 
 class CefManager(object):
-    def __init__(self):
-        self.cef = cefore_handle.Cef()
+    def __init__(self, jikken):
+        self.cef = cefore_handle.Cef(jikken)
+
 
         self.is_active = True
 

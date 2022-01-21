@@ -10,7 +10,8 @@ from multiprocessing import Manager, Process, Queue
 
 
 class Cef(object):
-    def __init__(self):
+    def __init__(self, jikken):
+        self.jikken = jikken
         self.runners = {}
         self.handle = cefpyco.CefpycoHandle()
         self.handle.begin()
@@ -58,7 +59,7 @@ class Cef(object):
             manager = Manager()
             m_list = manager.list([manager.list(), manager.list()])
 
-            run_process = downloader.Run(m_list)
+            run_process = downloader.Run(m_list, self.jikken)
             run_process.start()
 
             self.pieces[info_hash] = m_list

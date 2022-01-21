@@ -1,14 +1,14 @@
 import logging
+import os.path
 import sys
 
 import cefore_manager
 
 
 class Run(object):
-    def __init__(self):
-        self.torrent = None
+    def __init__(self, jikken):
 
-        self.cef_manager = cefore_manager.CefManager()
+        self.cef_manager = cefore_manager.CefManager(jikken)
         self.handle = self.cef_manager.cef.handle
 
     def start(self):
@@ -16,7 +16,10 @@ class Run(object):
 
 
 def main():
-    run = Run()
+    args = sys.argv
+    jikken = int(args[1])
+
+    run = Run(jikken)
     try:
         run.start()
     except KeyboardInterrupt:

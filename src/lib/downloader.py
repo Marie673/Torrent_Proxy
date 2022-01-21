@@ -1,3 +1,5 @@
+import sys
+
 from block import State
 import time
 import peers_manager
@@ -14,8 +16,9 @@ class Run(object):
     percentage_completed = -1
     last_log_line = ""
 
-    def __init__(self):
-        self.torrent = torrent.Torrent().load_from_path(PATH)
+    def __init__(self, path):
+        self.path = path
+        self.torrent = torrent.Torrent().load_from_path(self.path)
         self.tracker = tracker.Tracker(self.torrent)
 
         self.pieces_manager = pieces_manager.PiecesManager(self.torrent)
@@ -100,5 +103,9 @@ class Run(object):
 if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)
 
-    run = Run()
+    args = sys.argv
+    path = args[1]
+    path = os.path.abspath(path)
+
+    run = Run(path)
     run.start()
