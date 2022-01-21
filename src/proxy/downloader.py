@@ -81,12 +81,14 @@ class Run(Process):
 
             time.sleep(0.1)
 
+        print(self.m_list[BITFIELD])
         for index in range(self.pieces_manager.number_of_pieces):
             if not self.m_list[BITFIELD][index]:
                 self.m_list[BITFIELD][index] = True
                 pieces = self.m_list[PIECES]
                 pieces[index] = self.pieces_manager.pieces[index].raw_data
                 self.m_list[PIECES] = pieces
+        print(self.m_list[BITFIELD])
 
         logging.info("File(s) downloaded successfully.")
         self.display_progression()
