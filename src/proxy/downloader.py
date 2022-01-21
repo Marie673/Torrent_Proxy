@@ -10,7 +10,9 @@ import message
 from multiprocessing import Process, managers
 
 
-PATH = ["/home/marie/Torrent_Proxy/test/100M.dummy.torrent",
+PATH = ["/home/marie/Torrent_Proxy/test/1M.dummy.torrent",
+        "/home/marie/Torrent_Proxy/test/10M.dummy.torrent",
+        "/home/marie/Torrent_Proxy/test/100M.dummy.torrent",
         "/home/marie/Torrent_Proxy/test/1G.dummy.torrent",
         "/home/marie/Torrent_Proxy/test/10G.dummy.torrent"]
 BITFIELD = 0
