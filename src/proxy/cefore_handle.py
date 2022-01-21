@@ -29,7 +29,6 @@ class Cef(object):
         chunk_num = 0
         end_chunk_num = len(payload) // 1024
         while payload:
-            print(chunk_num)
             chunk = payload[:1024]
             self.handle.send_data(name, chunk, chunk_num, end_chunk_num)
             payload = payload[1024:]
