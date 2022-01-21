@@ -38,7 +38,7 @@ class Run(object):
         self.handle.send_interest(interest)
         time.sleep(1)
         """
-
+        start_time = time.time()
         while not self.pieces_manager.all_pieces_completed():
             # logging.debug('start request pieces')
             for piece in self.pieces_manager.pieces:
@@ -62,6 +62,8 @@ class Run(object):
 
         logging.info("File(s) downloaded successfully.")
         self.display_progression()
+        end_time = time.time() - start_time
+        print("time: {0}".format(end_time) + "[sec]")
 
         self._exit_threads()
 

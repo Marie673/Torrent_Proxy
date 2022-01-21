@@ -29,6 +29,7 @@ class Run(object):
         peers_dict = self.tracker.get_peers_from_trackers()
         self.peers_manager.add_peers(peers_dict.values())
 
+        start_time = time.time()
         while not self.pieces_manager.all_pieces_completed():
             if not self.peers_manager.has_unchoked_peers():
                 time.sleep(1)
@@ -61,6 +62,8 @@ class Run(object):
 
         logging.info("File(s) downloaded successfully.")
         self.display_progression()
+        end_time = time.time() - start_time
+        print("time: {0}".format(end_time) + "[sec]")
 
         self._exit_threads()
 
