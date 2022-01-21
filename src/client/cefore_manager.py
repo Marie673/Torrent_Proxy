@@ -26,13 +26,13 @@ class CefManager(Thread):
     def _process_new_message(self, info: cefpyco.core.CcnPacketInfo):
         prefix = info.name.split('/')
         if info.is_interest:
-            logging.debug('\033[32m' + 'Received Interest' + '\033[0m')
+            # logging.debug('\033[32m' + 'Received Interest' + '\033[0m')
 
             if prefix[3] == 'torrent':
                 self.cef.handle_torrent(info)
 
         if info.is_data:
-            logging.debug('Received Data')
+            # logging.debug('Received Data')
             self.cef.handle_piece(info)
             if info.chunk_num != info.end_chunk_num:
                 self.cef.send_interest(info.name, info.chunk_num+1)

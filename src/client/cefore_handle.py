@@ -15,11 +15,11 @@ class Cef(object):
 
     def send_interest(self, name, chunk_num=0):
         self.handle.send_interest(name, chunk_num)
-        logging.debug('Send interest: {}'.format(name))
+        # logging.debug('Send interest: {}'.format(name))
 
     def send_data(self, name, payload, chunk_num=-1):
         self.handle.send_data(name, payload, chunk_num)
-        logging.debug('Send data: {}'.format(name))
+        # logging.debug('Send data: {}'.format(name))
 
     def handle_piece(self, info: cefpyco.core.CcnPacketInfo):
         prefix = info.name.split('/')
