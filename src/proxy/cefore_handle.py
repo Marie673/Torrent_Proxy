@@ -68,7 +68,7 @@ class Cef(object):
             m_list = self.runners[info_hash].m_list
             bitfield = m_list[BITFIELD]
             pieces  = m_list[PIECES]
-
+            print(bitfield)
             if index == '0':
                 print(runner.pieces_manager.pieces[0].is_full)
                 print(bitfield)
