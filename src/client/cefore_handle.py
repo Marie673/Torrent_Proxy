@@ -23,8 +23,11 @@ class Cef(object):
 
     def handle_piece(self, info: cefpyco.core.CcnPacketInfo):
         prefix = info.name.split('/')
-        index = prefix[4]
-        pub.sendMessage('PiecesManager.Piece', piece=(index, 0, info.payload))
+        index = int(prefix[4])
+        chunk_num = info.chunk_num
+        offset = chunk_num * 1024
+
+        pub.sendMessage('PiecesManager.Piece', piece=(index, offset, info.payload))
 
     def handle_torrent(self, info):
         with open(self.torrent.path, 'rb') as file:

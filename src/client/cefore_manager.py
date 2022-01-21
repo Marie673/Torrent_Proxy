@@ -34,3 +34,5 @@ class CefManager(Thread):
         if info.is_data:
             logging.debug('Received Data')
             self.cef.handle_piece(info)
+            if info.chunk_num != info.end_chunk.num:
+                self.cef.send_interest(info.name, info.chunk_num+1)

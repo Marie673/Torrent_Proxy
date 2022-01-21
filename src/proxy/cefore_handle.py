@@ -26,8 +26,13 @@ class Cef(object):
         logging.debug('Send interest: {}'.format(name))
 
     def send_data(self, name, payload, chunk_num=-1):
-        self.handle.send_data(name, payload, 0)
-        logging.debug('Send data: {}'.format(name))
+        chunk_num = 0
+        end_chunk_num = len(payload) // 1024
+        while payload:
+            chunk = payload[:1024]
+            self.handle.send_data(name, chunk, chunk_num, end_chunk_num)
+            payload = payload[1024:]
+            chunk_num += 1
 
     def is_torrent(self, info: cefpyco.core.CcnPacketInfo):
         d = downloader.Run(info.payload)
