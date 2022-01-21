@@ -1,3 +1,5 @@
+import time
+
 import downloader
 
 import cefpyco
@@ -53,6 +55,8 @@ class Cef(object):
             self.data[info_hash] = m_list
             self.runners[info_hash] = run_process
             run_process.start()
+            time.sleep(5)
+            print(m_list[0])
             logging.debug('downloader started')
         """"""
 
