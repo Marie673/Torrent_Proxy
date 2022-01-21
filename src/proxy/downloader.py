@@ -10,7 +10,9 @@ import message
 from multiprocessing import Process, managers
 
 
-PATH = "/home/marie/Torrent_Proxy/test/testPicture.jpg.torrent"
+PATH = ["/home/marie/Torrent_Proxy/test/100M.dummy.torrent",
+        "/home/marie/Torrent_Proxy/test/1G.dummy.torrent",
+        "/home/marie/Torrent_Proxy/test/10G.dummy.torrent"]
 BITFIELD = 0
 PIECES = 1
 
@@ -20,9 +22,9 @@ class Run(Process):
     last_log_line = ""
 
 
-    def __init__(self, m_list, torrent_file=PATH):
+    def __init__(self, m_list, jikken):
         Process.__init__(self)
-        self.torrent = torrent.Torrent().load_from_path(torrent_file)
+        self.torrent = torrent.Torrent().load_from_path(PATH[jikken])
         self.tracker = tracker.Tracker(self.torrent)
 
         self.pieces_manager = pieces_manager.PiecesManager(self.torrent)
