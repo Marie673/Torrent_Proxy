@@ -50,12 +50,19 @@ class Run(Process):
                 logging.info("No unchocked peers")
                 continue
 
+
+
             for piece in self.pieces_manager.pieces:
                 index = piece.piece_index
 
                 if self.pieces_manager.pieces[index].is_full:
-                    self.m_list[BITFIELD][index] = 1
-                    self.m_list[PIECES][index] = piece.raw_data
+                    bitfield = self.m_list[BITFIELD]
+                    if not bitfield[index]:
+                        bitfield[index] = True
+                        self.m_list[BITFIELD] = bitfield
+                        pieces = self.m_list[PIECES]
+                        pieces[index] = piece.raw_data
+                        self.m_list[PIECES] = pieces
                     continue
 
                 peer = self.peers_manager.get_random_peer_having_piece(index)
@@ -110,9 +117,3 @@ class Run(Process):
         self.peers_manager.is_active = False
         os._exit(0)
 
-
-if __name__ == '__main__':
-    logging.basicConfig(level=logging.DEBUG)
-
-    run = Run()
-    run.start()
