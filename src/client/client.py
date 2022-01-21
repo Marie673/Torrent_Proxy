@@ -40,7 +40,7 @@ class Run(object):
         """
 
         while not self.pieces_manager.all_pieces_completed():
-            logging.debug('start request pieces')
+            # logging.debug('start request pieces')
             for piece in self.pieces_manager.pieces:
                 index = piece.piece_index
 
