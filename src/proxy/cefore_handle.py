@@ -28,6 +28,8 @@ class Cef(object):
     def send_data(self, name, payload, chunk_num=-1):
         chunk_num = 0
         end_chunk_num = len(payload) // 1024
+        print(len(payload))
+        print(end_chunk_num)
         while payload:
             chunk = payload[:1024]
             self.handle.send_data(name, chunk, chunk_num, end_chunk_num)
