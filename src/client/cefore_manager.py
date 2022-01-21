@@ -20,12 +20,14 @@ class CefManager(Thread):
         logging.debug('cefore receiver start')
         while self.is_active:
             info = self.cef.handle.receive()
+            print("debug0")
             if info.is_succeeded:
+                print("debug1")
                 self._process_new_message(info)
 
     def _process_new_message(self, info: cefpyco.core.CcnPacketInfo):
         prefix = info.name.split('/')
-
+        print("debug2")
         if info.is_interest:
             logging.debug('\033[32m' + 'Received Interest' + '\033[0m')
 
