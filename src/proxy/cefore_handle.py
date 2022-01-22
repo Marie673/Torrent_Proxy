@@ -10,6 +10,9 @@ import multiprocessing
 from multiprocessing import Manager, Process, Queue
 
 
+BLOCK_SIZE = 4096
+
+
 class Cef(object):
     def __init__(self, jikken):
         self.jikken = jikken
@@ -28,7 +31,7 @@ class Cef(object):
         logging.debug('Send interest: {}'.format(name))
 
     def send_data(self, name, payload):
-        BLOCK_SIZE = 4096
+
         chunk_num = 0
         end_chunk_num = len(payload) // BLOCK_SIZE
         while payload:
