@@ -40,6 +40,7 @@ class Cef(object):
             chunk_num += 1
 
     def queue_manager(self, info_hash):
+        logging.debug('debug')
         piece_q: Queue = self.queues[info_hash][1]
         while True:
             piece = piece_q.get()
