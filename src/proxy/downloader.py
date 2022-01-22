@@ -81,12 +81,7 @@ class Run(Process):
             time.sleep(0.1)
 
         bitfield = [True for _ in range(self.pieces_manager.number_of_pieces)]
-        for index in range(self.pieces_manager.number_of_pieces):
-            if not self.m_list[BITFIELD][index]:
-                self.m_list[BITFIELD] = bitfield
-                pieces = self.m_list[PIECES]
-                pieces[index] = self.pieces_manager.pieces[index].raw_data
-                self.m_list[PIECES] = pieces
+        self.m_list[BITFIELD] = bitfield
 
         logging.info("File(s) downloaded successfully.")
         end_time = time.time() - start_time
