@@ -68,7 +68,7 @@ class Cef(object):
         index = prefix[4]
 
         """実験用"""
-        if info_hash not in self.runners:
+        if info_hash not in self.queues or info_hash not in self.runners:
             logging.debug('create instance: {}'.format(info_hash))
 
             request_q = Queue()
@@ -86,7 +86,8 @@ class Cef(object):
 
             logging.debug('downloader started')
 
-        if info_hash in self.queues:
+        if info_hash in self.queues and info_hash in self.runners:
+            logging.debug('get request')
             queue = self.queues[info_hash]
             queue[0].put(int(index))
         """"""
