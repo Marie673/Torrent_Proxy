@@ -76,7 +76,7 @@ class Cef(object):
             bitfield = m_list[BITFIELD]
 
             if bitfield[int(index)]:
-                tmp_path = info_hash + '_' + index
+                tmp_path = 'tmp/' + info_hash + '_' + index
                 try:
                     f = open(tmp_path, 'rb')
                 except Exception:
