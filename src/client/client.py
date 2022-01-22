@@ -67,7 +67,6 @@ class Run(object):
         logging.info("File(s) downloaded successfully.")
         end_time = time.time() - start_time
         self.display_progression()
-        end_time = time.time() - start_time
         print("time: {0}".format(end_time) + "[sec]")
 
         self._exit_threads()
