@@ -57,10 +57,9 @@ class Run(object):
                 # logging.debug('send Interest: {}'.format(interest))
                 self.handle.send_interest(interest)
 
-            # self.display_progression()
-
             if self.pieces_manager.all_pieces_completed():
                 break
+            self.display_progression()
 
             time.sleep(3)
 
