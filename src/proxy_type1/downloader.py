@@ -32,7 +32,21 @@ class Run(Process):
         self.request_q: Queue = queue[0]
         self.piece_q: Queue = queue[1]
 
+        self.request = []
+
         logging.info("PiecesManager Started")
+
+    def queue_manager(self):
+        while True:
+            if self.request_q.empty():
+                continue
+
+            index = self.request_q.get()
+            if index in self.request:
+                continue
+            else:
+                self.request.append(index)
+
 
     def run(self):
         self.peers_manager.start()
@@ -41,33 +55,27 @@ class Run(Process):
         self.peers_manager.add_peers(peers_dict.values())
 
         while True:
-            if self.request_q.empty():
-                continue
-            else:
-                index = self.request_q.get()
-
             if not self.peers_manager.has_unchoked_peers():
                 time.sleep(1)
                 continue
 
-            if self.pieces_manager.pieces[index].is_full:
-                piece = [index, self.pieces_manager.pieces[index].raw_data]
-                self.piece_q.put(piece)
-                continue
+            for index in self.request:
+                if self.pieces_manager.pieces[index].is_full:
+                    piece = [index, self.pieces_manager.pieces[index].raw_data]
+                    self.piece_q.put(piece)
+                    self.request.remove(index)
+                    continue
 
-            while not self.pieces_manager.pieces[index].is_full:
                 peer = self.peers_manager.get_random_peer_having_piece(index)
                 if not peer:
-                    time.sleep(1)
                     continue
 
                 self.pieces_manager.pieces[index].update_block_status()
+
                 data = self.pieces_manager.pieces[index].get_empty_block()
                 if not data:
                     continue
+
                 piece_index, block_offset, block_length = data
                 piece_data = message.Request(piece_index, block_offset, block_length).to_bytes()
                 peer.send_to_peer(piece_data)
-
-            piece = [index, self.pieces_manager.pieces[index].raw_data]
-            self.piece_q.put(piece)
