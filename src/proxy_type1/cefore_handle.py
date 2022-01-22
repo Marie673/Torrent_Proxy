@@ -78,10 +78,11 @@ class Cef(object):
             run_process = downloader.Run(q, self.jikken)
             run_process.start()
             q_manager = Process(target=self.queue_manager(info_hash))
-            q_manager.start()
 
             self.queues[info_hash] = q
             self.runners[info_hash] = run_process
+
+            q_manager.start()
 
             logging.debug('downloader started')
 
