@@ -33,8 +33,8 @@ class Cef(object):
         end_chunk_num = len(payload) // BLOCK_SIZE
         while payload:
             chunk = payload[:BLOCK_SIZE]
-            self.handle.send_data(name=name, payload=chunk,
-                                  chunk_num=chunk_num, end_chunk_num=end_chunk_num)
+            self.handle.send_data(name=name, payload=chunk, chunk_num=chunk_num,
+                                  end_chunk_num=end_chunk_num, cache_time=100)
             payload = payload[BLOCK_SIZE:]
             chunk_num += 1
 
@@ -83,6 +83,7 @@ class Cef(object):
                     return
                 piece = f.read()
                 f.close()
+                os.remove(tmp_path)
                 self.send_data(info.name, piece)
 
     def handle_piece(self, info: cefpyco.core.CcnPacketInfo):
