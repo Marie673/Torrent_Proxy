@@ -83,3 +83,18 @@ class Run(Process):
                 piece_index, block_offset, block_length = data
                 piece_data = message.Request(piece_index, block_offset, block_length).to_bytes()
                 peer.send_to_peer(piece_data)
+
+            time.sleep(0.1)
+
+    def display_progression(self):
+        new_progression = 0
+
+        for i in range(self.pieces_manager.number_of_pieces):
+            for j in range(self.pieces_manager.pieces[i].number_of_blocks):
+                if self.pieces_manager.pieces[i].blocks[j].state == State.FULL:
+                    new_progression += len(self.pieces_manager.pieces[i].blocks[j].data)
+
+        if new_progression == self.percentage_completed:
+            return
+
+        self.percentage_completed = new_progression
