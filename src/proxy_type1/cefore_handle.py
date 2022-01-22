@@ -40,7 +40,6 @@ class Cef(object):
             chunk_num += 1
 
     def queue_manager(self, info_hash):
-        logging.debug('debug')
         piece_q: Queue = self.queues[info_hash][1]
         while True:
             piece = piece_q.get()
@@ -82,7 +81,7 @@ class Cef(object):
             self.queues[info_hash] = q
             self.runners[info_hash] = run_process
 
-            q_manager = Process(target=self.queue_manager(info_hash))
+            q_manager = Process(target=self.queue_manager, args=info_hash)
             q_manager.start()
 
             logging.debug('downloader started')
