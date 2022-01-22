@@ -81,13 +81,12 @@ class Cef(object):
             self.queues[info_hash] = q
             self.runners[info_hash] = run_process
 
-            q_manager = Process(target=self.queue_manager, args=info_hash)
+            q_manager = Process(target=self.queue_manager, args=(self, info_hash))
             q_manager.start()
 
             logging.debug('downloader started')
 
         if info_hash in self.queues and info_hash in self.runners:
-            logging.debug('get request')
             queue = self.queues[info_hash]
             queue[0].put(int(index))
         """"""
