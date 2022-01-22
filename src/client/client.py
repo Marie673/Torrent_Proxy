@@ -58,6 +58,10 @@ class Run(object):
                 self.handle.send_interest(interest)
 
             self.display_progression()
+
+            if self.pieces_manager.all_pieces_completed():
+                break
+
             time.sleep(3)
 
         logging.info("File(s) downloaded successfully.")
