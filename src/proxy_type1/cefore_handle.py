@@ -36,7 +36,7 @@ class Cef(object):
         while payload:
             chunk = payload[:BLOCK_SIZE]
             self.handle.send_data(name=name, payload=chunk,
-                                  chunk_num=chunk_num, end_chunk_num=end_chunk_num, cache_time=100)
+                                  chunk_num=chunk_num, end_chunk_num=end_chunk_num, cache_time=1000)
             payload = payload[BLOCK_SIZE:]
             chunk_num += 1
 
