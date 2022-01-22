@@ -82,7 +82,7 @@ class Cef(object):
                 except Exception:
                     return
                 piece = f.read()
-                os.remove(tmp_path)
+                f.close()
                 self.send_data(info.name, piece)
 
     def handle_piece(self, info: cefpyco.core.CcnPacketInfo):
