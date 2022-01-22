@@ -58,7 +58,7 @@ class Run(object):
                 self.handle.send_interest(interest)
 
             self.display_progression()
-            time.sleep(1)
+            time.sleep(3)
 
         logging.info("File(s) downloaded successfully.")
         self.display_progression()
