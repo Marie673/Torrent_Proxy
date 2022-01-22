@@ -81,7 +81,7 @@ class Cef(object):
             self.queues[info_hash] = q
             self.runners[info_hash] = run_process
 
-            q_manager = Process(target=self.queue_manager, args=(self, info_hash))
+            q_manager = Process(target=self.queue_manager, args=(info_hash,))
             q_manager.start()
 
             logging.debug('downloader started')
