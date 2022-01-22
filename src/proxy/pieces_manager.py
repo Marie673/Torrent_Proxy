@@ -10,7 +10,7 @@ class PiecesManager(object):
         self.bitfield = bitstring.BitArray(self.number_of_pieces)
         self.pieces = self._generate_pieces()
         for piece in self.pieces:
-            piece.tmp_path = self.torrent.info_hash
+            piece.tmp_path = str(self.torrent.info_hash.hex())
 
         self.complete_pieces = 0
 
