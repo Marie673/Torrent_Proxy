@@ -1,3 +1,4 @@
+import os
 import time
 
 import downloader
@@ -58,7 +59,7 @@ class Cef(object):
             logging.debug('create instance: {}'.format(info_hash))
 
             manager = Manager()
-            m_list = manager.list([manager.list(), manager.list()])
+            m_list = manager.list([manager.list()])
 
             run_process = downloader.Run(m_list, self.jikken)
             run_process.start()
@@ -73,10 +74,15 @@ class Cef(object):
             runner = self.runners[info_hash]
             m_list = self.pieces[info_hash]
             bitfield = m_list[BITFIELD]
-            pieces  = m_list[PIECES]
 
             if bitfield[int(index)]:
-                piece = pieces[int(index)]
+                tmp_path = info_hash + '_' + index
+                try:
+                    f = open(tmp_path, 'rb')
+                except Exception:
+                    return
+                piece = f.read()
+                os.remove(tmp_path)
                 self.send_data(info.name, piece)
 
     def handle_piece(self, info: cefpyco.core.CcnPacketInfo):

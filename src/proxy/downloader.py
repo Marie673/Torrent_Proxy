@@ -34,9 +34,7 @@ class Run(Process):
 
         self.m_list = m_list
         bitfield = [False for _ in range(self.pieces_manager.number_of_pieces)]
-        pieces = [b'' for _ in range(self.pieces_manager.number_of_pieces)]
         self.m_list[0] = bitfield
-        self.m_list[1] = pieces
 
         logging.info("PiecesManager Started")
 
@@ -62,9 +60,6 @@ class Run(Process):
                     if not bitfield[index]:
                         bitfield[index] = True
                         self.m_list[BITFIELD] = bitfield
-                        pieces = self.m_list[PIECES]
-                        pieces[index] = piece.raw_data
-                        self.m_list[PIECES] = pieces
                     continue
 
                 peer = self.peers_manager.get_random_peer_having_piece(index)
