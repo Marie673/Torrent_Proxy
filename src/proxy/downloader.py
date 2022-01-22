@@ -46,7 +46,7 @@ class Run(Process):
         peers_dict = self.tracker.get_peers_from_trackers()
         self.peers_manager.add_peers(peers_dict.values())
 
-
+        start_time = time.time()
 
         while not self.pieces_manager.all_pieces_completed():
             if not self.peers_manager.has_unchoked_peers():
@@ -94,6 +94,8 @@ class Run(Process):
                 self.m_list[PIECES] = pieces
 
         logging.info("File(s) downloaded successfully.")
+        end_time = time.time() - start_time
+        print("time: {0}".format(end_time) + "[sec]")
         self.display_progression()
         time.sleep(300)
         # self._exit_threads()
