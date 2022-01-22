@@ -7,6 +7,7 @@ import tracker
 import logging
 import message
 from multiprocessing import Process, Queue
+from threading import Thread
 
 
 PATH = ["/home/marie/Torrent_Proxy/test/1M.dummy.torrent",
@@ -53,6 +54,9 @@ class Run(Process):
         logging.info("PeersManager Started")
         peers_dict = self.tracker.get_peers_from_trackers()
         self.peers_manager.add_peers(peers_dict.values())
+
+        q_thread = Thread(target=self.queue_manager)
+        q_thread.start()
 
         while True:
             if not self.peers_manager.has_unchoked_peers():
