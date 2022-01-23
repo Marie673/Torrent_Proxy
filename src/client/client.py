@@ -71,27 +71,23 @@ class Run(object):
         self._exit_threads()
 
     def display_progression(self):
-        new_progression = 0
-
+        """
         for i in range(self.pieces_manager.number_of_pieces):
             for j in range(self.pieces_manager.pieces[i].number_of_blocks):
                 if self.pieces_manager.pieces[i].blocks[j].state == State.FULL:
                     new_progression += len(self.pieces_manager.pieces[i].blocks[j].data)
-
         if new_progression == self.percentage_completed:
-            return
+            return"""
 
-        percentage_completed = float((float(new_progression) / self.torrent.total_length) * 100)
+        # percentage_completed = float((float(new_progression) / self.torrent.total_length) * 100)
 
-        current_log_line = "{}% completed | {}/{} pieces" \
-            .format(round(percentage_completed, 2),
-                    self.pieces_manager.complete_pieces,
+        current_log_line = "{}/{} pieces" \
+            .format(self.pieces_manager.complete_pieces,
                     self.pieces_manager.number_of_pieces)
         if current_log_line != self.last_log_line:
             print(current_log_line)
 
         self.last_log_line = current_log_line
-        self.percentage_completed = new_progression
 
     def _exit_threads(self):
         self.cef_manager.is_active = False
