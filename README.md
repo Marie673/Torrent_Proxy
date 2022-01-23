@@ -1,4 +1,6 @@
 # Torrent_Proxy
+仮で書いているためraw dataで見た方が見やすい
+
 
 ソースファイルはsrc/に格納
 
