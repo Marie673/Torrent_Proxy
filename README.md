@@ -3,12 +3,23 @@
 ソースファイルはsrc/に格納
 
 lib 通常のBitTorrentクライアント
+threadingでソケット通信 受信送信共に
 
 proxy プロキシ Interestを受信するとそのコンテンツのすべてのピースを要求 データサイズが大きいとメモリが書き換えられるのでファイルシステム
+ceforeの受信がメインプロセス
+Interest受信後にmultiprocessingでBitTorrentダウンロード開始 
+BitTorrentのメッセージはthreading
+multiprocessing.Managerを使用しピースを管理
 
 proxy_type1 受信したInterestのピースのみダウンロード ピースをずっと保持している必要はないのでメモリに保管
+Interest受信後にmultiprocessingでBitTorrentダウンロード開始
+同時にQueue監視用thread処理も開始
+BitTorrentのメッセージ受信はthreading
+ピースが完成するとQueueでメインプロセスに通知
+QueueにputされるとメインプロセスはData送信
 
 client CCNで使用するbittorrentクライアント ピースの管理方法はilbで記述したものと一緒 ブロック単位での要求ではなくピース単位での要求 所持していないピースのInterestをすべて送信 
 Interestのlifetimeを3秒に設定しているのでInterestの送信は3秒毎 udpのためInterestは3通同時送信()
+threadingでceforeのメッセージ管理
 
 プログラム毎で時間計測 最初の要求を出した時点で計測開始 すべてのピースが手に入ると(ファイルが完成すると：ピースの検証完了まで)計測終了
