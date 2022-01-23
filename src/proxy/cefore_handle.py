@@ -56,7 +56,6 @@ class Cef(object):
         index = prefix[4]
 
         BITFIELD = 0
-        PIECES = 1
         """実験用"""
         if info_hash not in self.runners and index == '0':
             logging.debug('create instance: {}'.format(info_hash))
@@ -86,7 +85,7 @@ class Cef(object):
                     return
                 piece = f.read()
                 f.close()
-                os.remove(tmp_path)
+                # os.remove(tmp_path)
                 self.send_data(info.name, piece)
 
     def handle_piece(self, info: cefpyco.core.CcnPacketInfo):

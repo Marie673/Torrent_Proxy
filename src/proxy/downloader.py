@@ -87,8 +87,10 @@ class Run(Process):
         end_time = time.time() - start_time
         print("time: {0}".format(end_time) + "[sec]")
         self.display_progression()
-        time.sleep(300)
-        # self._exit_threads()
+        time.sleep(60)
+        tmp_path = 'tmp/*'
+        os.remove(tmp_path)
+        self._exit_threads()
 
     def display_progression(self):
         new_progression = 0
