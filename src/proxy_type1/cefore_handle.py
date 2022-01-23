@@ -30,13 +30,14 @@ class Cef(object):
         logging.debug('Send interest: {}'.format(name))
 
     def send_data(self, name, payload):
-
+        # cache_time = 6000 # 50秒
+        cache_time = 360000 # 1時間
         chunk_num = 0
         end_chunk_num = len(payload) // BLOCK_SIZE
         while payload:
             chunk = payload[:BLOCK_SIZE]
             self.handle.send_data(name=name, payload=chunk,
-                                  chunk_num=chunk_num, end_chunk_num=end_chunk_num, cache_time=5000)
+                                  chunk_num=chunk_num, end_chunk_num=end_chunk_num, cache_time=cache_time)
             payload = payload[BLOCK_SIZE:]
             chunk_num += 1
 
