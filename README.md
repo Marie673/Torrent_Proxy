@@ -25,3 +25,15 @@ Interestのlifetimeを3秒に設定しているのでInterestの送信は3秒毎
 threadingでceforeのメッセージ管理
 
 プログラム毎で時間計測 最初の要求を出した時点で計測開始 すべてのピースが手に入ると(ファイルが完成すると：ピースの検証完了まで)計測終了
+
+
+tc/はtcコマンドのbash
+
+lient1 client3は帯域制限のみ 100Mbps
+client2は帯域制限と遅延 100Mbps 10ms
+
+
+test/に実験に使用したtorrentファイル格納
+
+ファイルはddにより作成
+ex.)dd if=/dev/zero of=1G.dummy bs=1M count=1024
