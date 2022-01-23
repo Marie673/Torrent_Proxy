@@ -37,3 +37,25 @@ test/に実験に使用したtorrentファイル格納
 
 ファイルはddにより作成
 ex.)dd if=/dev/zero of=1G.dummy bs=1M count=1024
+
+ceforeはバッファチューンしろと書いていたのでそれ用のbashコマンドbuffa_tune.sh
+
+
+依存
+cefore https://github.com/cefore/cefore.git 
+キャッシュ機能使いたいから ./config --ebable-csmgr --enable-cache
+※なぜか設定ファイルcefnetd.confでCS_MODEを0以外に設定するとファイル読み込めないと文句を言われる．
+解決するためにdebugしてたところ，printfしただけで治った．謎だが同様のエラーが出る場合は下記のforkしたものの使用推奨
+
+https://github.com/Marie673/cefore.git
+
+
+cefpyco https://github.com/cefore/cefpyco
+
+bcoding==1.5
+bitstring == 3.1.7
+PyPubSub == 4.0.3
+requests >= 2.24.0
+pubsub == 0.1.2
+ipaddress == 1.0.23
+後でrequirement書く
