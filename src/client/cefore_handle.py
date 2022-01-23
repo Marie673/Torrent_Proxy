@@ -15,7 +15,8 @@ class Cef(object):
         self.handle.register('ccnx:/client0')
 
     def send_interest(self, name, chunk_num=0):
-        self.handle.send_interest(name=name, chunk_num=chunk_num, lifetime=300)
+        for _ in range(3):
+            self.handle.send_interest(name=name, chunk_num=chunk_num, lifetime=300)
         # logging.debug('Send interest: {}'.format(name))
 
     def send_data(self, name, payload, chunk_num=-1):
