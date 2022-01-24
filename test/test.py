@@ -27,7 +27,7 @@ def main():
 
             name = info.name.split("/")
             if info.is_interest:
-                print('get interest')
+                # print('get interest')
                 if name[2] == '1M.dummy' or name[2] == '10M.dummy' or name[2] == '100M.dummy':
                     send_file(h, info, name[2])
 
