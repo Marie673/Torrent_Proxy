@@ -1,53 +1,44 @@
 import sys
+import time
 
 import cefpyco
-from threading import Thread
-import socket
 
+SIZE=4096
+NAME0='ccnx:/test/1M.dummy'
+NAME1='ccnx:/test/10M.dummy'
+NAME2='ccnx:/test/100M.dummy'
 
-class Cef(Thread):
-    def __init__(self):
-        Thread.__init__(self)
-        self.handle = cefpyco.CefpycoHandle()
-        self.handle.begin()
-        self.handle.register('ccnx:/BitTorrent')
+def get_data(info):
 
-    def run(self):
-        while True:
-            info = self.handle.receive()
-            if info.is_succeeded:
-                print('get info')
-
-
-class P2P(Thread):
-    def __init__(self):
-        Thread.__init__(self)
-        self.socket: socket.socket = None
-        self.ip = '127.0.0.1'
-        self.port = 10000
-
-    def connect(self):
-        try:
-            self.socket = socket.create_connection((self.ip, self.port))
-            self.socket.setblocking(False)
-        except Exception as e:
-            print('failed to connect to peer %s' % e)
-
-    def run(self):
-        self.connect()
-        while True:
-            payload = self.socket.recv(4096)
-            print(payload)
 
 def main():
-    cef = Cef()
-    p2p = P2P()
+    args = sys.argv
+    if args[1] == '0':
+        name = NAME0
+    elif args[1] == '1':
+        name = NAME1
+    elif args[1] == '2':
+        name = NAME2
+    else:
+        name = None
+        exit(1)
 
-    try:
-        cef.start()
-        p2p.start()
-    except KeyboardInterrupt:
-        sys.exit(0)
+    with cefpyco.create_handle() as h:
+        h.send_interest(name, 0)
+        start_time = time.time()
+        while True:
+            info = h.receive()
+            if not info.is_succeeded:
+                continue
+
+            if info.is_data:
+                get_data(info)
+                if info.chunk_num != info.end_chunk_num:
+                    h.send_interest(info.name, info.chunk_num+1)
+                else:
+                    end_time = time.time() - start_time
+                    break
+        print(end_time)
 
 if __name__ == '__main__':
     main()

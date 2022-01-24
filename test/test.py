@@ -1,12 +1,33 @@
-import socket
+import cefpyco
 
-socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-socket.bind(("127.0.0.1", 10000))
-socket.listen(10)
+SIZE=4096
 
-client_sock, client_addr = socket.accept()
+def send_data(h, name, payload):
+    cache_time = 360000  # 1時間
+    chunk_num = 0
+    end_chunk_num = len(payload) // SIZE
+    while payload:
+        chunk = payload[:SIZE]
+        h.send_data(name=name, payload=chunk,
+                                  chunk_num=chunk_num, end_chunk_num=end_chunk_num, cache_time=cache_time)
+        payload = payload[SIZE:]
+        chunk_num += 1
 
-while True:
-    data = input()
+def main():
+    with cefpyco.create_handle() as h:
+        h.register("ccnx:/test")
+        while True:
+            info = h.receive()
+            if not info.is_succeeded:
+                continue
 
-    client_sock.sendall(data.encode())
+            name = info.name.split("/")
+            if info.is_interest:
+                if name[2] == '1M.dummy' or name[2] == '10M.dummy' or name[2] == '100M.dummy':
+                    with open(name[2], "rb") as file:
+                        payload = file.read()
+                        send_data(h, name, payload)
+
+
+if __name__ == '__main__':
+    main()
