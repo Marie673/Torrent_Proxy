@@ -30,7 +30,7 @@ class Cefore(object):
 
             if not info.is_succeeded:
                 continue
-
+            print("get info")
             if info.is_data:
                 print(self.bitfield)
                 if not self.bitfield:
@@ -49,7 +49,6 @@ class Cefore(object):
     def run(self):
         start_time = time.time()
         self.handle.send_interest(self.name, 0)
-        print("send interest: {}".format(self.name))
         event.wait()
         print("get first chunk")
         while False in self.bitfield:
