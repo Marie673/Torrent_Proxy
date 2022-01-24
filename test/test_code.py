@@ -23,6 +23,7 @@ def main():
         name = None
         exit(1)
 
+    data_size = 0
     with cefpyco.create_handle() as h:
         h.send_interest(name, 0)
         start_time = time.time()
@@ -32,16 +33,17 @@ def main():
                 continue
 
             if info.is_data:
-                print("get data " + str(info.chunk_num) + " " + str(info.end_chunk_num))
+                data_size += len(info.payload)
                 get_data(info)
                 if info.chunk_num != info.end_chunk_num:
                     h.send_interest(info.name, info.chunk_num+1)
                 else:
                     get_data(info)
                     end_time = time.time() - start_time
-                    print(end_time)
+                    break
 
         print(end_time)
+        print(data_size)
 
 if __name__ == '__main__':
     main()
