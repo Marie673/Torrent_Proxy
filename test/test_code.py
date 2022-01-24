@@ -24,6 +24,10 @@ class Cefore(object):
 
         self.t_listener.start()
 
+    def display_progress(self):
+        count = self.bitfield.count(True)
+        print("[{}/{}]".format(count, len(self.bitfield)))
+
     def listener(self):
         print("listener starting")
         while self.active_state:
@@ -45,6 +49,8 @@ class Cefore(object):
 
                 self.bitfield[info.chunk_num] = True
                 self.data_size += len(info.payload)
+
+            self.display_progress()
 
     def run(self):
         start_time = time.time()
