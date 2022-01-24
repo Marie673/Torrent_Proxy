@@ -64,7 +64,7 @@ class Cefore(object):
                 else:
                     self.handle.send_interest(self.name, chunk_num)
 
-            time.sleep(1)
+            time.sleep(0.1)
 
         self.active_state = False
         end_time = time.time() - start_time
