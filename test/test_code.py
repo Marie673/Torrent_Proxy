@@ -3,7 +3,6 @@ import time
 
 import cefpyco
 
-SIZE=4096
 NAME0='ccnx:/test/1M.dummy'
 NAME1='ccnx:/test/10M.dummy'
 NAME2='ccnx:/test/100M.dummy'
