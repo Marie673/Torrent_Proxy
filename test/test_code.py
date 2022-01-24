@@ -34,10 +34,11 @@ def main():
             if info.is_data:
                 data_size += len(info.payload)
                 get_data(info)
-                if info.chunk_num != info.end_chunk_num:
-                    h.send_interest(info.name, info.chunk_num+1)
+                if info.chunk_num == 1:
+                    for chunk_num in range(1, info.end_chunk_num):
+                        for _ in range(3):
+                            h.send_interest(name, chunk_num)
                 else:
-                    get_data(info)
                     end_time = time.time() - start_time
                     break
 
