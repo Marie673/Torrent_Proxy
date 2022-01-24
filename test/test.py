@@ -27,6 +27,7 @@ def main():
                 if name[2] == '1M.dummy' or name[2] == '10M.dummy' or name[2] == '100M.dummy':
                     with open(name[2], "rb") as file:
                         payload = file.read()
+                        file.close()
                         send_data(h, info.name, payload)
 
 
