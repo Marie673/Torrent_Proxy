@@ -49,6 +49,7 @@ class Cefore(object):
     def run(self):
         start_time = time.time()
         self.handle.send_interest(self.name, 0)
+        print("send interest: {}".format(self.name))
         event.wait()
         print("get first chunk")
         while False in self.bitfield:
