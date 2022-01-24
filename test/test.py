@@ -1,5 +1,5 @@
 import os
-
+from threading import Thread
 import cefpyco
 
 SIZE = 1024 * 4
@@ -29,7 +29,8 @@ def main():
             name = info.name.split("/")
             if info.is_interest:
                 if name[2] == '1M.dummy' or name[2] == '10M.dummy' or name[2] == '100M.dummy':
-                    send_file(h, info, name[2])
+                    thread = Thread(target=send_file, args=(h, info, name[2]))
+                    thread.start()
 
 
 if __name__ == '__main__':
