@@ -2,7 +2,7 @@ import os
 
 import cefpyco
 
-SIZE=9216
+SIZE=1024 * 8
 
 def send_file(h, info, file_name):
     cache_time = 360000  # 1時間
