@@ -58,13 +58,16 @@ class Cefore(object):
         event.wait()
         print("get first chunk")
         while False in self.bitfield:
+            send_interest_num = 0
             for chunk_num in range(len(self.bitfield)):
                 if self.bitfield[chunk_num]:
                     continue
                 else:
+                    send_interest_num += 1
                     self.handle.send_interest(self.name, chunk_num)
-
-            time.sleep(0.1)
+                    if send_interest_num >= 32:
+                        time.sleep(1)
+                        continue
 
         self.active_state = False
         end_time = time.time() - start_time
