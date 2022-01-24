@@ -51,7 +51,7 @@ def main():
                 bitfield[info.chunk_num] = True
                 data_size += len(info.payload)
 
-                if data_size == full_data_size:
+                if False in bitfield:
                     end_time = time.time() - start_time
                     break
 
