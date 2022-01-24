@@ -1,6 +1,7 @@
 import time
 import select
 from threading import Thread
+from multiprocessing import Process
 from pubsub import pub
 import rarest_piece
 import logging
@@ -11,9 +12,9 @@ import socket
 import random
 
 
-class PeersManager(Thread):
+class PeersManager(Process):
     def __init__(self, torrent, pieces_manager):
-        Thread.__init__(self)
+        Process.__init__(self)
         self.peers = []
         self.torrent = torrent
         self.pieces_manager = pieces_manager
