@@ -16,7 +16,6 @@ def send_file(h, info, file_name):
         payload = file.read(SIZE)
         h.send_data(name=name, payload=payload,
                     chunk_num=chunk, end_chunk_num=end_chunk_num, cache_time=cache_time)
-        print("name: {} data size: {}".format(name, len(payload)))
 
 def main():
     with cefpyco.create_handle() as h:

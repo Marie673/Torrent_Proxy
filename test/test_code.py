@@ -25,7 +25,7 @@ class Cefore(object):
 
     def listener(self):
         print("listener starting")
-        while False in self.bitfield:
+        while True:
             info = self.handle.receive()
 
             if not info.is_succeeded:
