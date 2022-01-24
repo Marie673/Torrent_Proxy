@@ -54,6 +54,8 @@ def main():
                 data_size += len(info.payload)
 
                 if False in bitfield:
+                    continue
+                else:
                     end_time = time.time() - start_time
                     break
 
