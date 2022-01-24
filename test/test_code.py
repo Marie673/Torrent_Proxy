@@ -30,7 +30,7 @@ class Cefore(object):
 
             if not info.is_succeeded:
                 continue
-            print("get info")
+
             if info.is_data:
                 print(self.bitfield)
                 if not self.bitfield:
