@@ -50,6 +50,7 @@ class Cefore(object):
         start_time = time.time()
         self.handle.send_interest(self.name, 0)
         event.wait()
+        print("get first chunk")
         while False in self.bitfield:
             for chunk_num in range(len(self.bitfield)):
                 if self.bitfield[chunk_num]:
