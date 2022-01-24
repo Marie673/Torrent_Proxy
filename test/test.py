@@ -5,7 +5,7 @@ SIZE=4096
 def send_data(h, name, payload):
     cache_time = 360000  # 1時間
     chunk_num = 0
-    end_chunk_num = len(payload) // SIZE
+    end_chunk_num = len(payload) // SIZE -1
     while payload:
         chunk = payload[:SIZE]
         h.send_data(name=name, payload=chunk,
