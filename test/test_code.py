@@ -1,5 +1,6 @@
 import sys
 import time
+from threading import Thread, Event
 
 import cefpyco
 
@@ -7,8 +8,57 @@ NAME0='ccnx:/test/1M.dummy'
 NAME1='ccnx:/test/10M.dummy'
 NAME2='ccnx:/test/100M.dummy'
 
-def get_data(info):
-    return
+
+event = Event()
+
+class Cefore(object):
+    def __init__(self, name):
+        self.name = name
+        self.handle = cefpyco.CefpycoHandle()
+        self.handle.begin()
+        self.bitfield = []
+        self.data_size = 0
+
+        self.t_listener = Thread(target=self.listener)
+
+        self.t_listener.start()
+
+    def listener(self):
+        while False in self.bitfield:
+            info = self.handle.receive()
+
+            if not info.is_succeeded:
+                continue
+
+            if info.is_data:
+                if not self.bitfield:
+                    bitfield = [False for _ in range(info.end_chunk_num)]
+                    bitfield[info.chunk_num] = True
+                    self.data_size += len(info.payload)
+                    event.set()
+                    continue
+
+                if self.bitfield[info.chunk_num] is True:
+                    continue
+
+                self.bitfield[info.chunk_num] = True
+                self.data_size += len(info.payload)
+
+    def run(self):
+        start_time = time.time()
+        self.handle.send_interest(self.name, 0)
+        event.wait()
+        while False in self.bitfield:
+            for chunk_num in range(len(self.bitfield)):
+                if self.bitfield[chunk_num]:
+                    continue
+                else:
+                    self.handle.send_interest(self.name, chunk_num)
+
+        end_time = time.time() - start_time
+        print("time:{}[sec] data size: {}[byte]".format(end_time,
+                                                        self.data_size))
+
 
 def main():
     args = sys.argv
@@ -26,41 +76,8 @@ def main():
     else:
         exit(1)
 
-    data_size = 0
-    bitfield = [False]
-    with cefpyco.create_handle() as h:
-        h.send_interest(name, 0)
-        start_time = time.time()
-        while True:
-            info = h.receive()
-            if not info.is_succeeded:
-                continue
-
-            if info.is_data:
-                if bitfield[info.chunk_num] is True:
-                    continue
-
-                if info.chunk_num == 0:
-                    bitfield = [False for _ in range(info.end_chunk_num)]
-                    bitfield[0] = True
-                    data_size += len(info.payload)
-                    print("send interest")
-                    for chunk_num in range(1, info.end_chunk_num):
-                        for _ in range(3):
-                            h.send_interest(name, chunk_num)
-
-                bitfield[info.chunk_num] = True
-                print("get data {}".format(info.chunk_num))
-                data_size += len(info.payload)
-
-                if False in bitfield:
-                    continue
-                else:
-                    end_time = time.time() - start_time
-                    break
-
-        print(end_time)
-        print(data_size)
+    cef = Cefore(name)
+    cef.run()
 
 if __name__ == '__main__':
     main()
