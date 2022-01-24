@@ -37,8 +37,10 @@ def main():
                 if info.chunk_num != info.end_chunk_num:
                     h.send_interest(info.name, info.chunk_num+1)
                 else:
+                    get_data(info)
                     end_time = time.time() - start_time
-                    break
+                    print(end_time)
+
         print(end_time)
 
 if __name__ == '__main__':
