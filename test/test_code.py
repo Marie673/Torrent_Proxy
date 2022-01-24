@@ -24,6 +24,7 @@ class Cefore(object):
         self.t_listener.start()
 
     def listener(self):
+        print("listener starting")
         while False in self.bitfield:
             info = self.handle.receive()
 
@@ -31,7 +32,7 @@ class Cefore(object):
                 continue
 
             if info.is_data:
-                print(bitfield)
+                print(self.bitfield)
                 if not self.bitfield:
                     bitfield = [False for _ in range(info.end_chunk_num)]
                     bitfield[info.chunk_num] = True
