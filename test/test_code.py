@@ -31,6 +31,7 @@ class Cefore(object):
                 continue
 
             if info.is_data:
+                print(bitfield)
                 if not self.bitfield:
                     bitfield = [False for _ in range(info.end_chunk_num)]
                     bitfield[info.chunk_num] = True
