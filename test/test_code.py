@@ -32,6 +32,7 @@ def main():
                 continue
 
             if info.is_data:
+                print("get data")
                 get_data(info)
                 if info.chunk_num != info.end_chunk_num:
                     h.send_interest(info.name, info.chunk_num+1)
