@@ -67,6 +67,7 @@ class Cefore(object):
                     self.handle.send_interest(self.name, chunk_num)
                     if send_interest_num >= 32:
                         time.sleep(1)
+                        send_interest_num = 0
                         continue
 
         self.active_state = False
