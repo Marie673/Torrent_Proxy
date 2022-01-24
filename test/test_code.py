@@ -27,7 +27,7 @@ def main():
         exit(1)
 
     data_size = 0
-    bitfield = []
+    bitfield = [False]
     with cefpyco.create_handle() as h:
         h.send_interest(name, 0)
         start_time = time.time()
