@@ -28,6 +28,7 @@ def main():
 
             name = info.name.split("/")
             if info.is_interest:
+                print("receive Interest: {}".format(info.name))
                 if name[2] == '1M.dummy' or name[2] == '10M.dummy' or name[2] == '100M.dummy':
                     thread = Thread(target=send_file, args=(h, info, name[2]))
                     thread.start()
