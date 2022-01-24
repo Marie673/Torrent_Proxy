@@ -9,7 +9,7 @@ NAME1='ccnx:/test/10M.dummy'
 NAME2='ccnx:/test/100M.dummy'
 
 def get_data(info):
-
+    return
 
 def main():
     args = sys.argv
