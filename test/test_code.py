@@ -36,7 +36,6 @@ class Cefore(object):
                 if not self.bitfield:
                     bitfield = [False for _ in range(info.end_chunk_num)]
                     bitfield[info.chunk_num] = True
-                    print(bitfield)
                     self.data_size += len(info.payload)
                     event.set()
                     continue
@@ -52,6 +51,7 @@ class Cefore(object):
         self.handle.send_interest(self.name, 0)
         event.wait()
         print("get first chunk")
+        print(self.bitfield)
         while False in self.bitfield:
             for chunk_num in range(len(self.bitfield)):
                 if self.bitfield[chunk_num]:
