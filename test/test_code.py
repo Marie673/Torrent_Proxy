@@ -18,6 +18,7 @@ class Cefore(object):
         self.handle.begin()
         self.bitfield = []
         self.data_size = 0
+        self.active_state = True
 
         self.t_listener = Thread(target=self.listener)
 
@@ -25,7 +26,7 @@ class Cefore(object):
 
     def listener(self):
         print("listener starting")
-        while not self.bitfield or False in self.bitfield:
+        while self.active_state:
             info = self.handle.receive()
 
             if not info.is_succeeded:
@@ -58,6 +59,7 @@ class Cefore(object):
                 else:
                     self.handle.send_interest(self.name, chunk_num)
 
+        self.active_state = False
         end_time = time.time() - start_time
         print("time:{}[sec] data size: {}[byte]".format(end_time,
                                                         self.data_size))
