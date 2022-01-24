@@ -27,7 +27,7 @@ class Cef(object):
         prefix = info.name.split('/')
         index = int(prefix[4])
         chunk_num = info.chunk_num
-        offset = chunk_num * block.BLOCK_SIZE
+        offset = chunk_num * len(info.payload)
 
         pub.sendMessage('PiecesManager.Piece', piece=(index, offset, info.payload))
 

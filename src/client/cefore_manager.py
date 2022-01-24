@@ -34,5 +34,11 @@ class CefManager(Thread):
         if info.is_data:
             # logging.debug('Received Data')
             self.cef.handle_piece(info)
+            if info.chunk_num == 0:
+                for chunk_num in range(1, info.end_chunk_num):
+                    self.cef.send_interest(name=info.name, chunk_num=chunk_num)
+
+            """
             if info.chunk_num != info.end_chunk_num:
                 self.cef.send_interest(info.name, info.chunk_num+1)
+            """
