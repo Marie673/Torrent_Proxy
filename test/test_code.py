@@ -44,11 +44,13 @@ def main():
                     bitfield = [False for _ in range(info.end_chunk_num)]
                     bitfield[0] = True
                     data_size += len(info.payload)
+                    print("send interest")
                     for chunk_num in range(1, info.end_chunk_num):
                         for _ in range(3):
                             h.send_interest(name, chunk_num)
 
                 bitfield[info.chunk_num] = True
+                print("get data {}".format(info.chunk_num))
                 data_size += len(info.payload)
 
                 if False in bitfield:
