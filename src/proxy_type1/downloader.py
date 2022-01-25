@@ -63,7 +63,7 @@ class Run(Process):
                     piece = [index, self.pieces_manager.pieces[index].raw_data]
                     self.piece_q.put(piece)
                     self.request.remove(index)
-                    self.pieces_manager.pieces[index].
+                    del self.pieces_manager.pieces[index].raw_data
                     continue
 
                 peer = self.peers_manager.get_random_peer_having_piece(index)
