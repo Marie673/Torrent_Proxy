@@ -84,7 +84,7 @@ class Cefore(object):
                 continue
 
             for chunk_num in range(len(self.bitfield)):
-                if self.bitfield[chunk_num]:
+                if self.bitfield[chunk_num] or chunk_num in self.interests:
                     continue
 
                 interest = Interest(self.name, chunk_num)
