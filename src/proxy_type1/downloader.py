@@ -53,11 +53,13 @@ class Run(Process):
         cache_time = 360000
         end_chunk_num = len(payload) // CHUNK_SIZE
 
+        chunk_num = 0
         while payload:
             chunk = payload[:CHUNK_SIZE]
-            self.handle.send_data(name=name, payload=payload,
-                    chunk_num=chunk, end_chunk_num=end_chunk_num, cache_time=cache_time)
+            self.handle.send_data(name=name, payload=chunk,
+                    chunk_num=chunk_num, end_chunk_num=end_chunk_num, cache_time=cache_time)
             payload = payload[CHUNK_SIZE:payload]
+            chunk += 1
 
 
     def run(self):
