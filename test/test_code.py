@@ -49,6 +49,10 @@ class Cefore(object):
         if info.chunk_num in self.interests:
             self.t_lock.acquire()
             del self.interests[info.chunk_num]
+            if info.chunk_num in self.interests:
+                print("error")
+                exit(1)
+
             self.t_lock.release()
 
         if self.bitfield[info.chunk_num] is True:
@@ -84,6 +88,7 @@ class Cefore(object):
             for index in self.interests:
                 i = self.interests[index]
                 if time.time() - i.time > 2:
+                    del i
                     del self.interests[index]
 
 
