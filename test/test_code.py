@@ -35,17 +35,11 @@ class Cefore(object):
         self.interests = {}
         self.t_listener = Thread(target=self.listener)
 
-        self._stop_event = threading.Event()
-
         self.t_listener.start()
 
     def display_progress(self):
         count = self.bitfield.count(True)
         print("[{}/{}]".format(count, len(self.bitfield)))
-
-    def kill(self):
-        self.active_state = False
-        self._stop_event.wait()
 
     def listener(self):
         print("listener starting")
@@ -82,7 +76,6 @@ class Cefore(object):
         print("get first chunk")
 
         while False in self.bitfield:
-            #print(self.interests)
             for index in self.interests:
                 i = self.interests[index]
                 if time.time() - i.time > 5:
@@ -101,13 +94,14 @@ class Cefore(object):
                 interest = Interest(self.name, chunk_num)
                 interest.send_interest(self.handle)
                 self.interests[chunk_num] = interest
-            print(self.interests)
+
             time.sleep(0.0000001)
 
-        self._stop_event.set()
         end_time = time.time() - start_time
+        throughput = (self.data_size / (1024*1024)) / end_time
         print("time:{}[sec] data size: {}[byte]".format(end_time,
                                                         self.data_size))
+        print("throughput: {}".format(throughput))
 
 
 def main():
