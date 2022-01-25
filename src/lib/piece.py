@@ -1,3 +1,4 @@
+import gc
 import hashlib
 import math
 import time
@@ -101,7 +102,8 @@ class Piece(object):
             f.seek(file_offset)
             f.write(self.raw_data[piece_offset:piece_offset + length])
             f.close()
-            self.raw_data = b''
+            del self.raw_data
+            gc.collect()
 
     def _merge_blocks(self):
         buf = b''

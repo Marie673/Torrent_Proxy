@@ -146,9 +146,6 @@ class CefAppConsumer(CefApp):
         info.n_finished += 1
         self.send_next_interest(info)
 
-    def on_rcv_meta(self, info, packet):
-        pass
-
     def reset_req_status(self, info):
         self.req_flag = np.zeros(info.count)
         self.req_tail_index = self.rcv_tail_index
