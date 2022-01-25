@@ -60,6 +60,7 @@ class Run(object):
                 peer.send_to_peer(piece_data)
 
             self.display_progression()
+            time.sleep(0.001)
 
             time.sleep(0.5)
 
