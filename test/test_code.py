@@ -91,7 +91,7 @@ class Cefore(object):
                 interest.send_interest(self.handle)
                 self.interests[chunk_num] = interest
 
-            t
+
 
         self.active_state = False
         end_time = time.time() - start_time
