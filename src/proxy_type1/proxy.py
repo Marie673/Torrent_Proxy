@@ -42,9 +42,10 @@ class Run(object):
         self.piece_q[info_hash] = piece_q
         self.download_process[info_hash] = process
         process.run()
+        print('new process is running')
 
     def handle_interest(self, packet):
-        print("get interest: {}".format(packet.name))
+        print("interest: {}".format(packet.name))
         prefix = packet.name.split("/")
         info_hash = prefix[2]
         piece_index = prefix[3]
