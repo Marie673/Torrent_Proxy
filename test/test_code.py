@@ -89,6 +89,10 @@ class Cefore(object):
         print("get first chunk")
 
         while False in self.bitfield:
+            for key in self.interests:
+                if time.time() - self.interests[key].time > 1:
+                    del self.interests[key]
+                    print("del")
 
             for chunk_num in range(len(self.bitfield)):
                 if self.bitfield[chunk_num] or chunk_num in self.interests:
