@@ -74,7 +74,7 @@ class Cefore(object):
                     i.time = time.time()
                     i.send_interest(self.handle)
 
-            if len(self.interests) >= 30:
+            if len(self.interests) >= 3000:
                 continue
 
             for chunk_num in range(len(self.bitfield)):
