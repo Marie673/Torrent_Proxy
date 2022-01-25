@@ -10,6 +10,7 @@ import message
 
 class Peer(object):
     def __init__(self, number_of_pieces, ip, port=6881):
+        self.time = time.time()
         self.last_call = 0.0
         self.has_handshacked = False
         self.healthy = False
