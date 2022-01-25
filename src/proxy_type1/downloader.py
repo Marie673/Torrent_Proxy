@@ -48,7 +48,7 @@ class Run(Process):
 
     def send_data(self, piece):
         index, payload = piece
-        name = 'ccnx:/BitTorrent/' + self.torrent.info_hash + '/' + str(index)
+        name = 'ccnx:/BitTorrent/' + self.torrent.info_hash_str + '/' + str(index)
         cache_time = 360000
         end_chunk_num = len(payload) // CHUNK_SIZE
 

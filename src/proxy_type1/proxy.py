@@ -25,7 +25,7 @@ class Run(object):
         for path in PATH:
             t = torrent.Torrent()
             t.load_from_path(path)
-            self.torrent[t.info_hash] = t
+            self.torrent[t.info_hash_str] = t
 
         self.download_process = {}
         self.request_q = {}
