@@ -75,7 +75,7 @@ class Cefore(object):
         print("get first chunk")
 
         while False in self.bitfield:
-            print(self.interests)
+            #print(self.interests)
             for index in self.interests:
                 i = self.interests[index]
                 if time.time() - i.time > 5:
@@ -94,6 +94,7 @@ class Cefore(object):
                 interest = Interest(self.name, chunk_num)
                 interest.send_interest(self.handle)
                 self.interests[chunk_num] = interest
+            time.sleep(0.0000001)
 
         self.active_state = False
         end_time = time.time() - start_time
