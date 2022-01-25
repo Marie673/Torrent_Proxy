@@ -3,12 +3,13 @@ import os.path
 import sys
 
 import cefore_manager
-
+import torrent
 
 class Run(object):
-    def __init__(self, jikken):
+    def __init__(self, path):
+        self.torrent = torrent.Torrent().load_from_path(path)
 
-        self.cef_manager = cefore_manager.CefManager(jikken)
+        self.cef_manager = cefore_manager.CefManager(torrent)
         self.handle = self.cef_manager.cef.handle
 
     def start(self):
@@ -17,9 +18,17 @@ class Run(object):
 
 def main():
     args = sys.argv
-    jikken = int(args[1])
+    if len(args) != 2:
+        print('Usage: {} torrent_file'.format(args[0]))
+        exit(1)
 
-    run = Run(jikken)
+    path = args[1]
+    if not os.path.isfile(path):
+        print('{} is not found.'.format(path))
+        exit(1)
+
+    path = os.path.abspath(path)
+    run = Run(path)
     try:
         run.start()
     except KeyboardInterrupt:

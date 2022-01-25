@@ -2,7 +2,6 @@ from block import State
 import time
 import peers_manager
 import pieces_manager
-import torrent
 import tracker
 import logging
 import message
