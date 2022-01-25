@@ -95,6 +95,7 @@ class Cefore(object):
 
             time.sleep(0.0000001)
 
+        self.active_state = False
         end_time = time.time() - start_time
         throughput = (self.data_size / (1024*1024)) / end_time
         print("time:{}[sec] data size: {}[byte]".format(end_time,
