@@ -26,7 +26,7 @@ class Cefore(object):
         self.name = name
         self.handle = cefpyco.CefpycoHandle()
         self.handle.begin()
-        self.bitfield = []
+        self.bitfield = Manager().list()
         self.data_size = 0
         self.active_state = True
 
