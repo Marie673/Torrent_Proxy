@@ -10,6 +10,7 @@ NAME2='ccnx:/test/100M.dummy'
 
 
 event = Event()
+alive = True
 
 class Interest(object):
     def __init__(self, interest, chunk):
@@ -41,7 +42,7 @@ class Cefore(object):
 
     def listener(self):
         print("listener starting")
-        while self.active_state:
+        while self.active_state and alive:
             info = self.handle.receive()
 
             if not info.is_succeeded:
@@ -119,6 +120,7 @@ def main():
         cef = Cefore(name)
         cef.run()
     except KeyboardInterrupt:
+        alive = False
         sys.exit(0)
 
 
