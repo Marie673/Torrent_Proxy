@@ -10,9 +10,6 @@ NAME1='ccnx:/test/10M.dummy'
 NAME2='ccnx:/test/100M.dummy'
 
 
-event = Event()
-alive = True
-
 class Interest(object):
     def __init__(self, interest, chunk):
         self.interest = interest
@@ -43,11 +40,10 @@ class Cefore(object):
 
     def listener(self):
         print("listener starting")
-        while self.active_state and alive:
+        while self.active_state:
             info = self.handle.receive()
 
             if not info.is_succeeded:
-                time.sleep(0.00000001)
                 continue
 
             if info.is_data:
@@ -55,7 +51,6 @@ class Cefore(object):
                     self.bitfield = [False for _ in range(info.end_chunk_num)]
                     self.bitfield[info.chunk_num] = True
                     self.data_size += len(info.payload)
-                    event.set()
                     continue
 
                 if info.chunk_num in self.interests:
@@ -72,7 +67,9 @@ class Cefore(object):
     def run(self):
         start_time = time.time()
         self.handle.send_interest(self.name, 0)
-        event.wait()
+        while True:
+            if len(self.bitfield) >= 1:
+                break
         print("get first chunk")
 
         while False in self.bitfield:
