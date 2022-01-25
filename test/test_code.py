@@ -15,16 +15,6 @@ BLOCK_SIZE = 30
 
 alive = True
 
-class Interest:
-    def __init__(self, interest, chunk):
-        self.interest = interest
-        self.chunk = chunk
-        self.time = time.time()
-
-    def send_interest(self, handle):
-        self.time = time.time()
-        handle.send_interest(self.interest, self.chunk)
-
 
 class Cefore(object):
     def __init__(self, name):
@@ -35,10 +25,6 @@ class Cefore(object):
         self.data_size = 0
         self.active_state = True
         self.interests = {}
-        self.t_lock = threading.Lock()
-
-        self.t_listener = Thread(target=self.listener)
-        self.t_listener.start()
 
     def display_progress(self):
         count = self.bitfield.count(True)
@@ -60,19 +46,6 @@ class Cefore(object):
         self.bitfield[info.chunk_num] = True
         self.data_size += len(info.payload)
 
-    def listener(self):
-        print("listener starting")
-        while self.active_state and alive:
-            info = self.handle.receive()
-
-            if not info.is_succeeded:
-                continue
-
-            if info.is_data:
-                self.handle_interest(info)
-
-            self.display_progress()
-
     def run(self):
         start_time = time.time()
         self.handle.send_interest(self.name, 0)
@@ -81,28 +54,21 @@ class Cefore(object):
                 break
         print("get first chunk")
 
+        padding = self.bitfield
+        for chunk in range(1, MAX_INTEREST):
+            self.handle.send_interest(self.name, chunk)
+            padding[chunk] = True
+
         while False in self.bitfield:
-            for key in self.interests:
-                if time.time() - self.interests[key].time > 5:
-                    del self.interests[key]
-                    print("del")
+            info = self.handle.receive()
+            if not info.is_succeeded:
+                continue
+            else:
+                self.handle_interest(info)
 
-            block = 0
-            for chunk_num in range(len(self.bitfield)):
-                if self.bitfield[chunk_num] or chunk_num in self.interests:
-                    continue
-                if len(self.interests) >= MAX_INTEREST:
-                    break
-                interest = Interest(self.name, chunk_num)
-                self.interests[chunk_num] = interest
-                interest.send_interest(self.handle)
-                block += 1
-                if block >= BLOCK_SIZE:
-                    break
-
-            time.sleep(0.1)
-
-
+            chunk = padding.index(False)
+            self.handle.send_interest(self.name, chunk)
+            padding[chunk] = True
 
         self.active_state = False
         end_time = time.time() - start_time
