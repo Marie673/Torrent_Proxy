@@ -65,18 +65,17 @@ class Tracker(object):
     def try_peer_connect(self):
         logging.info("Trying to connect to %d peer(s)" % len(self.dict_sock_addr))
 
-        for _ in range(MAX_PEERS_CONNECTED):
-            for _, sock_addr in self.dict_sock_addr.items():
-                if len(self.connected_peers) >= MAX_PEERS_CONNECTED:
-                    break
+        for _, sock_addr in self.dict_sock_addr.items():
+            if len(self.connected_peers) >= MAX_PEERS_CONNECTED:
+                break
 
-                new_peer = peer.Peer(int(self.torrent.number_of_pieces), sock_addr.ip, sock_addr.port)
-                if not new_peer.connect():
-                    continue
+            new_peer = peer.Peer(int(self.torrent.number_of_pieces), sock_addr.ip, sock_addr.port)
+            if not new_peer.connect():
+                continue
 
-                print('Connected to %d/%d peers' % (len(self.connected_peers), MAX_PEERS_CONNECTED))
+            print('Connected to %d/%d peers' % (len(self.connected_peers), MAX_PEERS_CONNECTED))
 
-                self.connected_peers[new_peer.__hash__()] = new_peer
+            self.connected_peers[new_peer.__hash__()] = new_peer
 
     def http_scraper(self, torrent, tracker):
         params = {

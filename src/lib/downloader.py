@@ -47,6 +47,7 @@ class Run(object):
 
                 peer = self.peers_manager.get_random_peer_having_piece(index)
                 if not peer:
+                    print("test")
                     continue
 
                 self.pieces_manager.pieces[index].update_block_status()
