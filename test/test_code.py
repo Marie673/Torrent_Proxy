@@ -37,6 +37,22 @@ class Cefore(object):
         count = self.bitfield.count(True)
         print("[{}/{}]".format(count, len(self.bitfield)))
 
+    def handle_interest(self, info):
+        if not self.bitfield:
+            self.bitfield = [False for _ in range(info.end_chunk_num)]
+            self.bitfield[info.chunk_num] = True
+            self.data_size += len(info.payload)
+            return
+
+        if info.chunk_num in self.interests:
+            del self.interests[info.chunk_num]
+
+        if self.bitfield[info.chunk_num] is True:
+            return
+
+        self.bitfield[info.chunk_num] = True
+        self.data_size += len(info.payload)
+
     def listener(self):
         print("listener starting")
         while self.active_state:
@@ -46,20 +62,7 @@ class Cefore(object):
                 continue
 
             if info.is_data:
-                if not self.bitfield:
-                    self.bitfield = [False for _ in range(info.end_chunk_num)]
-                    self.bitfield[info.chunk_num] = True
-                    self.data_size += len(info.payload)
-                    continue
-
-                if info.chunk_num in self.interests:
-                    del self.interests[info.chunk_num]
-
-                if self.bitfield[info.chunk_num] is True:
-                    continue
-
-                self.bitfield[info.chunk_num] = True
-                self.data_size += len(info.payload)
+                self.handle_interest(info)
 
             # self.display_progress()
 
