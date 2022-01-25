@@ -87,7 +87,7 @@ class Cefore(object):
                     del self.interests[index]
 
 
-            if len(self.interests) >= 300:
+            if len(self.interests) >= 30:
                 print("max")
                 continue
 
