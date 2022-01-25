@@ -7,9 +7,7 @@ class PiecesManager(object):
     def __init__(self, torrent):
         self.torrent = torrent
         self.number_of_pieces = int(torrent.number_of_pieces)
-        self.bitfield = bitstring.BitArray(self.number_of_pieces)
         self.pieces = self._generate_pieces()
-
         self.files = self._load_files()
         self.complete_pieces = 0
 
@@ -18,10 +16,6 @@ class PiecesManager(object):
             self.pieces[id_piece].files.append(file)
 
         pub.subscribe(self.receive_block_piece, 'PiecesManager.Piece')
-        pub.subscribe(self.update_bitfield, 'PiecesManager.PieceCompleted')
-
-    def update_bitfield(self, piece_index):
-        self.bitfield[piece_index] = 1
 
     def receive_block_piece(self, piece):
         piece_index, piece_offset, piece_data = piece

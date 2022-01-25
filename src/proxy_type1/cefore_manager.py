@@ -28,7 +28,3 @@ class CefManager(object):
 
         if info.is_data:
             logging.debug('Received Data')
-
-            if prefix[1] != 'BitTorrent':
-                self.cef.is_torrent(info)
-                return
