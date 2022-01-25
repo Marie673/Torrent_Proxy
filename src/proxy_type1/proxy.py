@@ -17,15 +17,6 @@ class Run(object):
 
 
 def main():
-    args = sys.argv
-    if len(args) != 2:
-        print('Usage: {} torrent_file'.format(args[0]))
-        exit(1)
-
-    path = args[1]
-    if not os.path.isfile(path):
-        print('{} is not found.'.format(path))
-        exit(1)
 
     path = os.path.abspath(path)
     run = Run(path)

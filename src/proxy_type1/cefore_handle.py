@@ -18,14 +18,13 @@ PATH = ["/home/marie/Torrent_Proxy/test/1M.dummy.torrent",
 
 
 class Cef(object):
-    def __init__(self, jikken):
+    def __init__(self):
         self.torrent = {}
         for path in PATH:
             t = torrent.Torrent()
             t.load_from_path(path)
             self.torrent[t.info_hash] = t
 
-        self.jikken = jikken
         self.runners = {}
         self.handle = cefpyco.CefpycoHandle()
         self.handle.begin()
@@ -65,7 +64,7 @@ class Cef(object):
             name = 'ccnx:/BitTorrent/' + info_hash + '/' + index
             self.send_data(name, payload)
 
-    def handle_request(self, info: cefpyco.core.CcnPacketInfo):
+    def handle_interest(self, info: cefpyco.core.CcnPacketInfo):
         prefix = info.name.split('/')
         info_hash = prefix[2]
         index = prefix[3]
