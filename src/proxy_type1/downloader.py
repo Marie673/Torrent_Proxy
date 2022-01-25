@@ -49,6 +49,7 @@ class Run(Process):
     def send_data(self, piece):
         index, payload = piece
         name = 'ccnx:/BitTorrent/' + self.torrent.info_hash_str + '/' + str(index)
+        print("send Data: " + name)
         cache_time = 360000
         end_chunk_num = len(payload) // CHUNK_SIZE
 
@@ -97,7 +98,7 @@ class Run(Process):
 
                 piece_index, block_offset, block_length = data
                 piece_data = message.Request(piece_index, block_offset, block_length).to_bytes()
-                if piece_index == 0:
+                if block_offset == 0:
                     print("download piece: {}".format(piece_index))
                 peer.send_to_peer(piece_data)
 
