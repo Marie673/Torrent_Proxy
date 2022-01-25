@@ -1,7 +1,7 @@
 import sys
-import threading
 import time
 from threading import Thread, Event
+from multiprocessing import Process, Manager
 
 import cefpyco
 
@@ -29,8 +29,9 @@ class Cefore(object):
         self.bitfield = []
         self.data_size = 0
         self.active_state = True
-        self.interests = {}
-        self.t_listener = Thread(target=self.listener)
+
+        self.interests = Manager().dict()
+        self.t_listener = Process(target=self.listener)
 
         self.t_listener.start()
 
@@ -55,7 +56,6 @@ class Cefore(object):
 
                 if info.chunk_num in self.interests:
                     del self.interests[info.chunk_num]
-                    print("del")
 
                 if self.bitfield[info.chunk_num] is True:
                     continue
