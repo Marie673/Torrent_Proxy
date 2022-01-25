@@ -67,7 +67,7 @@ class Cefore(object):
                     del self.interests[info.chunk_num]
                 self.data_size += len(info.payload)
 
-            self.display_progress()
+            # self.display_progress()
 
     def run(self):
         start_time = time.time()
