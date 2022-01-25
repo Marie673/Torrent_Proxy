@@ -10,9 +10,13 @@ import os
 import sys
 import time
 import logging
+from threading import Thread
+import numpy
 
 
 PROTOCOL = 'ccnx:/BitTorrent'
+MAX_PIECE = 30
+counter = 0
 
 
 class Run(object):
@@ -25,11 +29,13 @@ class Run(object):
         self.pieces_manager = pieces_manager.PiecesManager(self.torrent)
         self.handle = cefpyco.CefpycoHandle()
         self.handle.begin()
+        self.req_piece_flg = numpy.zeros(self.torrent.number_of_pieces)
 
         logging.info('Cefore Manager Started')
         logging.info("PiecesManager Started")
 
     def start(self):
+        global counter
         start_time = time.time()
         while not self.pieces_manager.all_pieces_completed():
             # logging.debug('start request pieces')
@@ -41,13 +47,18 @@ class Run(object):
 
                 self.pieces_manager.pieces[index].update_block_status()
 
-                data = self.pieces_manager.pieces[index].get_empty_block()
-                if not data:
-                    continue
+                if counter >= MAX_PIECE:
+                    break
 
-                interest = '/'.join([PROTOCOL, self.info_hash, str(index)])
-                cef = cefapp.CefAppConsumer(self.handle)
-                cef.run(interest)
+                if not self.req_piece_flg[index]:
+                    interest = '/'.join([PROTOCOL, self.info_hash, str(index)])
+                    cef = cefapp.CefAppConsumer(self.handle)
+                    thread = Thread(target=cef.run, args=(interest,))
+                    thread.start()
+                    self.req_piece_flg[index] = True
+
+                    counter += 1
+
                 # logging.debug('send Interest: {}'.format(interest))
 
             if self.pieces_manager.all_pieces_completed():

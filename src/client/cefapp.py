@@ -6,9 +6,11 @@ import os
 from sys import stderr
 
 import torrent
+import client
 
 MAX_INTEREST = 1000
 BLOCK_SIZE = 30
+
 
 class CefAppRunningInfo(object):
     def __init__(self, name, count):
@@ -29,7 +31,6 @@ class CefApp(object):
         self.timeout_limit = timeout_limit
 
     def run(self, name, count=0):
-        start_time = time.time()
         if count <= 0:
             count = self.resolve_count(name)
             if not count:
@@ -46,8 +47,8 @@ class CefApp(object):
             elif packet.name == info.name:
                 self.on_rcv_succeeded(info, packet)
         if info.n_finished == info.count:
-            print("time:".format(time))
             self.show_result_on_success(info)
+            client.counter -= 1
         else:
             self.show_result_on_failure(info)
 
