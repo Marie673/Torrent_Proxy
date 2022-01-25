@@ -40,6 +40,9 @@ class Cefore(object):
         count = self.bitfield.count(True)
         print("[{}/{}]".format(count, len(self.bitfield)))
 
+    def kill(self):
+        self.active_state = False
+
     def listener(self):
         print("listener starting")
         while self.active_state and alive:
@@ -119,11 +122,11 @@ def main():
     else:
         exit(1)
 
+    cef = Cefore(name)
     try:
-        cef = Cefore(name)
         cef.run()
     except KeyboardInterrupt:
-        alive = False
+        cef.kill()
         sys.exit(0)
 
 
