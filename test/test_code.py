@@ -94,6 +94,7 @@ class Cefore(object):
                 interest = Interest(self.name, chunk_num)
                 interest.send_interest(self.handle)
                 self.interests[chunk_num] = interest
+            print(self.interests)
             time.sleep(0.0000001)
 
         self.active_state = False
