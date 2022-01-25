@@ -61,12 +61,12 @@ class Run(object):
                 piece_index, block_offset, block_length = data
                 piece_data = message.Request(piece_index, block_offset, block_length).to_bytes()
                 peer.send_to_peer(piece_data)
-
                 break
 
             if time.time() - prog_time > 1:
                 self.display_progression()
                 prog_time = time.time()
+            time.sleep(0.000001)
 
         logging.info("File(s) downloaded successfully.")
         self.display_progression()
