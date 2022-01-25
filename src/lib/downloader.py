@@ -12,10 +12,6 @@ import tracker
 import message
 
 
-peers_manager.Manager.register("Manager",
-                               callable=peers_manager.PeersManager)
-
-
 class Run(object):
     percentage_completed = -1
     last_log_line = ""
