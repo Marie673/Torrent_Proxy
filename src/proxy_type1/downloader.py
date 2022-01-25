@@ -74,6 +74,7 @@ class Run(Process):
                 request_index = self.request_q.get()
                 if request_index not in self.request:
                     self.request.append(request_index)
+                    print("get new request: {}".format(request_index))
 
             for index in self.request:
                 if self.pieces_manager.pieces[index].is_full:
@@ -81,6 +82,7 @@ class Run(Process):
                     self.send_data(piece)
                     self.request.remove(index)
                     del self.pieces_manager.pieces[index].raw_data
+                    print("complete piece: {}".format(index))
                     continue
 
                 peer = self.peers_manager.get_random_peer_having_piece(index)
@@ -95,6 +97,8 @@ class Run(Process):
 
                 piece_index, block_offset, block_length = data
                 piece_data = message.Request(piece_index, block_offset, block_length).to_bytes()
+                if piece_index == 0:
+                    print("download piece: {}".format(piece_index))
                 peer.send_to_peer(piece_data)
 
             time.sleep(0.00001)
