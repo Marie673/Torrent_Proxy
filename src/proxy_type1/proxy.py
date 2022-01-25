@@ -45,7 +45,7 @@ class Run(object):
         print('new process is running')
 
     def handle_interest(self, packet):
-        print("interest: {}".format(packet.name))
+        print("interest: {} chunk = {}".format(packet.name), packet.chunk_num)
         prefix = packet.name.split("/")
         info_hash = prefix[2]
         piece_index = int(prefix[3])
