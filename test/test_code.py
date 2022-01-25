@@ -94,7 +94,7 @@ class Cefore(object):
                     del self.interests[key]
                     print("del")
 
-            for chunk_num in range(len(self.bitfield)):
+            for chunk_num in range(len(self.bitfield)-1):
                 if self.bitfield[chunk_num] or chunk_num in self.interests:
                     continue
                 if len(self.interests) >= MAX_INTEREST:
