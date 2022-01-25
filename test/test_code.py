@@ -191,7 +191,10 @@ def main():
             h
         )
         try:
+            start_time = time.time()
             app.run(name)
+            end_time = time.time() - start_time
+            print("time: {}".format(end_time))
         except MetaInfoNotResolvedError as e:
             return
 
