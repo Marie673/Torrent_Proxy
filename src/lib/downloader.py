@@ -12,6 +12,9 @@ import tracker
 import message
 
 
+sys.setcheckinterval(10)
+
+
 class Run(object):
     percentage_completed = -1
     last_log_line = ""
