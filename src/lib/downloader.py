@@ -1,16 +1,20 @@
 import sys
+import time
+import logging
+import os
+from multiprocessing import Queue
 
 from block import State
-import time
 import peers_manager
 import pieces_manager
 import torrent
 import tracker
-import logging
-import os
 import message
 
-PATH = "/home/marie/Torrent_Proxy/test/testPicture.jpg.torrent"
+
+peers_manager.Manager.register("Manager",
+                               callable=peers_manager.PeersManager)
+
 
 class Run(object):
     percentage_completed = -1

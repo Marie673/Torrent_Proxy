@@ -2,9 +2,11 @@ import time
 import select
 from threading import Thread
 from multiprocessing import Process
+from multiprocessing.managers import BaseManager
 from pubsub import pub
-import rarest_piece
 import logging
+
+import rarest_piece
 import message
 import peer
 import errno
@@ -12,9 +14,9 @@ import socket
 import random
 
 
-class PeersManager(Process):
+class PeersManager(Thread):
     def __init__(self, torrent, pieces_manager):
-        Process.__init__(self)
+        Thread.__init__(self)
         self.peers = []
         self.torrent = torrent
         self.pieces_manager = pieces_manager
