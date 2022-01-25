@@ -57,14 +57,13 @@ class Cefore(object):
                     event.set()
                     continue
 
+                if info.chunk_num in self.interests:
+                    del self.interests[info.chunk_num]
+
                 if self.bitfield[info.chunk_num] is True:
-                    if info.chunk_num in self.interests:
-                        del self.interests[info.chunk_num]
                     continue
 
                 self.bitfield[info.chunk_num] = True
-                if info.chunk_num in self.interests:
-                    del self.interests[info.chunk_num]
                 self.data_size += len(info.payload)
 
             # self.display_progress()
