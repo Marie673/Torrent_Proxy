@@ -44,6 +44,7 @@ class Run(object):
         process.run()
 
     def handle_interest(self, packet):
+        print("get interest: {}".format(packet.name))
         prefix = packet.name.split("/")
         info_hash = prefix[2]
         piece_index = prefix[3]
