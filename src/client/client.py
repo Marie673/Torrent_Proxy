@@ -12,8 +12,6 @@ import time
 import logging
 
 
-UUID = 'client0'
-INIT_MY_NAME = 'ccnx:/' + UUID
 PROTOCOL = 'ccnx:/BitTorrent'
 
 
@@ -47,7 +45,7 @@ class Run(object):
                 if not data:
                     continue
 
-                interest = '/'.join([PROTOCOL, self.info_hash, 'request', str(index)])
+                interest = '/'.join([PROTOCOL, self.info_hash, str(index)])
                 cef = cefapp.CefAppConsumer(self.handle)
                 cef.run(interest)
                 # logging.debug('send Interest: {}'.format(interest))
