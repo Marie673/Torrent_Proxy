@@ -1,4 +1,5 @@
 import sys
+import threading
 import time
 from threading import Thread, Event
 
@@ -34,6 +35,8 @@ class Cefore(object):
         self.interests = {}
         self.t_listener = Thread(target=self.listener)
 
+        self._stop_event = threading.Event()
+
         self.t_listener.start()
 
     def display_progress(self):
@@ -42,6 +45,7 @@ class Cefore(object):
 
     def kill(self):
         self.active_state = False
+        self._stop_event.wait()
 
     def listener(self):
         print("listener starting")
@@ -100,7 +104,7 @@ class Cefore(object):
             print(self.interests)
             time.sleep(0.0000001)
 
-        self.active_state = False
+        self._stop_event.set()
         end_time = time.time() - start_time
         print("time:{}[sec] data size: {}[byte]".format(end_time,
                                                         self.data_size))
