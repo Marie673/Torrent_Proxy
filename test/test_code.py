@@ -79,9 +79,7 @@ class Cefore(object):
             for index in self.interests:
                 i = self.interests[index]
                 if time.time() - i.time > 2:
-                    i.time = time.time()
-                    i.send_interest(self.handle)
-                    self.interests[index] = i
+                    del self.interests[index]
 
 
             if len(self.interests) >= 3000:
@@ -101,7 +99,7 @@ class Cefore(object):
         throughput = (self.data_size / (1024*1024)) / end_time
         print("time:{}[sec] data size: {}[byte]".format(end_time,
                                                         self.data_size))
-        print("throughput: {}".format(throughput))
+        print("throughput: {}".format(round(throughput, 2)))
 
 
 def main():
