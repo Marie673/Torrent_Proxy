@@ -49,7 +49,7 @@ class CefApp(object):
             elif packet.name == info.name:
                 self.on_rcv_succeeded(info, packet)
         if info.n_finished == info.count:
-            print("time:".format(time))
+            print("time:".format(time.time() - start_time))
             self.show_result_on_success(info)
         else:
             self.show_result_on_failure(info)
@@ -109,6 +109,7 @@ class CefAppConsumer(CefApp):
         self.req_flag = None
         self.pipeline = pipeline
         self.data_store = data_store
+        self.data_size = 0
         super(CefAppConsumer, self).__init__(
             cef_handle, "Data", "receive", timeout_limit)
 
@@ -134,6 +135,9 @@ class CefAppConsumer(CefApp):
         self.req_tail_index = 0
         self.send_interests_with_pipeline(info)
 
+    def show_result_on_success(self, info):
+        print("data size: {}".format(self.data_size))
+
     def continues_to_run(self, info):
         return info.n_finished < info.count
 
@@ -145,6 +149,7 @@ class CefAppConsumer(CefApp):
         c = packet.chunk_num
         if info.finished_flag[c]: return
         if self.data_store: self.cob_list[c] = packet.payload_s
+        self.data_size += packet.payload_len
         info.finished_flag[c] = 1
         info.n_finished += 1
         self.send_next_interest(info)
