@@ -103,7 +103,7 @@ class Cefore(object):
                 self.interests[chunk_num] = interest
                 interest.send_interest(self.handle)
 
-            time.sleep(0.1)
+            time.sleep(0.00001)
 
 
 
