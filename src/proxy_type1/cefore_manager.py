@@ -9,7 +9,6 @@ class CefManager(object):
     def __init__(self, jikken):
         self.cef = cefore_handle.Cef(jikken)
 
-
         self.is_active = True
 
     def run(self):
@@ -25,10 +24,7 @@ class CefManager(object):
         if info.is_interest:
             # logging.debug('Received Interest')
 
-            if prefix[3] == 'request' or prefix[3] == '6':
-                self.cef.handle_request(info)
-            if prefix[3] == 'torrent':
-                self.cef.handle_torrent(info)
+            self.cef.handle_request(info)
 
         if info.is_data:
             logging.debug('Received Data')

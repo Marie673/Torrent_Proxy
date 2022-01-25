@@ -10,11 +10,6 @@ from multiprocessing import Process, Queue
 from threading import Thread
 
 
-PATH = ["/home/marie/Torrent_Proxy/test/1M.dummy.torrent",
-        "/home/marie/Torrent_Proxy/test/10M.dummy.torrent",
-        "/home/marie/Torrent_Proxy/test/100M.dummy.torrent",
-        "/home/marie/Torrent_Proxy/test/1G.dummy.torrent",
-        "/home/marie/Torrent_Proxy/test/10G.dummy.torrent"]
 BITFIELD = 0
 PIECES = 1
 
@@ -22,9 +17,9 @@ PIECES = 1
 class Run(Process):
     percentage_completed = -1
 
-    def __init__(self, queue, jikken):
+    def __init__(self, torrent, queue):
         Process.__init__(self)
-        self.torrent = torrent.Torrent().load_from_path(PATH[jikken])
+        self.torrent = torrent
         self.tracker = tracker.Tracker(self.torrent)
 
         self.pieces_manager = pieces_manager.PiecesManager(self.torrent)
@@ -84,7 +79,7 @@ class Run(Process):
                 piece_data = message.Request(piece_index, block_offset, block_length).to_bytes()
                 peer.send_to_peer(piece_data)
 
-            time.sleep(0.1)
+            time.sleep(0.00001)
 
     def display_progression(self):
         new_progression = 0

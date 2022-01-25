@@ -1,19 +1,30 @@
 import time
-
-import downloader
-
 import cefpyco
 import logging
 from pubsub import pub
 import multiprocessing
 from multiprocessing import Manager, Process, Queue
 
+import downloader
+import torrent
 
 BLOCK_SIZE = 4096
+
+PATH = ["/home/marie/Torrent_Proxy/test/1M.dummy.torrent",
+        "/home/marie/Torrent_Proxy/test/10M.dummy.torrent",
+        "/home/marie/Torrent_Proxy/test/100M.dummy.torrent",
+        "/home/marie/Torrent_Proxy/test/1G.dummy.torrent",
+        "/home/marie/Torrent_Proxy/test/10G.dummy.torrent"]
 
 
 class Cef(object):
     def __init__(self, jikken):
+        self.torrent = {}
+        for path in PATH:
+            t = torrent.Torrent()
+            t.load_from_path(path)
+            self.torrent[t.info_hash] = t
+
         self.jikken = jikken
         self.runners = {}
         self.handle = cefpyco.CefpycoHandle()
@@ -51,33 +62,28 @@ class Cef(object):
             if index is None or payload is None:
                 continue
 
-            name = 'ccnx:/BitTorrent/' + info_hash + '/request/' + index
+            name = 'ccnx:/BitTorrent/' + info_hash + '/' + index
             self.send_data(name, payload)
-
-
-    def is_torrent(self, info: cefpyco.core.CcnPacketInfo):
-        d = downloader.Run(info.payload)
-        runner = downloader.Run(d)
-        name = info.name.split('/')
-        info_hash = name[4]
-        self.runners[info_hash] = runner
-
-        # threading.Thread(target=runner.start).start()
 
     def handle_request(self, info: cefpyco.core.CcnPacketInfo):
         prefix = info.name.split('/')
         info_hash = prefix[2]
-        index = prefix[4]
+        index = prefix[3]
 
         """実験用"""
         if info_hash not in self.queues or info_hash not in self.runners:
             logging.debug('create instance: {}'.format(info_hash))
 
+            if info_hash not in self.torrent:
+                return
+            else:
+                torrent = self.torrent[info_hash]
+
             request_q = Queue()
             piece_q = Queue()
             q = [request_q, piece_q]
 
-            run_process = downloader.Run(q, self.jikken)
+            run_process = downloader.Run(torrent, q)
             run_process.start()
 
             self.queues[info_hash] = q
