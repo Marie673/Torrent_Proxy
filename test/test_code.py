@@ -131,7 +131,6 @@ def main():
         cef.run()
     except KeyboardInterrupt:
         cef.kill()
-        sys.exit(0)
 
 
 if __name__ == '__main__':
