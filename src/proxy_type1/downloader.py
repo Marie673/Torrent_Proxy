@@ -84,7 +84,7 @@ class Run(Process):
                     piece = [index, self.pieces_manager.pieces[index].raw_data]
                     self.send_data(piece)
                     self.request.remove(index)
-                    del self.pieces_manager.pieces[index].raw_data
+                    # del self.pieces_manager.pieces[index].raw_data
                     print("complete piece: {}".format(index))
                     continue
 
