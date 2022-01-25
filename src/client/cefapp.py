@@ -100,7 +100,7 @@ class CefApp(object):
 
 class CefAppConsumer(CefApp):
     def __init__(self, cef_handle,
-                 pipeline=1000, timeout_limit=2, data_store=True):
+                 pipeline=1000, timeout_limit=10, data_store=True):
         self.rcv_tail_index = None
         self.req_tail_index = None
         self.cob_list = None
