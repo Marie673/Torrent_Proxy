@@ -41,7 +41,7 @@ class Run(object):
         self.request_q[info_hash] = request_q
         self.piece_q[info_hash] = piece_q
         self.download_process[info_hash] = process
-        process.run()
+        process.start()
         print('new process is running')
 
     def handle_interest(self, packet):
