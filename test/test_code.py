@@ -10,6 +10,9 @@ NAME1='ccnx:/test/10M.dummy'
 NAME2='ccnx:/test/100M.dummy'
 
 
+MAX_INTEREST = 3000
+
+
 class Interest:
     def __init__(self, interest, chunk):
         self.interest = interest
@@ -94,7 +97,7 @@ class Cefore(object):
             for chunk_num in range(len(self.bitfield)):
                 if self.bitfield[chunk_num] or chunk_num in self.interests:
                     continue
-                if len(self.interests) >= 30:
+                if len(self.interests) >= MAX_INTEREST:
                     break
                 interest = Interest(self.name, chunk_num)
                 self.interests[chunk_num] = interest
