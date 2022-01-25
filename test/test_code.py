@@ -9,7 +9,7 @@ NAME1='ccnx:/test/10M.dummy'
 NAME2='ccnx:/test/100M.dummy'
 
 
-class Interest(object):
+class Interest:
     def __init__(self, interest, chunk):
         self.interest = interest
         self.chunk = chunk
