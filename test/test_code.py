@@ -2,7 +2,6 @@ import sys
 import time
 import numpy as np
 import cefpyco
-from sys import stderr
 
 NAME0='ccnx:/test/1M.dummy'
 NAME1='ccnx:/test/10M.dummy'
@@ -150,7 +149,7 @@ class CefAppConsumer(CefApp):
         if info.finished_flag[c]: return
         if self.data_store: self.cob_list[c] = packet.payload_s
         self.data_size += packet.payload_len
-        print(self.data_size)
+        # print(self.data_size)
         info.finished_flag[c] = 1
         info.n_finished += 1
         self.send_next_interest(info)
