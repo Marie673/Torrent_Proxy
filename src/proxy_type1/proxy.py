@@ -48,7 +48,7 @@ class Run(object):
         print("interest: {}".format(packet.name))
         prefix = packet.name.split("/")
         info_hash = prefix[2]
-        piece_index = prefix[3]
+        piece_index = int(prefix[3])
 
         if info_hash not in self.download_process:
             self.create_new_process(info_hash)
