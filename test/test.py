@@ -7,7 +7,7 @@ SIZE = 1024 * 4
 def send_file(h, info, file_name):
     cache_time = 360000  # 1時間
     file_size = os.path.getsize(file_name)
-    end_chunk_num = file_size // SIZE - 1
+    end_chunk_num = file_size // SIZE
     chunk = info.chunk_num
     seek = chunk * SIZE
     name = info.name
