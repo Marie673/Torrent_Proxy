@@ -74,10 +74,13 @@ class Cefore(object):
         print("get first chunk")
 
         while False in self.bitfield:
-            for i in self.interests.values():
+            for index in self.interests:
+                i = self.interests[index]
                 if time.time() - i.time > 5:
                     i.time = time.time()
                     i.send_interest(self.handle)
+                    self.interests[index] = i
+
 
             if len(self.interests) >= 3000:
                 continue
@@ -112,8 +115,12 @@ def main():
     else:
         exit(1)
 
-    cef = Cefore(name)
-    cef.run()
+    try:
+        cef = Cefore(name)
+        cef.run()
+    except KeyboardInterrupt:
+        sys.exit(0)
+
 
 if __name__ == '__main__':
     main()
