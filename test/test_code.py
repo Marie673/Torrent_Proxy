@@ -55,6 +55,7 @@ class Cefore(object):
 
                 if info.chunk_num in self.interests:
                     del self.interests[info.chunk_num]
+                    print("del")
 
                 if self.bitfield[info.chunk_num] is True:
                     continue
