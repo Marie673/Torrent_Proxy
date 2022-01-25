@@ -61,8 +61,9 @@ class Run(object):
                 peer.send_to_peer(piece_data)
 
                 break
-
-            self.display_progression()
+            if time.time() - prog_time > 1:
+                self.display_progression()
+                prog_time = time.time()
 
             time.sleep(0.0001)
 
