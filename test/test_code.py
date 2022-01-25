@@ -49,10 +49,8 @@ class Cefore(object):
     def run(self):
         start_time = time.time()
         self.handle.send_interest(self.name, 0)
-        while True:
-            if len(self.bitfield) >= 1:
-                break
-        print("get first chunk")
+        info = self.handle.receive()
+        self.handle_interest(info)
 
         padding = self.bitfield
         for chunk in range(1, MAX_INTEREST):
