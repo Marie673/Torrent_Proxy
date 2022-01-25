@@ -1,7 +1,6 @@
 import sys
 import time
-from threading import Thread, Event
-from multiprocessing import Process, Manager
+from threading import Thread
 
 import cefpyco
 
@@ -26,12 +25,11 @@ class Cefore(object):
         self.name = name
         self.handle = cefpyco.CefpycoHandle()
         self.handle.begin()
-        self.bitfield = Manager().list()
+        self.bitfield = []
         self.data_size = 0
         self.active_state = True
-
-        self.interests = Manager().dict()
-        self.t_listener = Process(target=self.listener)
+        self.interests = {}
+        self.t_listener = Thread(target=self.listener)
 
         self.t_listener.start()
 
