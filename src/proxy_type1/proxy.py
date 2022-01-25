@@ -6,10 +6,8 @@ import cefore_manager
 import torrent
 
 class Run(object):
-    def __init__(self, path):
-        self.torrent = torrent.Torrent().load_from_path(path)
-
-        self.cef_manager = cefore_manager.CefManager(torrent)
+    def __init__(self):
+        self.cef_manager = cefore_manager.CefManager()
         self.handle = self.cef_manager.cef.handle
 
     def start(self):
@@ -17,9 +15,7 @@ class Run(object):
 
 
 def main():
-
-    path = os.path.abspath(path)
-    run = Run(path)
+    run = Run()
     try:
         run.start()
     except KeyboardInterrupt:
