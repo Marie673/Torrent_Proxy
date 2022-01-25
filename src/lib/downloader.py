@@ -32,10 +32,10 @@ class Run(object):
         logging.info("PiecesManager Started")
 
     def start(self):
+        start_time = prog_time = time.time()
         peers_dict = self.tracker.get_peers_from_trackers()
         self.peers_manager.add_peers(peers_dict.values())
 
-        start_time = prog_time = lock_time = time.time()
         while not self.pieces_manager.all_pieces_completed():
             if not self.peers_manager.has_unchoked_peers():
                 time.sleep(1)
