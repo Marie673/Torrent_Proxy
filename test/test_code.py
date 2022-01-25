@@ -10,7 +10,7 @@ NAME1='ccnx:/test/10M.dummy'
 NAME2='ccnx:/test/100M.dummy'
 
 
-MAX_INTEREST = 30
+MAX_INTEREST = 100
 
 alive = True
 
@@ -90,7 +90,7 @@ class Cefore(object):
 
         while False in self.bitfield:
             for key in self.interests:
-                if time.time() - self.interests[key].time > 1:
+                if time.time() - self.interests[key].time > 5:
                     del self.interests[key]
                     print("del")
 
