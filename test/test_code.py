@@ -78,7 +78,7 @@ class Cefore(object):
         while False in self.bitfield:
             for index in self.interests:
                 i = self.interests[index]
-                if time.time() - i.time > 5:
+                if time.time() - i.time > 2:
                     i.time = time.time()
                     i.send_interest(self.handle)
                     self.interests[index] = i
