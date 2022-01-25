@@ -6,11 +6,12 @@ import tracker
 import logging
 import message
 from multiprocessing import Process, Queue
-from threading import Thread
-
+import cefpyco
 
 BITFIELD = 0
 PIECES = 1
+
+CHUNK_SIZE = 1024 * 4
 
 
 class Run(Process):
@@ -18,6 +19,9 @@ class Run(Process):
 
     def __init__(self, torrent, queue):
         Process.__init__(self)
+        self.handle = cefpyco.CefpycoHandle()
+        self.handle.begin()
+
         self.torrent = torrent
         self.tracker = tracker.Tracker(self.torrent)
 
@@ -42,6 +46,18 @@ class Run(Process):
             else:
                 self.request.append(index)
 
+    def send_data(self, piece):
+        index, payload = piece
+        name = 'ccnx:/BitTorrent/' + self.torrent.info_hash + '/' + str(index)
+        cache_time = 360000
+        end_chunk_num = len(payload) // CHUNK_SIZE
+
+        while payload:
+            chunk = payload[:CHUNK_SIZE]
+            self.handle.send_data(name=name, payload=payload,
+                    chunk_num=chunk, end_chunk_num=end_chunk_num, cache_time=cache_time)
+            payload = payload[CHUNK_SIZE:payload]
+
 
     def run(self):
         self.peers_manager.start()
@@ -49,18 +65,20 @@ class Run(Process):
         peers_dict = self.tracker.get_peers_from_trackers()
         self.peers_manager.add_peers(peers_dict.values())
 
-        q_thread = Thread(target=self.queue_manager)
-        q_thread.start()
-
         while True:
             if not self.peers_manager.has_unchoked_peers():
                 time.sleep(1)
                 continue
 
+            if not self.request_q.empty():
+                request_index = self.request_q.get()
+                if request_index not in self.request:
+                    self.request.append(request_index)
+
             for index in self.request:
                 if self.pieces_manager.pieces[index].is_full:
                     piece = [index, self.pieces_manager.pieces[index].raw_data]
-                    self.piece_q.put(piece)
+                    self.send_data(piece)
                     self.request.remove(index)
                     del self.pieces_manager.pieces[index].raw_data
                     continue
