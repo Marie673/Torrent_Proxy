@@ -35,14 +35,6 @@ class Tracker(object):
         self.dict_sock_addr[s.__hash__()] = s
         s = SockAddr("10.0.2.4", 53117)
         self.dict_sock_addr[s.__hash__()] = s
-        s = SockAddr("10.0.2.3", 53117)
-        self.dict_sock_addr[s.__hash__()] = s
-        s = SockAddr("10.0.2.4", 53117)
-        self.dict_sock_addr[s.__hash__()] = s
-        s = SockAddr("10.0.2.3", 53117)
-        self.dict_sock_addr[s.__hash__()] = s
-        s = SockAddr("10.0.2.4", 53117)
-        self.dict_sock_addr[s.__hash__()] = s
         """ 実験用につきコメント化 ↑実験用
         for i, tracker in enumerate(self.torrent.announce_list):
             if len(self.dict_sock_addr) >= MAX_PEERS_TRY_CONNECT:
@@ -73,7 +65,8 @@ class Tracker(object):
     def try_peer_connect(self):
         logging.info("Trying to connect to %d peer(s)" % len(self.dict_sock_addr))
 
-        for _, sock_addr in self.dict_sock_addr.items():
+        for _, sock_addr in range(MAX_PEERS_CONNECTED):
+        # for _, sock_addr in self.dict_sock_addr.items():
             if len(self.connected_peers) >= MAX_PEERS_CONNECTED:
                 break
 
