@@ -75,6 +75,7 @@ class Cefore(object):
         print("get first chunk")
 
         while False in self.bitfield:
+            print(self.interests)
             for index in self.interests:
                 i = self.interests[index]
                 if time.time() - i.time > 5:
