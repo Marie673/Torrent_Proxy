@@ -10,7 +10,8 @@ NAME1='ccnx:/test/10M.dummy'
 NAME2='ccnx:/test/100M.dummy'
 
 
-MAX_INTEREST = 100
+MAX_INTEREST = 1000
+BLOCK_SIZE = 30
 
 alive = True
 
@@ -94,6 +95,7 @@ class Cefore(object):
                     del self.interests[key]
                     print("del")
 
+            block = 0
             for chunk_num in range(len(self.bitfield)-1):
                 if self.bitfield[chunk_num] or chunk_num in self.interests:
                     continue
@@ -102,6 +104,9 @@ class Cefore(object):
                 interest = Interest(self.name, chunk_num)
                 self.interests[chunk_num] = interest
                 interest.send_interest(self.handle)
+                block += 1
+                if block >= BLOCK_SIZE:
+                    break
 
             time.sleep(0.1)
 
