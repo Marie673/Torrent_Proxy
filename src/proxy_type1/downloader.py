@@ -60,7 +60,7 @@ class Run(Process):
                     piece = [index, self.pieces_manager.pieces[index].raw_data]
                     tmp_path = "tmp/" + self.torrent.info_hash_str + '.' + str(index)
                     with open(tmp_path, "wb") as file:
-                        file.write(tmp_path)
+                        file.write(piece[1])
                     self.request.remove(index)
                     del self.pieces_manager.pieces[index].raw_data
                     print("complete piece: {}".format(index))
