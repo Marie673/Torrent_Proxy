@@ -51,7 +51,7 @@ class PeersManager(Thread):
 
         for peer in self.peers:
             # if peer.is_eligible() and peer.is_unchoked() and peer.am_interested() and peer.has_piece(index):
-            if peer.is_eligible() and peer.is_unchoked() and peer.am_interested() and peer.has_piece(index):
+            if peer.is_unchoked() and peer.am_interested() and peer.has_piece(index):
                 ready_peers.append(peer)
 
         return random.choice(ready_peers) if ready_peers else None
