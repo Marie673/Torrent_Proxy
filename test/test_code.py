@@ -101,7 +101,7 @@ class CefApp(object):
 
 class CefAppConsumer(CefApp):
     def __init__(self, cef_handle,
-                 pipeline=1000, timeout_limit=2, data_store=True):
+                 pipeline=1000, timeout_limit=10, data_store=True):
         self.rcv_tail_index = None
         self.req_tail_index = None
         self.cob_list = None
@@ -147,7 +147,7 @@ class CefAppConsumer(CefApp):
     def on_rcv_succeeded(self, info, packet):
         c = packet.chunk_num
         if info.finished_flag[c]: return
-        if self.data_store: self.cob_list[c] = packet.payload_s
+        if self.data_store: self.cob_list[c] = packet.payload
         self.data_size += packet.payload_len
         # print(self.data_size)
         info.finished_flag[c] = 1
