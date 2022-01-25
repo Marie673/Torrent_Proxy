@@ -6,12 +6,6 @@ import tracker
 import logging
 import message
 from multiprocessing import Process, Queue
-import cefpyco
-
-BITFIELD = 0
-PIECES = 1
-
-CHUNK_SIZE = 1024 * 4
 
 
 class Run(Process):
@@ -19,9 +13,6 @@ class Run(Process):
 
     def __init__(self, torrent, queue):
         Process.__init__(self)
-        self.handle = cefpyco.CefpycoHandle()
-        self.handle.begin()
-
         self.torrent = torrent
         self.tracker = tracker.Tracker(self.torrent)
 
@@ -46,21 +37,6 @@ class Run(Process):
             else:
                 self.request.append(index)
 
-    def send_data(self, piece):
-        index, payload = piece
-        name = 'ccnx:/BitTorrent/' + self.torrent.info_hash_str + '/' + str(index)
-        print("send Data: " + name)
-        cache_time = 360000
-        end_chunk_num = len(payload) // CHUNK_SIZE
-
-        chunk_num = 0
-        while payload:
-            chunk = payload[:CHUNK_SIZE]
-            self.handle.send_data(name=name, payload=chunk,
-                    chunk_num=chunk_num, end_chunk_num=end_chunk_num, cache_time=cache_time)
-            payload = payload[CHUNK_SIZE:]
-            chunk_num += 1
-
 
     def run(self):
         self.peers_manager.start()
@@ -82,9 +58,11 @@ class Run(Process):
             for index in self.request:
                 if self.pieces_manager.pieces[index].is_full:
                     piece = [index, self.pieces_manager.pieces[index].raw_data]
-                    self.send_data(piece)
+                    tmp_path = "tmp/" + self.torrent.info_hash_str + '.' + str(index)
+                    with open(tmp_path, "wb") as file:
+                        file.write(tmp_path)
                     self.request.remove(index)
-                    # del self.pieces_manager.pieces[index].raw_data
+                    del self.pieces_manager.pieces[index].raw_data
                     print("complete piece: {}".format(index))
                     continue
 

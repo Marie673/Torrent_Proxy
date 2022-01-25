@@ -15,6 +15,8 @@ PATH = ["/home/marie/Torrent_Proxy/test/1M.dummy.torrent",
         "/home/marie/Torrent_Proxy/test/10G.dummy.torrent"]
 
 
+SIZE = 1024 * 4
+
 class Run(object):
     def __init__(self):
         self.handle = cefpyco.CefpycoHandle()
@@ -44,11 +46,30 @@ class Run(object):
         process.start()
         print('new process is running')
 
+    def send_file(self, info, file_name):
+        cache_time = 100  # 1時間
+        file_size = os.path.getsize(file_name)
+        end_chunk_num = file_size // SIZE
+        chunk = info.chunk_num
+        seek = chunk * SIZE
+        name = info.name
+        with open(file_name, "rb") as file:
+            file.seek(seek)
+            payload = file.read(SIZE)
+            self.handle.send_data(name=name, payload=payload,
+                        chunk_num=chunk, end_chunk_num=end_chunk_num, cache_time=cache_time)
+
+
     def handle_interest(self, packet):
         print("interest: {} chunk = {}".format(packet.name, packet.chunk_num))
         prefix = packet.name.split("/")
         info_hash = prefix[2]
         piece_index = int(prefix[3])
+
+        tmp_path = "tmp/" + info_hash + '.' + piece_index
+        if os.path.exists(tmp_path):
+            self.send_file(packet, tmp_path)
+            return
 
         if info_hash not in self.download_process:
             self.create_new_process(info_hash)
