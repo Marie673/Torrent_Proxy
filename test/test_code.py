@@ -7,6 +7,7 @@ from sys import stderr
 NAME0='ccnx:/test/1M.dummy'
 NAME1='ccnx:/test/10M.dummy'
 NAME2='ccnx:/test/100M.dummy'
+NAME3='ccnx:/test/1G.dummy'
 
 
 MAX_INTEREST = 1000
@@ -185,6 +186,9 @@ def main():
     elif args[1] == '2':
         name = NAME2
         full_data_size = 1024 * 1024 * 100
+    elif args[1] == '3':
+        name = NAME3
+        full_data_size = 1024 * 1024 * 1024
     else:
         exit(1)
 
