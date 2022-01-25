@@ -81,6 +81,7 @@ class Cefore(object):
 
 
             if len(self.interests) >= 3000:
+                print("max")
                 continue
 
             for chunk_num in range(len(self.bitfield)):
