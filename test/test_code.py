@@ -1,4 +1,5 @@
 import sys
+import threading
 import time
 from threading import Thread
 
@@ -29,8 +30,9 @@ class Cefore(object):
         self.data_size = 0
         self.active_state = True
         self.interests = {}
-        self.t_listener = Thread(target=self.listener)
+        self.t_lock = threading.Lock()
 
+        self.t_listener = Thread(target=self.listener)
         self.t_listener.start()
 
     def display_progress(self):
@@ -45,7 +47,9 @@ class Cefore(object):
             return
 
         if info.chunk_num in self.interests:
+            self.t_lock.acquire()
             del self.interests[info.chunk_num]
+            self.t_lock.release()
 
         if self.bitfield[info.chunk_num] is True:
             return
