@@ -47,6 +47,7 @@ class Run(object):
 
                 peer = self.peers_manager.get_random_peer_having_piece(index)
                 if not peer:
+                    print("test")
                     continue
 
                 self.pieces_manager.pieces[index].update_block_status()
@@ -61,7 +62,7 @@ class Run(object):
 
             self.display_progression()
 
-            time.sleep(0.1)
+            time.sleep(0.5)
 
         logging.info("File(s) downloaded successfully.")
         self.display_progression()
