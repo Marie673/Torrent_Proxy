@@ -64,7 +64,7 @@ class Cefore(object):
             if info.is_data:
                 self.handle_interest(info)
 
-            # self.display_progress()
+            self.display_progress()
 
     def run(self):
         start_time = time.time()
