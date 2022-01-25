@@ -59,7 +59,7 @@ class Run(Process):
             self.handle.send_data(name=name, payload=chunk,
                     chunk_num=chunk_num, end_chunk_num=end_chunk_num, cache_time=cache_time)
             payload = payload[CHUNK_SIZE:]
-            chunk += 1
+            chunk_num += 1
 
 
     def run(self):
