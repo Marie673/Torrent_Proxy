@@ -61,7 +61,7 @@ class Run(object):
 
                 break
 
-            if prog_time - time.time() > 1:
+            if prog_time - time.time() > 0.5:
                 self.display_progression()
 
             # time.sleep(0.0001)
