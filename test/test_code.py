@@ -12,12 +12,14 @@ NAME2='ccnx:/test/100M.dummy'
 event = Event()
 
 class Interest(object):
-    def __init__(self, interest):
+    def __init__(self, interest, chunk):
         self.interest = interest
+        self.chunk = chunk
         self.time = None
 
     def send_interest(self, handle):
         self.time = time.time()
+        handle.send_interest(self.interest, self.chunk)
 
 
 class Cefore(object):
@@ -81,7 +83,7 @@ class Cefore(object):
                 if self.bitfield[chunk_num]:
                     continue
 
-                interest = Interest(self.name + str(chunk_num))
+                interest = Interest(self.name, chunk_num)
                 interest.send_interest(self.handle)
                 self.interests[chunk_num] = interest
 
