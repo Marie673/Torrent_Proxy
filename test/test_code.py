@@ -10,7 +10,7 @@ NAME1='ccnx:/test/10M.dummy'
 NAME2='ccnx:/test/100M.dummy'
 
 
-MAX_INTEREST = 3000
+MAX_INTEREST = 1500
 
 alive = True
 
@@ -18,7 +18,7 @@ class Interest:
     def __init__(self, interest, chunk):
         self.interest = interest
         self.chunk = chunk
-        self.time = None
+        self.time = time.time()
 
     def send_interest(self, handle):
         self.time = time.time()
