@@ -33,7 +33,7 @@ class CefApp(object):
         if count <= 0:
             count = self.resolve_count(name)
             if not count:
-                errmsg = "{0}/meta is not resolved.".format(name)
+                errmsg = "{0} is not resolved.".format(name)
                 raise MetaInfoNotResolvedError(errmsg)
 
         info = CefAppRunningInfo(name, count)
@@ -114,7 +114,7 @@ class CefAppConsumer(CefApp):
         return "".join(self.cob_list) if self.data_store else None
 
     def resolve_count(self, name):
-        for i in range(self.timeout_limit):
+        while True:
             self.cef_handle.send_interest(name, 0)
             packet = self.cef_handle.receive()
             if packet.is_failed: continue
