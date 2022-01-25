@@ -91,18 +91,16 @@ class Cefore(object):
                     del i
                     del self.interests[index]
 
-
-            if len(self.interests) >= 30:
-                print("max")
-                continue
-
             for chunk_num in range(len(self.bitfield)):
                 if self.bitfield[chunk_num] or chunk_num in self.interests:
                     continue
-
+                if len(self.interests) >= 30:
+                    break
                 interest = Interest(self.name, chunk_num)
-                interest.send_interest(self.handle)
                 self.interests[chunk_num] = interest
+                interest.send_interest(self.handle)
+
+            time.sleep(0.1)
 
 
 
