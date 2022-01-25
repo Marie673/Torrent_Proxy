@@ -60,6 +60,9 @@ class Run(object):
                 piece_data = message.Request(piece_index, block_offset, block_length).to_bytes()
                 peer.send_to_peer(piece_data)
 
+                if prog_time - time.time() > 0.5:
+                    prog_time = time.time()
+                    self.display_progression()
                 break
 
             if prog_time - time.time() > 0.5:
