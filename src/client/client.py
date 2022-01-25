@@ -3,6 +3,7 @@ import torrent
 import pieces_manager
 from block import State
 import cefore_manager
+import cefpyco
 import cefapp
 
 import os
@@ -24,8 +25,8 @@ class Run(object):
         self.torrent = torrent.Torrent().load_from_path(torrent_file_path)
         self.info_hash = str(self.torrent.info_hash.hex())
         self.pieces_manager = pieces_manager.PiecesManager(self.torrent)
-        self.cef_manager = cefore_manager.CefManager(self.torrent)
-        self.handle = self.cef_manager.cef.handle
+        self.handle = cefpyco.CefpycoHandle()
+        self.handle.begin()
 
         logging.info('Cefore Manager Started')
         logging.info("PiecesManager Started")
@@ -47,8 +48,8 @@ class Run(object):
                     continue
 
                 interest = '/'.join([PROTOCOL, self.info_hash, 'request', str(index)])
-                cef = cefapp.CefAppConsumer(interest)
-                cef.run()
+                cef = cefapp.CefAppConsumer(self.handle)
+                cef.run(interest)
                 # logging.debug('send Interest: {}'.format(interest))
 
             if self.pieces_manager.all_pieces_completed():
