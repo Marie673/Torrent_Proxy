@@ -52,21 +52,13 @@ class Cefore(object):
             return
 
         if info.chunk_num in self.interests:
-            self.t_lock.acquire()
             del self.interests[info.chunk_num]
-            if info.chunk_num in self.interests:
-                print("error")
-                exit(1)
-
-            self.t_lock.release()
 
         if self.bitfield[info.chunk_num] is True:
             return
 
-        self.t_lock.acquire()
         self.bitfield[info.chunk_num] = True
         self.data_size += len(info.payload)
-        self.t_lock.release()
 
     def listener(self):
         print("listener starting")
@@ -96,7 +88,7 @@ class Cefore(object):
                     print("del")
 
             block = 0
-            for chunk_num in range(len(self.bitfield)-1):
+            for chunk_num in range(len(self.bitfield)):
                 if self.bitfield[chunk_num] or chunk_num in self.interests:
                     continue
                 if len(self.interests) >= MAX_INTEREST:
