@@ -54,8 +54,10 @@ class Cefore(object):
         if self.bitfield[info.chunk_num] is True:
             return
 
+        self.t_lock.acquire()
         self.bitfield[info.chunk_num] = True
         self.data_size += len(info.payload)
+        self.t_lock.release()
 
     def listener(self):
         print("listener starting")
