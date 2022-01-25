@@ -32,8 +32,7 @@ class Run(object):
         peers_dict = self.tracker.get_peers_from_trackers()
         self.peers_manager.add_peers(peers_dict.values())
 
-        start_time = time.time()
-        prog_time = time.time()
+        start_time = prog_time = lock_time = time.time()
         while not self.pieces_manager.all_pieces_completed():
             if not self.peers_manager.has_unchoked_peers():
                 time.sleep(1)
@@ -61,11 +60,12 @@ class Run(object):
                 peer.send_to_peer(piece_data)
 
                 break
+            if time.time() - lock_time > 0.01:
+                time.sleep(0.000001)
+                lock_time = time.time()
             if time.time() - prog_time > 1:
                 self.display_progression()
                 prog_time = time.time()
-
-            time.sleep(0.01)
 
         logging.info("File(s) downloaded successfully.")
         self.display_progression()
