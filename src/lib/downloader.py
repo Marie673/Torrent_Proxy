@@ -38,7 +38,7 @@ class Run(object):
                 time.sleep(1)
                 logging.info("No unchocked peers")
                 continue
-
+            prog_time = time.time()
             for piece in self.pieces_manager.pieces:
                 index = piece.piece_index
 
@@ -61,7 +61,8 @@ class Run(object):
 
                 break
 
-            #self.display_progression()
+            if prog_time - time.time() > 1:
+                self.display_progression()
 
             # time.sleep(0.0001)
 
