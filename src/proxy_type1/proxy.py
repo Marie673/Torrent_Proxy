@@ -26,7 +26,6 @@ class Run(object):
             t = torrent.Torrent()
             t.load_from_path(path)
             self.torrent[t.info_hash_str] = t
-            print(t.info_hash_str)
 
         self.download_process = {}
         self.request_q = {}

@@ -53,6 +53,7 @@ class Torrent(object):
         self.pieces = self.torrent_file['info']['pieces']
         raw_info_hash = bencode(self.torrent_file['info'])
         self.info_hash = hashlib.sha1(raw_info_hash).digest()
+        self.info_hash_str = str(self.info_hash.hex())
         self.peer_id = self.generate_peer_id()
         # self.announce_list = self.get_trackers()
         self.init_files()
