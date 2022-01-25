@@ -47,6 +47,7 @@ class Cefore(object):
             info = self.handle.receive()
 
             if not info.is_succeeded:
+                time.sleep(0.00000001)
                 continue
 
             if info.is_data:
