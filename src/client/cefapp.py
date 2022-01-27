@@ -61,8 +61,9 @@ class CefAppConsumer:
             if packet.name != name:
                 continue
             self.data_size += packet.payload_len
+            piece_index = int(packet.name.split('/')[-1])
             pub.sendMessage('PiecesManager.Piece',
-                            piece=(packet.chunk_num, 0, packet.payload))
+                            piece=(piece_index, 0, packet.payload))
 
             return packet.payload, packet.end_chunk_num
 
