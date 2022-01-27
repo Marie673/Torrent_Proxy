@@ -2,7 +2,7 @@ import logging
 import numpy as np
 from pubsub import pub
 import cefpyco
-
+from multiprocessing import Process
 from piece import Piece
 
 class CefAppRunningInfo(object):
@@ -15,15 +15,15 @@ class CefAppRunningInfo(object):
         self.timeout_count = 0
 
 
-class CefAppConsumer:
-    def __init__(self, name, piece,
+class CefAppConsumer(Process):
+    def __init__(self, names, pieces,
                  pipeline=1000, timeout_limit=10):
-
+        Process.__init__(self)
         self.cef_handle = cefpyco.CefpycoHandle()
         self.cef_handle.begin()
 
-        self.pieces: [Piece]= piece
-        self.names: [str] = name
+        self.pieces: [Piece]= pieces
+        self.names: [str] = names
         self.timeout_limit = timeout_limit
         self.rcv_tail_index = None
         self.req_tail_index = None

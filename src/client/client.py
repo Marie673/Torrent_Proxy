@@ -34,6 +34,7 @@ class Run(object):
         # logging.debug('start request pieces')
         process = []
         works = self.torrent.number_of_pieces // MAX_PROCESS
+
         for process_index in range(MAX_PROCESS):
             interests = []
             pieces = []
@@ -44,9 +45,8 @@ class Run(object):
             time.sleep(1)
 
             app = cefapp.CefAppConsumer(interests, pieces)
-            runner = Process(target=app.run)
-            runner.start()
-            process.append(runner)
+            app.start()
+            process.append(app)
 
         for runner in process:
             runner.join()
