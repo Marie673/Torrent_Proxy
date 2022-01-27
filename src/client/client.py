@@ -40,8 +40,14 @@ class Run(object):
                     continue
 
                 interest = '/'.join([PROTOCOL, self.info_hash, str(index)])
-                app = cefapp.CefAppConsumer(self.handle)
-                app.run(interest)
+                app = cefapp.CefAppConsumer(self.handle, interest)
+                # あらかじめピースを要求して取得しておいてもらう
+                to_index = min(self.torrent.number_of_pieces, index+MAX_PIECE)
+                for i in range(index+1, to_index+1):
+                    sub_interest = '/'.join([PROTOCOL, self.info_hash, str(index)])
+                    self.handle.send_interest(sub_interest, 0)
+                # 1つの完全なピース取得開始
+                app.run()
                 self.display_progression()
 
             if self.pieces_manager.all_pieces_completed():

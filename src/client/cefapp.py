@@ -14,8 +14,9 @@ class CefAppRunningInfo(object):
 
 
 class CefAppConsumer:
-    def __init__(self, cef_handle,
+    def __init__(self, cef_handle, name,
                  pipeline=1000, timeout_limit=10):
+        self.name = name
         self.cef_handle = cef_handle
         self.timeout_limit = timeout_limit
         self.rcv_tail_index = None
@@ -27,12 +28,12 @@ class CefAppConsumer:
         self.data_size = 0
 
 
-    def run(self, name):
-        _, end_chunk_num = self.get_first_chunk(name)
+    def run(self):
+        _, end_chunk_num = self.get_first_chunk(self.name)
         if end_chunk_num is None:
             logging.error("failed to get_first_chunk")
             return
-        info = CefAppRunningInfo(name, end_chunk_num)
+        info = CefAppRunningInfo(self.name, end_chunk_num)
         self.on_start(info)
         while info.timeout_count < self.timeout_limit and self.continues_to_run(info):
             packet = self.cef_handle.receive()
