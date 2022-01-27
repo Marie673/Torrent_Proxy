@@ -38,7 +38,6 @@ class Run(object):
             interests = []
             pieces = []
             for index in range(process_index*works, works):
-                print(index)
                 interest = '/'.join([PROTOCOL, self.info_hash, str(index+0)])
                 interests.append(interest)
                 pieces.append(self.pieces_manager.pieces[index])
