@@ -89,11 +89,12 @@ class CefAppConsumer:
         self.send_interests_with_pipeline(info)
 
     def on_rcv_succeeded(self, info, packet):
+        piece_index = int(packet.name.split('/')[-1])
         chunk_num = packet.chunk_num
         if info.finished_flag[chunk_num]: return
         print("test: {}".format(packet.chunk_num))
         pub.sendMessage('PiecesManager.Piece',
-                        piece=(chunk_num, packet.payload_len * chunk_num, packet.payload))
+                        piece=(piece_index, packet.payload_len * chunk_num, packet.payload))
         info.finished_flag[chunk_num] = 1
         info.num_of_finished += 1
         self.send_next_interest(info)
