@@ -21,9 +21,9 @@ class CefAppConsumer:
 
         self.cef_handle = cefpyco.CefpycoHandle()
         self.cef_handle.begin()
-        self.piece: Piece = piece
 
-        self.name = name
+        self.pieces: [Piece]= piece
+        self.names: [str] = name
         self.timeout_limit = timeout_limit
         self.rcv_tail_index = None
         self.req_tail_index = None
@@ -33,13 +33,16 @@ class CefAppConsumer:
         # test
         self.data_size = 0
 
-
     def run(self):
-        _, end_chunk_num = self.get_first_chunk(self.name)
+        for index in range(len(self.names)):
+            self.download(self.names[index], self.pieces[index])
+
+    def download(self, name, piece):
+        _, end_chunk_num = self.get_first_chunk(name, piece)
         if end_chunk_num is None:
             logging.error("failed to get_first_chunk")
             return
-        info = CefAppRunningInfo(self.name, end_chunk_num)
+        info = CefAppRunningInfo(name, end_chunk_num)
         self.on_start(info)
         while info.timeout_count < self.timeout_limit and self.continues_to_run(info):
             packet = self.cef_handle.receive()
@@ -47,15 +50,15 @@ class CefAppConsumer:
                 # info.timeout_count += 1
                 self.on_rcv_failed(info)
             elif packet.name == info.name:
-                self.on_rcv_succeeded(info, packet)
+                self.on_rcv_succeeded(info, packet, piece)
         if info.num_of_finished == info.end_chunk_num:
-            print("success download piece: {}".format(self.piece.piece_index))
+            print("success download piece: {}".format(piece.piece_index))
             return True
         else:
             return False
 
     # return first_chunk_payload and end_chunk_num
-    def get_first_chunk(self, name) -> (bytes, int):
+    def get_first_chunk(self, name, piece) -> (bytes, int):
         while True:
             self.cef_handle.send_interest(name, 0)
             packet = self.cef_handle.receive()
@@ -70,7 +73,7 @@ class CefAppConsumer:
             """pub.sendMessage('PiecesManager.Piece',
                             piece=(piece_index, 0, packet.payload))
             """
-            self.piece.set_block(0, packet.payload)
+            piece.set_block(0, packet.payload)
             return packet.payload, packet.end_chunk_num
 
     def on_start(self, info):
@@ -88,14 +91,14 @@ class CefAppConsumer:
         self.reset_req_status(info)
         self.send_interests_with_pipeline(info)
 
-    def on_rcv_succeeded(self, info, packet):
+    def on_rcv_succeeded(self, info, packet, piece):
         piece_index = int(packet.name.split('/')[-1])
 
         chunk_num = packet.chunk_num
         if info.finished_flag[chunk_num]: return
-        self.piece.set_block(packet.payload_len * chunk_num, packet.payload)
-        if self.piece.are_all_blocks_full():
-            if self.piece.set_to_full():
+        piece.set_block(packet.payload_len * chunk_num, packet.payload)
+        if piece.are_all_blocks_full():
+            if piece.set_to_full():
                 pass
         """pub.sendMessage('PiecesManager.Piece',
                         piece=(piece_index, packet.payload_len * chunk_num, packet.payload))

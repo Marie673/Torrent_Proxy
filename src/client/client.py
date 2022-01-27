@@ -11,7 +11,7 @@ from multiprocessing import Process
 import numpy
 
 PROTOCOL = 'ccnx:/BitTorrent'
-MAX_PIECE = 5
+MAX_PROCESS = 5
 
 
 class Run(object):
@@ -25,7 +25,6 @@ class Run(object):
 
         self.req_flg = numpy.zeros(self.torrent.number_of_pieces)
         self.default_port = 9896
-        self.process = {}
         logging.info('Cefore Manager Started')
         logging.info("PiecesManager Started")
 
@@ -33,15 +32,23 @@ class Run(object):
     def start(self):
         start_time = time.time()
         # logging.debug('start request pieces')
-        for index in range(0,self.torrent.number_of_pieces):
-            interest = '/'.join([PROTOCOL, self.info_hash, str(index+0)])
-            app = cefapp.CefAppConsumer(interest, self.pieces_manager.pieces[index+0])
-            runner0 = Process(target=app.run)
-            runner0.start()
+        process = []
+        for f_index in range(0,self.torrent.number_of_pieces, MAX_PROCESS):
+            interests = []
+            pieces = []
+            for index in range(f_index, MAX_PROCESS):
+                interest = '/'.join([PROTOCOL, self.info_hash, str(index+0)])
+                interests.append(interest)
+                pieces.append(self.pieces_manager.pieces[index])
 
-            runner0.join()
-            runner0.close()
+            app = cefapp.CefAppConsumer(interests, pieces)
+            runner = Process(target=app.run)
+            runner.start()
+            process.append(runner)
 
+        for runner in process:
+            runner.join()
+            runner.close()
 
         logging.info("File(s) downloaded successfully.")
         end_time = time.time() - start_time
