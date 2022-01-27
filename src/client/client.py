@@ -40,6 +40,7 @@ class Run(object):
                 port = self.wait_empty_port()
 
             interest = '/'.join([PROTOCOL, self.info_hash, str(index)])
+            print("{}:{}".format(port, interest))
             app = cefapp.CefAppConsumer(interest, self.pieces_manager.pieces[index], port)
             runner = Process(target=app.run)
             runner.start()
