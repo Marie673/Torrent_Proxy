@@ -1,7 +1,9 @@
+import ctypes
 import logging
 import numpy as np
 from pubsub import pub
 from threading import Thread
+import threading
 
 MAX_INTEREST = 1000
 BLOCK_SIZE = 30
@@ -35,25 +37,29 @@ class CefAppConsumer(Thread):
 
 
     def run(self):
-        self.semaphore.acquire()
-        _, end_chunk_num = self.get_first_chunk(self.name)
-        if end_chunk_num is None:
-            logging.error("failed to get_first_chunk")
-            return
-        info = CefAppRunningInfo(self.name, end_chunk_num)
-        self.on_start(info)
-        while info.timeout_count < self.timeout_limit and self.continues_to_run(info):
-            packet = self.cef_handle.receive()
-            if packet.is_failed:
-                info.timeout_count += 1
-                self.on_rcv_failed(info)
-            elif packet.name == info.name:
-                self.on_rcv_succeeded(info, packet)
-        self.semaphore.release()
-        if info.num_of_finished == info.end_chunk_num:
-            return True
-        else:
-            return False
+        try:
+            self.semaphore.acquire()
+            _, end_chunk_num = self.get_first_chunk(self.name)
+            if end_chunk_num is None:
+                logging.error("failed to get_first_chunk")
+                return
+            info = CefAppRunningInfo(self.name, end_chunk_num)
+            self.on_start(info)
+            while info.timeout_count < self.timeout_limit and self.continues_to_run(info):
+                packet = self.cef_handle.receive()
+                if packet.is_failed:
+                    info.timeout_count += 1
+                    self.on_rcv_failed(info)
+                elif packet.name == info.name:
+                    self.on_rcv_succeeded(info, packet)
+            self.semaphore.release()
+            if info.num_of_finished == info.end_chunk_num:
+                return True
+            else:
+                return False
+
+        finally:
+            pass
 
     # return first_chunk_payload and end_chunk_num
     def get_first_chunk(self, name) -> (bytes, int):
@@ -124,3 +130,17 @@ class CefAppConsumer(Thread):
         if self.req_tail_index < info.end_chunk_num:
             self.cef_handle.send_interest(info.name, self.req_tail_index)
             self.req_flag[self.req_tail_index] = 1
+
+    def get_id(self):
+        if hasattr(self, '_thread_id'):
+            return self._thread_id
+        for id, thread in threading._active.items():
+            if thread is self:
+                return id
+
+    def raise_exception(self):
+        thread_id = self.get_id()
+        res = ctypes.pythonapi.PyThreadState_SetAsyncExc(thread_id,
+                                                         ctypes.py_object(SystemExit))
+        if res > 1:
+            ctypes.pythonapi.PyThreadState_SetAsyncExc(thread_id, 0)

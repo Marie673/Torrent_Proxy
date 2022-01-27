@@ -30,38 +30,48 @@ class Run(object):
         self.handle = cefpyco.CefpycoHandle()
         self.handle.begin()
 
+        self.thread = {}
         self.semaphore = BoundedSemaphore(30)
 
         logging.info('Cefore Manager Started')
         logging.info("PiecesManager Started")
 
     def start(self):
-        start_time = time.time()
-        while not self.pieces_manager.all_pieces_completed():
-            # logging.debug('start request pieces')
-            for piece in self.pieces_manager.pieces:
-                index = piece.piece_index
+        try:
+            start_time = time.time()
+            while not self.pieces_manager.all_pieces_completed():
+                # logging.debug('start request pieces')
+                for piece in self.pieces_manager.pieces:
+                    index = piece.piece_index
 
-                if self.pieces_manager.pieces[index].is_full:
-                    continue
+                    if self.pieces_manager.pieces[index].is_full:
+                        continue
 
-                interest = '/'.join([PROTOCOL, self.info_hash, str(index)])
-                print(interest)
-                app = cefapp.CefAppConsumer(self.handle, interest, self.semaphore)
-                app.start()
+                    if index in self.thread:
+                        continue
 
-            if self.pieces_manager.all_pieces_completed():
-                break
+                    interest = '/'.join([PROTOCOL, self.info_hash, str(index)])
+                    app = cefapp.CefAppConsumer(self.handle, interest, self.semaphore)
+                    self.thread[index] = app
+                    app.start()
+
+                if self.pieces_manager.all_pieces_completed():
+                    break
+                self.display_progression()
+
+                #time.sleep(3)
+
+            logging.info("File(s) downloaded successfully.")
+            end_time = time.time() - start_time
             self.display_progression()
+            print("time: {0}".format(end_time) + "[sec]")
 
-            #time.sleep(3)
+            self._exit_threads()
 
-        logging.info("File(s) downloaded successfully.")
-        end_time = time.time() - start_time
-        self.display_progression()
-        print("time: {0}".format(end_time) + "[sec]")
-
-        self._exit_threads()
+        except KeyboardInterrupt:
+            for index in self.thread:
+                self.thread[index].raise_exception()
+                self.thread[index].join()
 
     def display_progression(self):
         """
@@ -100,10 +110,7 @@ def main():
     path = os.path.abspath(path)
 
     run = Run(path)
-    try:
-        run.start()
-    except KeyboardInterrupt:
-        sys.exit(0)
+    run.start()
 
 
 if __name__ == '__main__':
