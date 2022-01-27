@@ -11,7 +11,7 @@ from multiprocessing import Pool
 import numpy
 
 PROTOCOL = 'ccnx:/BitTorrent'
-MAX_PIECE = 2
+MAX_PIECE = 1
 
 
 class Run(object):
