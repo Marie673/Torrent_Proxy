@@ -10,8 +10,7 @@ import os
 import sys
 import time
 import logging
-from threading import Thread, BoundedSemaphore
-import numpy
+
 
 
 PROTOCOL = 'ccnx:/BitTorrent'
@@ -51,14 +50,6 @@ class Run(object):
                 app = cefapp.CefAppConsumer(self.handle)
                 state = app.run(interest)
                 self.display_progression()
-                """
-                if not self.req_piece_flg[index]:
-                    interest = '/'.join([PROTOCOL, self.info_hash, str(index)])
-                    cef = cefapp.CefAppConsumer(self.handle)
-                    thread = Thread(target=cef.run, args=interest)
-                    thread.start()
-                    self.req_piece_flg[index] = True
-                """
 
             if self.pieces_manager.all_pieces_completed():
                 break
