@@ -38,7 +38,7 @@ class Run(object):
             interest = '/'.join([PROTOCOL, self.info_hash, str(index)])
             app = cefapp.CefAppConsumer(interest, self.pieces_manager.pieces[index])
             pool.apply_async(app.run)
-
+        pool.join()
         self.display_progression()
 
         logging.info("File(s) downloaded successfully.")
