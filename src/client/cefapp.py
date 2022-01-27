@@ -45,7 +45,7 @@ class CefAppConsumer:
         if end_chunk_num is None:
             logging.error("failed to get_first_chunk")
             return
-
+        print(end_chunk_num)
         info = CefAppRunningInfo(name, end_chunk_num)
         self.on_start(info)
         while info.timeout_count < self.timeout_limit and self.continues_to_run(info):
