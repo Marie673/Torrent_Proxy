@@ -35,6 +35,7 @@ class CefAppConsumer:
 
 
     def run(self):
+        print("test")
         _, end_chunk_num = self.get_first_chunk(self.name)
         if end_chunk_num is None:
             logging.error("failed to get_first_chunk")

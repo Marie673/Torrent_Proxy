@@ -38,7 +38,6 @@ class Run(object):
                 app = cefapp.CefAppConsumer(interest, self.pieces_manager.pieces[index])
                 pool.apply_async(app.run)
 
-        self.display_progression()
 
         logging.info("File(s) downloaded successfully.")
         end_time = time.time() - start_time
