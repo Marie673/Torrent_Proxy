@@ -42,6 +42,7 @@ class CefAppConsumer:
                 info.timeout_count += 1
                 self.on_rcv_failed(info)
             elif packet.name == info.name:
+                print(packet.chunk_num)
                 self.on_rcv_succeeded(info, packet)
         print(self.data_size)
         if info.num_of_finished > info.end_chunk_num:
