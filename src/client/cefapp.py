@@ -86,6 +86,7 @@ class CefAppConsumer:
 
     @staticmethod
     def continues_to_run(info):
+        print("{} {}".format(info.num_of_finished, info.end_chunk_num))
         return info.num_of_finished < info.end_chunk_num
 
     def on_rcv_failed(self, info):
@@ -100,8 +101,6 @@ class CefAppConsumer:
                         piece=(piece_index, packet.payload_len * chunk_num, packet.payload))
         info.finished_flag[chunk_num] = 1
         info.num_of_finished += 1
-
-        print("num_of_finished: {} chunk: {}".format(info.num_of_finished, chunk_num))
 
         self.send_next_interest(info)
 
