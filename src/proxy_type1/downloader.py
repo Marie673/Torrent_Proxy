@@ -2,6 +2,7 @@ from block import State
 import time
 import peers_manager
 import pieces_manager
+from piece import Piece
 import tracker
 import logging
 import message
@@ -57,12 +58,14 @@ class Run(Process):
 
             for index in self.request:
                 if self.pieces_manager.pieces[index].is_full:
-                    piece = [index, self.pieces_manager.pieces[index].raw_data]
+                    piece = self.pieces_manager.pieces[index]
+                    raw_data = piece.raw_data
                     tmp_path = "tmp/" + self.torrent.info_hash_str + '.' + str(index)
                     with open(tmp_path, "wb") as file:
-                        file.write(piece[1])
+                        file.write(raw_data)
                     self.request.remove(index)
-                    del self.pieces_manager.pieces[index].raw_data
+                    self.pieces_manager.pieces[index] = Piece(index, piece.piece_size, piece.piece_hash)
+
                     print("complete piece: {}".format(index))
                     continue
 
