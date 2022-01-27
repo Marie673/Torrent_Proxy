@@ -26,12 +26,11 @@ class PiecesManager(object):
 
     def receive_block_piece(self, piece):
         piece_index, piece_offset, piece_data = piece
-        print("test1")
+        print(piece_index, piece_offset)
         if self.pieces[piece_index].is_full:
             print("test2")
             return
 
-        print("test3")
         self.pieces[piece_index].set_block(piece_offset, piece_data)
         print("test4")
 
