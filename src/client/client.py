@@ -11,7 +11,7 @@ import sys
 import time
 import logging
 from threading import Thread, Event
-from multiprocessing import Process, Manager
+from multiprocessing import Process, Pipe
 
 
 PROTOCOL = 'ccnx:/BitTorrent'
@@ -32,17 +32,19 @@ class Run(object):
         listener = Process(target=self.listener)
         listener.start()
 
-        self.thread = Manager().dict()
+        self.threads = {}
+        self.pipes = {}
 
         logging.info('Cefore Manager Started')
         logging.info("PiecesManager Started")
 
     def listener(self):
-        packet  = self.handle.receive()
+        while True:
+            packet  = self.handle.receive()
+            index = int(packet.name.split('/')[-1])
 
-        index = int(packet.name.split('/')[-1])
-        self.thread[index].packet = packet
-        self.thread[index].event.clear()
+            pipe = self.pipes[index]
+            pipe.send(packet)
 
     def start(self):
         try:
@@ -55,19 +57,20 @@ class Run(object):
                     if self.pieces_manager.pieces[index].is_full:
                         continue
 
-                    if index in self.thread:
-                        thread: Thread = self.thread[index]
+                    if index in self.threads:
+                        thread: Thread = self.threads[index]
                         if thread.is_alive():
                             continue
                         else:
-                            del self.thread[index]
+                            del self.threads[index]
 
-                    if len(self.thread) > MAX_PIECE:
+                    if len(self.threads) > MAX_PIECE:
                         continue
                     interest = '/'.join([PROTOCOL, self.info_hash, str(index)])
-                    event = Event()
-                    app = cefapp.CefAppConsumer(self.handle, interest, event)
-                    self.thread[index] = app
+                    s_pipe, r_pipe = Pipe(False)
+                    app = cefapp.CefAppConsumer(self.handle, interest, r_pipe)
+                    self.threads[index] = app
+                    self.pipes[index] = s_pipe
                     app.start()
                     print(interest)
 
@@ -87,20 +90,11 @@ class Run(object):
         except KeyboardInterrupt:
             print("Keyboard Interrupt")
             print("Stopping threads")
-            for index in self.thread:
-                self.thread[index].active = False
-                self.thread[index].join()
+            for index in self.threads:
+                self.threads[index].active = False
+                self.threads[index].join()
 
     def display_progression(self):
-        """
-        for i in range(self.pieces_manager.number_of_pieces):
-            for j in range(self.pieces_manager.pieces[i].number_of_blocks):
-                if self.pieces_manager.pieces[i].blocks[j].state == State.FULL:
-                    new_progression += len(self.pieces_manager.pieces[i].blocks[j].data)
-        if new_progression == self.percentage_completed:
-            return"""
-
-        # percentage_completed = float((float(new_progression) / self.torrent.total_length) * 100)
 
         current_log_line = "{}/{} pieces" \
             .format(self.pieces_manager.complete_pieces,

@@ -19,7 +19,7 @@ class CefAppRunningInfo(object):
 
 
 class CefAppConsumer(Thread):
-    def __init__(self, cef_handle, name, rcv_event,
+    def __init__(self, cef_handle, name, pipe,
                  pipeline=1000, timeout_limit=10):
         Thread.__init__(self)
         self.cef_handle = cef_handle
@@ -31,15 +31,11 @@ class CefAppConsumer(Thread):
         self.pipeline = pipeline
 
         self.active = True
-        self.rcv_event = rcv_event
+        self.pipe = pipe
         # test
         self.data_size = 0
 
         self.packet = None
-
-    def receive_data(self):
-        self.rcv_event.wait()
-        self.rcv_event.set()
 
     def run(self):
         try:
@@ -51,7 +47,7 @@ class CefAppConsumer(Thread):
             self.on_start(info)
             while info.timeout_count < self.timeout_limit and \
                     self.continues_to_run(info) and self.active:
-                self.receive_data()
+                self.pipe.recv()
                 if self.packet.is_failed:
                     info.timeout_count += 1
                     self.on_rcv_failed(info)
@@ -69,7 +65,7 @@ class CefAppConsumer(Thread):
     def get_first_chunk(self, name) -> (bytes, int):
         while True:
             self.cef_handle.send_interest(name, 0)
-            self.receive_data()
+            self.pipe.recv()
             if self.packet.is_failed:
                 continue
             if self.packet.is_interest_return:
