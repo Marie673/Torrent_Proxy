@@ -1,6 +1,7 @@
 import logging
 import numpy as np
 from pubsub import pub
+import cefpyco
 
 
 class CefAppRunningInfo(object):
@@ -14,10 +15,13 @@ class CefAppRunningInfo(object):
 
 
 class CefAppConsumer:
-    def __init__(self, cef_handle, name,
+    def __init__(self, name,
                  pipeline=1000, timeout_limit=10):
+
+        self.cef_handle = cefpyco.CefpycoHandle()
+        self.cef_handle.begin()
+
         self.name = name
-        self.cef_handle = cef_handle
         self.timeout_limit = timeout_limit
         self.rcv_tail_index = None
         self.req_tail_index = None

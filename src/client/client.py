@@ -1,14 +1,14 @@
 #!/usr/bin/env python3.9
 import torrent
 import pieces_manager
-import cefpyco
 import cefapp
 
 import os
 import sys
 import time
 import logging
-from multiprocessing import Process
+from multiprocessing import Pool
+import numpy
 
 PROTOCOL = 'ccnx:/BitTorrent'
 MAX_PIECE = 10
@@ -23,16 +23,14 @@ class Run(object):
         self.info_hash = str(self.torrent.info_hash.hex())
         self.pieces_manager = pieces_manager.PiecesManager(self.torrent)
 
-        self.handle = cefpyco.CefpycoHandle()
-        self.handle.begin()
-
-        self.req_flg = []
+        self.req_flg = numpy.zeros(self.torrent.number_of_pieces)
 
         logging.info('Cefore Manager Started')
         logging.info("PiecesManager Started")
 
     def start(self):
         start_time = time.time()
+        pool = Pool(MAX_PIECE)
         while not self.pieces_manager.all_pieces_completed():
             # logging.debug('start request pieces')
             for piece in self.pieces_manager.pieces:
@@ -41,19 +39,12 @@ class Run(object):
                 if self.pieces_manager.pieces[index].is_full:
                     continue
 
+                if self.req_flg[index] == 1:
+                    continue
                 interest = '/'.join([PROTOCOL, self.info_hash, str(index)])
-                app = cefapp.CefAppConsumer(self.handle, interest)
-                # あらかじめピースを要求して取得しておいてもらう
-                to_index = min(self.torrent.number_of_pieces, index+MAX_PIECE)
-                for i in range(index+1, to_index):
-                    if i in self.req_flg:
-                        continue
-                    sub_interest = '/'.join([PROTOCOL, self.info_hash, str(i)])
-                    self.handle.send_interest(sub_interest, 0)
-                    self.req_flg.append(i)
-                # 1つの完全なピース取得開始
-                app.run()
-                self.display_progression()
+                app = cefapp.CefAppConsumer(interest)
+                pool.apply_async(app.run)
+                self.req_flg[index] = 1
 
             if self.pieces_manager.all_pieces_completed():
                 break
