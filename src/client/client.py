@@ -31,28 +31,17 @@ class Run(object):
     def start(self):
         start_time = time.time()
         pool = Pool(MAX_PIECE)
-        while not self.pieces_manager.all_pieces_completed():
             # logging.debug('start request pieces')
-            for piece in self.pieces_manager.pieces:
-                index = piece.piece_index
+        for piece in self.pieces_manager.pieces:
+            index = piece.piece_index
 
-                if self.pieces_manager.pieces[index].is_full:
-                    continue
+            interest = '/'.join([PROTOCOL, self.info_hash, str(index)])
+            app = cefapp.CefAppConsumer(interest, self.pieces_manager.pieces[index])
+            pool.apply_async(app.run)
 
-                if self.req_flg[index] == 1:
-                    continue
-                interest = '/'.join([PROTOCOL, self.info_hash, str(index)])
-                app = cefapp.CefAppConsumer(interest)
-                pool.apply_async(app.run)
-                self.req_flg[index] = 1
-
-            pool.close()
-            pool.join()
-            if self.pieces_manager.all_pieces_completed():
-                break
-            self.display_progression()
-
-            #time.sleep(3)
+        pool.close()
+        pool.join()
+        self.display_progression()
 
         logging.info("File(s) downloaded successfully.")
         end_time = time.time() - start_time

@@ -3,6 +3,7 @@ import numpy as np
 from pubsub import pub
 import cefpyco
 
+from piece import Piece
 
 class CefAppRunningInfo(object):
     def __init__(self, name, end_chunk_num):
@@ -15,11 +16,12 @@ class CefAppRunningInfo(object):
 
 
 class CefAppConsumer:
-    def __init__(self, name,
+    def __init__(self, name, piece,
                  pipeline=1000, timeout_limit=10):
 
         self.cef_handle = cefpyco.CefpycoHandle()
         self.cef_handle.begin()
+        self.piece: Piece = piece
 
         self.name = name
         self.timeout_limit = timeout_limit
@@ -64,9 +66,10 @@ class CefAppConsumer:
                 continue
             self.data_size += packet.payload_len
             piece_index = int(packet.name.split('/')[-1])
-            pub.sendMessage('PiecesManager.Piece',
+            """pub.sendMessage('PiecesManager.Piece',
                             piece=(piece_index, 0, packet.payload))
-
+            """
+            self.piece.set_block(0, packet.payload)
             return packet.payload, packet.end_chunk_num
 
     def on_start(self, info):
@@ -89,8 +92,13 @@ class CefAppConsumer:
 
         chunk_num = packet.chunk_num
         if info.finished_flag[chunk_num]: return
-        pub.sendMessage('PiecesManager.Piece',
+        self.piece.set_block(packet.payload_len * chunk_num, packet.payload)
+        if self.piece.are_all_blocks_full():
+            if self.piece.set_to_full():
+                pass
+        """pub.sendMessage('PiecesManager.Piece',
                         piece=(piece_index, packet.payload_len * chunk_num, packet.payload))
+        """
         info.finished_flag[chunk_num] = 1
         info.num_of_finished += 1
         self.data_size += packet.payload_len
