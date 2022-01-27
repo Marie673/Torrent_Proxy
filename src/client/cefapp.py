@@ -104,6 +104,7 @@ class CefAppConsumer:
             if info.finished_flag[i]:
                 continue
             self.cef_handle.send_interest(info.name, i)
+            print(i)
             self.req_flag[i] = 1
 
     def send_next_interest(self, info):
