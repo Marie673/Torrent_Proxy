@@ -44,6 +44,7 @@ class Run(object):
             interest = '/'.join([PROTOCOL, self.info_hash, str(index)])
             app = cefapp.CefAppConsumer(interest, self.pieces_manager.pieces[index], port)
             runner = Process(target=app.run)
+            runner.start()
             process[port] = runner
 
         logging.info("File(s) downloaded successfully.")
