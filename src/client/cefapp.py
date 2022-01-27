@@ -11,7 +11,7 @@ class CefAppRunningInfo(object):
         self.name = name
         self.end_chunk_num = end_chunk_num
         self.num_of_finished = 0
-        self.finished_flag = np.zeros(end_chunk_num)
+        self.finished_flag = np.zeros(end_chunk_num + 1)
         self.timeout_count = 0
 
 
@@ -43,7 +43,8 @@ class CefAppConsumer:
                 self.on_rcv_failed(info)
             elif packet.name == info.name:
                 self.on_rcv_succeeded(info, packet)
-        if info.num_of_finished == info.end_chunk_num + 1:
+        print("{} {}".format(info.num_of_finished, info.end_chunk_num))
+        if info.num_of_finished > info.end_chunk_num:
             print("compleat piece: {}".format(name))
             return True
         else:
