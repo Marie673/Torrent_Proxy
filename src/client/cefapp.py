@@ -44,7 +44,6 @@ class CefAppConsumer:
                 self.on_rcv_failed(info)
             elif packet.name == info.name:
                 self.on_rcv_succeeded(info, packet)
-        print(self.data_size)
         if info.num_of_finished > info.end_chunk_num:
             print("compleat piece: {}".format(name))
             return True
@@ -77,7 +76,6 @@ class CefAppConsumer:
 
     @staticmethod
     def continues_to_run(info):
-        print(info.finished_flag)
         return 0 in info.finished_flag
 
     def on_rcv_failed(self, info):
