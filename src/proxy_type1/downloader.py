@@ -57,6 +57,7 @@ class Run(Process):
                     print("get new request: {}".format(request_index))
 
             for index in self.request:
+
                 if self.pieces_manager.pieces[index].is_full:
                     piece = self.pieces_manager.pieces[index]
                     raw_data = piece.raw_data
