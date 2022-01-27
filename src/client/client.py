@@ -34,10 +34,6 @@ class Run(object):
         start_time = time.time()
         # logging.debug('start request pieces')
         for index in range(self.torrent.number_of_pieces):
-            port = self.get_empty_port()
-            if port is None:
-                # all port is used
-                port = self.wait_empty_port()
 
             interest = '/'.join([PROTOCOL, self.info_hash, str(index)])
             print("{}:{}".format(port, interest))
