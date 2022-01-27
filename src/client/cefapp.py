@@ -42,7 +42,6 @@ class CefAppConsumer:
                 info.timeout_count += 1
                 self.on_rcv_failed(info)
             elif packet.name == info.name:
-                print(packet.chunk_num)
                 self.on_rcv_succeeded(info, packet)
         print(self.data_size)
         if info.num_of_finished > info.end_chunk_num:
@@ -84,6 +83,7 @@ class CefAppConsumer:
 
     def on_rcv_succeeded(self, info, packet):
         piece_index = int(packet.name.split('/')[-1])
+        print(piece_index)
         chunk_num = packet.chunk_num
         if info.finished_flag[chunk_num]: return
         pub.sendMessage('PiecesManager.Piece',
