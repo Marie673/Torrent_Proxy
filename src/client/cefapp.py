@@ -43,7 +43,6 @@ class CefAppConsumer:
                 self.on_rcv_failed(info)
             elif packet.name == info.name:
                 self.on_rcv_succeeded(info, packet)
-        print("{} {}".format(info.num_of_finished, info.end_chunk_num))
         if info.num_of_finished > info.end_chunk_num:
             print("compleat piece: {}".format(name))
             return True
@@ -75,7 +74,7 @@ class CefAppConsumer:
 
     @staticmethod
     def continues_to_run(info):
-        return info.num_of_finished <= info.end_chunk_num
+        return info.num_of_finished < info.end_chunk_num
 
     def on_rcv_failed(self, info):
         self.reset_req_status(info)
