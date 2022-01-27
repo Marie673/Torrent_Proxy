@@ -33,10 +33,11 @@ class Run(object):
         start_time = time.time()
         # logging.debug('start request pieces')
         process = []
-        for f_index in range(0,self.torrent.number_of_pieces, MAX_PROCESS):
+        works = self.torrent.number_of_pieces // MAX_PROCESS
+        for process_index in range(MAX_PROCESS):
             interests = []
             pieces = []
-            for index in range(f_index, MAX_PROCESS):
+            for index in range(process_index*works, works):
                 print(index)
                 interest = '/'.join([PROTOCOL, self.info_hash, str(index+0)])
                 interests.append(interest)
