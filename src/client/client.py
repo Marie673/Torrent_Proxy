@@ -38,7 +38,9 @@ class Run(object):
         for process_index in range(MAX_PROCESS):
             interests = []
             pieces = []
-            for index in range(process_index*works, works):
+            start = process_index * works
+            end = start + works
+            for index in range(start, end):
                 interest = '/'.join([PROTOCOL, self.info_hash, str(index+0)])
                 interests.append(interest)
                 pieces.append(self.pieces_manager.pieces[index])
