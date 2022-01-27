@@ -34,13 +34,17 @@ class Run(object):
         start_time = time.time()
         # logging.debug('start request pieces')
         for index in range(self.torrent.number_of_pieces):
+            port = self.get_empty_port()
+            if port is None:
+                # all port is used
+                port = self.wait_empty_port()
 
             interest = '/'.join([PROTOCOL, self.info_hash, str(index)])
-            print("{}:{}".format(index+self.default_port, interest))
-            app = cefapp.CefAppConsumer(interest, self.pieces_manager.pieces[index], index+self.default_port)
+            print("{}:{}".format(port, interest))
+            app = cefapp.CefAppConsumer(interest, self.pieces_manager.pieces[index], port)
             runner = Process(target=app.run)
             runner.start()
-            # self.process[port] = runner
+            self.process[port] = runner
 
         logging.info("File(s) downloaded successfully.")
         end_time = time.time() - start_time
