@@ -35,7 +35,6 @@ class CefAppConsumer:
 
 
     def run(self):
-        print("test")
         _, end_chunk_num = self.get_first_chunk(self.name)
         if end_chunk_num is None:
             logging.error("failed to get_first_chunk")
@@ -61,6 +60,7 @@ class CefAppConsumer:
         while True:
             self.cef_handle.send_interest(name, 0)
             packet = self.cef_handle.receive()
+            print("test")
             if packet.is_failed:
                 continue
             if packet.is_interest_return:
