@@ -70,7 +70,7 @@ class Run(object):
 
         except KeyboardInterrupt:
             for index in self.thread:
-                self.thread[index].raise_exception()
+                self.thread[index].active = False
                 self.thread[index].join()
 
     def display_progression(self):

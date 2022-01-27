@@ -32,6 +32,7 @@ class CefAppConsumer(Thread):
         self.req_flag = None
         self.pipeline = pipeline
 
+        self.active = True
         # test
         self.data_size = 0
 
@@ -45,7 +46,8 @@ class CefAppConsumer(Thread):
                 return
             info = CefAppRunningInfo(self.name, end_chunk_num)
             self.on_start(info)
-            while info.timeout_count < self.timeout_limit and self.continues_to_run(info):
+            while info.timeout_count < self.timeout_limit and \
+                    self.continues_to_run(info) and self.active:
                 packet = self.cef_handle.receive()
                 if packet.is_failed:
                     info.timeout_count += 1
@@ -130,17 +132,3 @@ class CefAppConsumer(Thread):
         if self.req_tail_index < info.end_chunk_num:
             self.cef_handle.send_interest(info.name, self.req_tail_index)
             self.req_flag[self.req_tail_index] = 1
-
-    def get_id(self):
-        if hasattr(self, '_thread_id'):
-            return self._thread_id
-        for id, thread in threading._active.items():
-            if thread is self:
-                return id
-
-    def raise_exception(self):
-        thread_id = self.get_id()
-        res = ctypes.pythonapi.PyThreadState_SetAsyncExc(thread_id,
-                                                         ctypes.py_object(SystemExit))
-        if res > 1:
-            ctypes.pythonapi.PyThreadState_SetAsyncExc(thread_id, 0)
