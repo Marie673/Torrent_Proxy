@@ -11,7 +11,7 @@ import sys
 import time
 import logging
 from threading import Thread, Event
-from multiprocessing import Process
+from multiprocessing import Process, Manager
 
 
 PROTOCOL = 'ccnx:/BitTorrent'
@@ -32,13 +32,14 @@ class Run(object):
         listener = Process(target=self.listener)
         listener.start()
 
-        self.thread = {}
+        self.thread = Manager().dict()
 
         logging.info('Cefore Manager Started')
         logging.info("PiecesManager Started")
 
     def listener(self):
         packet  = self.handle.receive()
+
         index = int(packet.name.split('/')[-1])
         self.thread[index].packet = packet
         self.thread[index].event.clear()
