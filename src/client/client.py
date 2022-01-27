@@ -48,7 +48,7 @@ class Run(object):
                 for i in range(index+1, to_index+1):
                     if i in self.req_flg:
                         continue
-                    sub_interest = '/'.join([PROTOCOL, self.info_hash, str(index)])
+                    sub_interest = '/'.join([PROTOCOL, self.info_hash, str(i)])
                     self.handle.send_interest(sub_interest, 0)
                     self.req_flg.append(i)
                 # 1つの完全なピース取得開始
