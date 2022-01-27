@@ -47,20 +47,10 @@ class Run(object):
 
                 self.pieces_manager.pieces[index].update_block_status()
 
-                self.pieces_manager.pieces[index].update_block_status()
-
                 interest = '/'.join([PROTOCOL, self.info_hash, str(index)])
                 app = cefapp.CefAppConsumer(self.handle, interest, self.semaphore)
                 app.run()
                 self.display_progression()
-                """
-                if not self.req_piece_flg[index]:
-                    interest = '/'.join([PROTOCOL, self.info_hash, str(index)])
-                    cef = cefapp.CefAppConsumer(self.handle)
-                    thread = Thread(target=cef.run, args=interest)
-                    thread.start()
-                    self.req_piece_flg[index] = True
-                """
 
             if self.pieces_manager.all_pieces_completed():
                 break
