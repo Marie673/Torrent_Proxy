@@ -40,10 +40,6 @@ class Run(object):
                 if self.pieces_manager.pieces[index].is_full:
                     continue
 
-                self.pieces_manager.pieces[index].update_block_status()
-
-                self.pieces_manager.pieces[index].update_block_status()
-
                 interest = '/'.join([PROTOCOL, self.info_hash, str(index)])
                 app = cefapp.CefAppConsumer(self.handle)
                 app.run(interest)
