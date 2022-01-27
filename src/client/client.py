@@ -35,7 +35,7 @@ class Run(object):
             # logging.debug('start request pieces')
             for index in range(0, self.torrent.number_of_pieces, MAX_PIECE):
                 default_port = 9896
-                for i in (index, MAX_PIECE):
+                for i in range(index, MAX_PIECE):
                     interest = '/'.join([PROTOCOL, self.info_hash, str(i)])
                     app = cefapp.CefAppConsumer(interest, self.pieces_manager.pieces[i],default_port+i)
                     pool.apply_async(app.run)
