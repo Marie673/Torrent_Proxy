@@ -41,6 +41,7 @@ class Run(object):
             runner0.start()
 
             runner0.join()
+            runner0.close()
 
 
         logging.info("File(s) downloaded successfully.")
