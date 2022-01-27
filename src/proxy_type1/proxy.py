@@ -61,7 +61,8 @@ class Run(object):
 
 
     def handle_interest(self, packet):
-        print("interest: {} chunk = {}".format(packet.name, packet.chunk_num))
+        if packet.chunk_num == 0:
+            print("interest: {} chunk = {}".format(packet.name, packet.chunk_num))
         prefix = packet.name.split("/")
         info_hash = prefix[2]
         piece_index = int(prefix[3])
