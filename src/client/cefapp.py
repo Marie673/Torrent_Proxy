@@ -63,10 +63,10 @@ class CefAppConsumer:
             pub.sendMessage('PiecesManager.Piece',
                             piece=(packet.chunk_num, 0, packet.payload))
 
-            return packet.payload, int(packet.end_chunk_num)-1
+            return packet.payload, packet.end_chunk_num
 
     def on_start(self, info):
-        self.req_flag = np.zeros(info.end_chunk_num)
+        self.req_flag = np.zeros(info.end_chunk_num + 1)
         self.req_flag[0] = 1
         self.rcv_tail_index = 1
         self.req_tail_index = 1
@@ -92,7 +92,7 @@ class CefAppConsumer:
         self.send_next_interest(info)
 
     def reset_req_status(self, info):
-        self.req_flag = np.zeros(info.end_chunk_num)
+        self.req_flag = np.zeros(info.end_chunk_num + 1)
         self.req_tail_index = self.rcv_tail_index
         while self.req_tail_index < info.end_chunk_num and info.finished_flag[self.req_tail_index]:
             self.req_tail_index += 1
