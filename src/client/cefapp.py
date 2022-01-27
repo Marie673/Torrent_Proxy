@@ -36,6 +36,9 @@ class CefAppConsumer:
         self.req_flag = None
         self.pipeline = pipeline
 
+        # test
+        self.data_size = 0
+
 
     def run(self, name):
         _, end_chunk_num = self.get_first_chunk(name)
@@ -97,6 +100,9 @@ class CefAppConsumer:
                         piece=(piece_index, packet.payload_len * chunk_num, packet.payload))
         info.finished_flag[chunk_num] = 1
         info.num_of_finished += 1
+
+        print("num_of_finished: {} chunk: {}".format(info.num_of_finished, chunk_num))
+
         self.send_next_interest(info)
 
     def reset_req_status(self, info):
