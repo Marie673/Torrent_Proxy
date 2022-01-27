@@ -43,6 +43,7 @@ class CefAppConsumer:
         self.on_start(info)
         while info.timeout_count < self.timeout_limit and self.continues_to_run(info):
             packet = self.cef_handle.receive()
+            print(packet)
             if packet.is_failed:
                 # info.timeout_count += 1
                 self.on_rcv_failed(info)
