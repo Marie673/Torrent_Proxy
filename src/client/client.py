@@ -7,7 +7,7 @@ import os
 import sys
 import time
 import logging
-from multiprocessing import Pool
+from multiprocessing import Pool, Process
 import numpy
 
 PROTOCOL = 'ccnx:/BitTorrent'
@@ -38,6 +38,9 @@ class Run(object):
                 for i in range(index, MAX_PIECE):
                     interest = '/'.join([PROTOCOL, self.info_hash, str(i)])
                     app = cefapp.CefAppConsumer(interest, self.pieces_manager.pieces[i],default_port+i)
+                    p = Process(target=app.run)
+                    p.start()
+                    p.join()
                     pool.apply_async(app.run)
                 pool.close()
                 pool.join()
