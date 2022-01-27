@@ -49,7 +49,7 @@ class Run(object):
 
                 interest = '/'.join([PROTOCOL, self.info_hash, str(index)])
                 app = cefapp.CefAppConsumer(self.handle, interest, self.semaphore)
-                app.run()
+                app.start()
                 self.display_progression()
 
             if self.pieces_manager.all_pieces_completed():
