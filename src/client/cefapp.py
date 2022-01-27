@@ -43,6 +43,7 @@ class CefAppConsumer:
                 self.on_rcv_failed(info)
             elif packet.name == info.name:
                 self.on_rcv_succeeded(info, packet)
+        print(self.data_size)
         if info.num_of_finished > info.end_chunk_num:
             print("compleat piece: {}".format(name))
             return True
@@ -88,6 +89,7 @@ class CefAppConsumer:
                         piece=(piece_index, packet.payload_len * chunk_num, packet.payload))
         info.finished_flag[chunk_num] = 1
         info.num_of_finished += 1
+        self.data_size += packet.payload_len
 
         self.send_next_interest(info)
 
