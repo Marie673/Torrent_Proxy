@@ -16,11 +16,11 @@ class CefAppRunningInfo(object):
 
 
 class CefAppConsumer:
-    def __init__(self, name, piece, port,
+    def __init__(self, name, piece,
                  pipeline=1000, timeout_limit=10):
 
         self.cef_handle = cefpyco.CefpycoHandle()
-        self.cef_handle.begin(portnum=port)
+        self.cef_handle.begin()
         self.piece: Piece = piece
 
         self.name = name
