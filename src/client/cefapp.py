@@ -35,6 +35,7 @@ class CefAppConsumer:
 
 
     def run(self):
+        print("test")
         _, end_chunk_num = self.get_first_chunk(self.name)
         if end_chunk_num is None:
             logging.error("failed to get_first_chunk")
@@ -43,6 +44,7 @@ class CefAppConsumer:
         self.on_start(info)
         while info.timeout_count < self.timeout_limit and self.continues_to_run(info):
             packet = self.cef_handle.receive()
+            print("testa")
             if packet.is_failed:
                 info.timeout_count += 1
                 self.on_rcv_failed(info)
