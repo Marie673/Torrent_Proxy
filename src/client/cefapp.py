@@ -20,7 +20,7 @@ class CefAppConsumer:
                  pipeline=1000, timeout_limit=10):
 
         self.cef_handle = cefpyco.CefpycoHandle()
-        self.cef_handle.begin(port)
+        self.cef_handle.begin(portnum=port)
         self.piece: Piece = piece
 
         self.name = name
