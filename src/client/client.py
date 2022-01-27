@@ -45,7 +45,7 @@ class Run(object):
                 app = cefapp.CefAppConsumer(self.handle, interest)
                 # あらかじめピースを要求して取得しておいてもらう
                 to_index = min(self.torrent.number_of_pieces, index+MAX_PIECE)
-                for i in range(index+1, to_index+1):
+                for i in range(index+1, to_index):
                     if i in self.req_flg:
                         continue
                     sub_interest = '/'.join([PROTOCOL, self.info_hash, str(i)])
