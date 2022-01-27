@@ -17,7 +17,6 @@ class Piece(object):
         self.files = []
         self.raw_data: bytes = b''
         self.number_of_blocks: int = int(math.ceil(float(piece_size) / BLOCK_SIZE))
-        print(self.number_of_blocks)
         self.blocks: list[Block] = []
 
         self._init_blocks()

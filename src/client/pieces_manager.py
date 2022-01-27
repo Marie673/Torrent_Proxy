@@ -33,7 +33,9 @@ class PiecesManager(object):
         self.pieces[piece_index].set_block(piece_offset, piece_data)
 
         if self.pieces[piece_index].are_all_blocks_full():
+            print("test1")
             if self.pieces[piece_index].set_to_full():
+                print("test2")
                 self.complete_pieces += 1
 
     def get_block(self, piece_index, block_offset, block_length):
