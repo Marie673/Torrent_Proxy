@@ -61,7 +61,7 @@ class Run(object):
 
 
     def handle_interest(self, packet):
-
+        print(packet.name)
         prefix = packet.name.split("/")
         info_hash = prefix[2]
         piece_index = int(prefix[3])

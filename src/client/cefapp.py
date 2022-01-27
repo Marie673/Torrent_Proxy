@@ -60,7 +60,6 @@ class CefAppConsumer:
         while True:
             self.cef_handle.send_interest(name, 0)
             packet = self.cef_handle.receive()
-            print("test")
             if packet.is_failed:
                 continue
             if packet.is_interest_return:
