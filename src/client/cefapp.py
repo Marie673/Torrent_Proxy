@@ -55,7 +55,7 @@ class CefAppConsumer:
                 self.on_rcv_failed(info)
             elif packet.name == info.name:
                 self.on_rcv_succeeded(info, packet)
-        if info.num_of_finished == info.end_chunk_num:
+        if info.num_of_finished == info.end_chunk_num + 1:
             print("compleat piece: {}".format(name))
             return True
         else:
