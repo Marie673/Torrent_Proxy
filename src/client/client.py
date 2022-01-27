@@ -33,7 +33,7 @@ class Run(object):
     def start(self):
         start_time = time.time()
         # logging.debug('start request pieces')
-        for index in range(0,self.torrent.number_of_pieces, 5):
+        for index in range(0,self.torrent.number_of_pieces):
             interest = '/'.join([PROTOCOL, self.info_hash, str(index+0)])
             app = cefapp.CefAppConsumer(interest, self.pieces_manager.pieces[index+0],
                                         self.default_port)
