@@ -7,6 +7,7 @@ import tracker
 import logging
 import message
 from multiprocessing import Process, Queue
+import os
 
 
 class Run(Process):
@@ -52,9 +53,11 @@ class Run(Process):
 
             if not self.request_q.empty():
                 request_index = self.request_q.get()
-                if request_index not in self.request:
+                tmp_path = "tmp/" + self.torrent.info_hash_str + '.' + str(request_index)
+                if not os.path.exists(tmp_path):
                     self.request.append(request_index)
                     print("get new request: {}".format(request_index))
+
 
             for index in self.request:
 
