@@ -35,7 +35,6 @@ class CefAppConsumer:
 
 
     def run(self):
-        print("test")
         _, end_chunk_num = self.get_first_chunk(self.name)
         if end_chunk_num is None:
             logging.error("failed to get_first_chunk")
@@ -50,6 +49,7 @@ class CefAppConsumer:
             elif packet.name == info.name:
                 self.on_rcv_succeeded(info, packet)
         if info.num_of_finished == info.end_chunk_num:
+            print("success download piece: {}".format(self.piece.piece_index))
             return True
         else:
             return False
