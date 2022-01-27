@@ -10,7 +10,6 @@ import time
 import logging
 
 
-
 PROTOCOL = 'ccnx:/BitTorrent'
 MAX_PIECE = 10
 
