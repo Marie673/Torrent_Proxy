@@ -74,7 +74,8 @@ class Run(object):
         if info_hash not in self.download_process:
             self.create_new_process(info_hash)
 
-        self.request_q[info_hash].put(piece_index)
+        if piece_index not in self.request_q[info_hash]:
+            self.request_q[info_hash].put(piece_index)
 
     def start(self):
         while True:
