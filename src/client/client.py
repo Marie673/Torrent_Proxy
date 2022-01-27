@@ -50,7 +50,7 @@ class Run(object):
                 self.pieces_manager.pieces[index].update_block_status()
 
                 interest = '/'.join([PROTOCOL, self.info_hash, str(index)])
-                app = cefapp.CefAppConsumer(self.handle, interest)
+                app = cefapp.CefAppConsumer(self.handle, interest, self.semaphore)
                 app.run()
                 self.display_progression()
                 """
