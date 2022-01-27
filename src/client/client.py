@@ -1,8 +1,6 @@
 #!/usr/bin/env python3.9
 import torrent
 import pieces_manager
-from block import State
-import cefore_manager
 import cefpyco
 import cefapp
 
@@ -48,7 +46,7 @@ class Run(object):
 
                 interest = '/'.join([PROTOCOL, self.info_hash, str(index)])
                 app = cefapp.CefAppConsumer(self.handle)
-                state = app.run(interest)
+                app.run(interest)
                 self.display_progression()
 
             if self.pieces_manager.all_pieces_completed():
@@ -65,15 +63,6 @@ class Run(object):
         self._exit_threads()
 
     def display_progression(self):
-        """
-        for i in range(self.pieces_manager.number_of_pieces):
-            for j in range(self.pieces_manager.pieces[i].number_of_blocks):
-                if self.pieces_manager.pieces[i].blocks[j].state == State.FULL:
-                    new_progression += len(self.pieces_manager.pieces[i].blocks[j].data)
-        if new_progression == self.percentage_completed:
-            return"""
-
-        # percentage_completed = float((float(new_progression) / self.torrent.total_length) * 100)
 
         current_log_line = "{}/{} pieces" \
             .format(self.pieces_manager.complete_pieces,

@@ -2,9 +2,6 @@ import logging
 import numpy as np
 from pubsub import pub
 
-MAX_INTEREST = 1000
-BLOCK_SIZE = 30
-
 
 class CefAppRunningInfo(object):
     def __init__(self, name, end_chunk_num):
