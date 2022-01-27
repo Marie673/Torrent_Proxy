@@ -10,8 +10,8 @@ import os
 import sys
 import time
 import logging
-from threading import Thread, BoundedSemaphore
-import numpy
+from threading import Thread, Event
+from multiprocessing import Process
 
 
 PROTOCOL = 'ccnx:/BitTorrent'
@@ -29,12 +29,19 @@ class Run(object):
 
         self.handle = cefpyco.CefpycoHandle()
         self.handle.begin()
+        listener = Process(target=self.listener)
+        listener.start()
 
         self.thread = {}
-        self.semaphore = BoundedSemaphore(MAX_PIECE)
 
         logging.info('Cefore Manager Started')
         logging.info("PiecesManager Started")
+
+    def listener(self):
+        packet  = self.handle.receive()
+        index = int(packet.name.split('/')[-1])
+        self.thread[index].packet = packet
+        self.thread[index].event.clear()
 
     def start(self):
         try:
@@ -57,7 +64,8 @@ class Run(object):
                     if len(self.thread) > MAX_PIECE:
                         continue
                     interest = '/'.join([PROTOCOL, self.info_hash, str(index)])
-                    app = cefapp.CefAppConsumer(self.handle, interest, self.semaphore)
+                    event = Event()
+                    app = cefapp.CefAppConsumer(self.handle, interest, event)
                     self.thread[index] = app
                     app.start()
                     print(interest)

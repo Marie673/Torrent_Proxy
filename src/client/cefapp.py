@@ -1,12 +1,8 @@
-import ctypes
 import logging
-import time
-
 import numpy as np
 from pubsub import pub
 from threading import Thread
-import cefpyco
-import threading
+
 
 MAX_INTEREST = 1000
 BLOCK_SIZE = 30
@@ -23,14 +19,11 @@ class CefAppRunningInfo(object):
 
 
 class CefAppConsumer(Thread):
-    def __init__(self, cef_handle, name, semaphore,
+    def __init__(self, cef_handle, name, rcv_event,
                  pipeline=1000, timeout_limit=10):
         Thread.__init__(self)
-        # self.cef_handle = cef_handle
-        self.handle = cefpyco.CefpycoHandle()
-        self.handle.begin()
+        self.cef_handle = cef_handle
         self.name = name
-        self.semaphore = semaphore
         self.timeout_limit = timeout_limit
         self.rcv_tail_index = None
         self.req_tail_index = None
@@ -38,14 +31,18 @@ class CefAppConsumer(Thread):
         self.pipeline = pipeline
 
         self.active = True
-        self.start_time = time.time()
+        self.rcv_event = rcv_event
         # test
         self.data_size = 0
 
+        self.packet = None
+
+    def receive_data(self):
+        self.rcv_event.wait()
+        self.rcv_event.set()
 
     def run(self):
         try:
-            self.semaphore.acquire()
             _, end_chunk_num = self.get_first_chunk(self.name)
             if end_chunk_num is None:
                 logging.error("failed to get_first_chunk")
@@ -54,14 +51,13 @@ class CefAppConsumer(Thread):
             self.on_start(info)
             while info.timeout_count < self.timeout_limit and \
                     self.continues_to_run(info) and self.active:
-                packet = self.cef_handle.receive()
+                self.receive_data()
 
-                if packet.is_failed:
+                if self.packet.is_failed:
                     info.timeout_count += 1
                     self.on_rcv_failed(info)
-                elif packet.name == info.name:
-                    self.on_rcv_succeeded(info, packet)
-            self.semaphore.release()
+                elif self.packet.name == info.name:
+                    self.on_rcv_succeeded(info, self.packet)
             if info.num_of_finished == info.end_chunk_num:
                 return True
             else:
@@ -74,19 +70,19 @@ class CefAppConsumer(Thread):
     def get_first_chunk(self, name) -> (bytes, int):
         while True:
             self.cef_handle.send_interest(name, 0)
-            packet = self.cef_handle.receive()
-            if packet.is_failed:
+            self.receive_data()
+            if self.packet.is_failed:
                 continue
-            if packet.is_interest_return:
+            if self.packet.is_interest_return:
                 continue
-            if packet.name != name:
+            if self.packet.name != name:
                 continue
-            self.data_size += packet.payload_len
-            piece_index = int(packet.name.split('/')[-1])
+            self.data_size += self.packet.payload_len
+            piece_index = int(self.packet.name.split('/')[-1])
             pub.sendMessage('PiecesManager.Piece',
-                            piece=(piece_index, 0, packet.payload))
+                            piece=(piece_index, 0, self.packet.payload))
 
-            return packet.payload, packet.end_chunk_num
+            return self.packet.payload, self.packet.end_chunk_num
 
     def on_start(self, info):
         self.req_flag = np.zeros(info.end_chunk_num + 1)
