@@ -1,6 +1,6 @@
 from enum import Enum
 
-BLOCK_SIZE = 4096
+BLOCK_SIZE = 1024 * 4
 
 
 class State(Enum):

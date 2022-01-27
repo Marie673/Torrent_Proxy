@@ -30,9 +30,6 @@ class Run(object):
         self.handle = cefpyco.CefpycoHandle()
         self.handle.begin()
 
-        self.req_piece_flg = numpy.zeros(self.torrent.number_of_pieces)
-        self.downloading_piece_num = 0
-
         logging.info('Cefore Manager Started')
         logging.info("PiecesManager Started")
 
