@@ -24,28 +24,27 @@ class Run(object):
         self.pieces_manager = pieces_manager.PiecesManager(self.torrent)
 
         self.req_flg = numpy.zeros(self.torrent.number_of_pieces)
-
+        self.default_port = 9896
+        self.process = {}
         logging.info('Cefore Manager Started')
         logging.info("PiecesManager Started")
 
-    default_port = 9896
+
     def start(self):
         start_time = time.time()
-
+        default_port = 9896
         # logging.debug('start request pieces')
-        for index in range(0, self.torrent.number_of_pieces, MAX_PIECE):
-            default_port = 9896
-            process = []
-            for i in range(index, MAX_PIECE):
-                interest = '/'.join([PROTOCOL, self.info_hash, str(i)])
-                app = cefapp.CefAppConsumer(interest, self.pieces_manager.pieces[i],default_port+i)
-                p = Process(target=app.run)
-                p.start()
-                process.append(p)
-            for i in range(len(process)):
-                process[i].join()
-                del process[i]
+        process = {}
+        for index in range(self.torrent.number_of_pieces):
+            port = self.get_empty_port()
+            if port is None:
+                # all port is used
+                port = self.wait_empty_port()
 
+            interest = '/'.join([PROTOCOL, self.info_hash, str(index)])
+            app = cefapp.CefAppConsumer(interest, self.pieces_manager.pieces[index], port)
+            runner = Process(target=app.run)
+            process[port] = runner
 
         logging.info("File(s) downloaded successfully.")
         end_time = time.time() - start_time
@@ -66,6 +65,25 @@ class Run(object):
 
     def _exit_threads(self):
         exit(0)
+
+    def get_empty_port(self):
+        for i in range(MAX_PIECE):
+            port = i + self.default_port
+            if port not in self.process:
+                return port
+
+        return None
+
+    def wait_empty_port(self):
+        while True:
+            for i in range(MAX_PIECE):
+                port = i + self.default_port
+                process: Process = self.process[port]
+                if process.is_alive():
+                    continue
+                else:
+                    return port
+            time.sleep(0.1)
 
 
 def main():
