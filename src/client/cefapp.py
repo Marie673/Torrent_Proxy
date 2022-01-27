@@ -1,14 +1,6 @@
 import logging
-import sys
-import time
 import numpy as np
-import cefpyco
-import os
-from sys import stderr
 from pubsub import pub
-
-import torrent
-import client
 
 MAX_INTEREST = 1000
 BLOCK_SIZE = 30
@@ -21,9 +13,6 @@ class CefAppRunningInfo(object):
         self.num_of_finished = 0
         self.finished_flag = np.zeros(end_chunk_num)
         self.timeout_count = 0
-
-class MetaInfoNotResolvedError(Exception):
-    pass
 
 
 class CefAppConsumer:
@@ -45,7 +34,6 @@ class CefAppConsumer:
         if end_chunk_num is None:
             logging.error("failed to get_first_chunk")
             return
-        print(end_chunk_num)
         info = CefAppRunningInfo(name, end_chunk_num)
         self.on_start(info)
         while info.timeout_count < self.timeout_limit and self.continues_to_run(info):
@@ -86,7 +74,7 @@ class CefAppConsumer:
 
     @staticmethod
     def continues_to_run(info):
-        return info.num_of_finished < info.end_chunk_num
+        return info.num_of_finished <= info.end_chunk_num
 
     def on_rcv_failed(self, info):
         self.reset_req_status(info)
