@@ -30,6 +30,8 @@ class Run(object):
         self.handle = cefpyco.CefpycoHandle()
         self.handle.begin()
 
+        self.semaphore = BoundedSemaphore(30)
+
         logging.info('Cefore Manager Started')
         logging.info("PiecesManager Started")
 
@@ -48,8 +50,8 @@ class Run(object):
                 self.pieces_manager.pieces[index].update_block_status()
 
                 interest = '/'.join([PROTOCOL, self.info_hash, str(index)])
-                app = cefapp.CefAppConsumer(self.handle)
-                state = app.run(interest)
+                app = cefapp.CefAppConsumer(self.handle, interest)
+                app.run()
                 self.display_progression()
                 """
                 if not self.req_piece_flg[index]:

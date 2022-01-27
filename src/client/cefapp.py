@@ -1,6 +1,7 @@
 import logging
 import numpy as np
 from pubsub import pub
+from threading import Thread
 
 MAX_INTEREST = 1000
 BLOCK_SIZE = 30
@@ -16,10 +17,13 @@ class CefAppRunningInfo(object):
         self.timeout_count = 0
 
 
-class CefAppConsumer:
-    def __init__(self, cef_handle,
+class CefAppConsumer(Thread):
+    def __init__(self, cef_handle, name, semaphore,
                  pipeline=1000, timeout_limit=10):
+        Thread.__init__(self)
         self.cef_handle = cef_handle
+        self.name = name
+        self.semaphore = semaphore
         self.timeout_limit = timeout_limit
         self.rcv_tail_index = None
         self.req_tail_index = None
@@ -30,12 +34,13 @@ class CefAppConsumer:
         self.data_size = 0
 
 
-    def run(self, name):
-        _, end_chunk_num = self.get_first_chunk(name)
+    def run(self):
+        self.semaphore.acquire()
+        _, end_chunk_num = self.get_first_chunk(self.name)
         if end_chunk_num is None:
             logging.error("failed to get_first_chunk")
             return
-        info = CefAppRunningInfo(name, end_chunk_num)
+        info = CefAppRunningInfo(self.name, end_chunk_num)
         self.on_start(info)
         while info.timeout_count < self.timeout_limit and self.continues_to_run(info):
             packet = self.cef_handle.receive()
@@ -44,6 +49,7 @@ class CefAppConsumer:
                 self.on_rcv_failed(info)
             elif packet.name == info.name:
                 self.on_rcv_succeeded(info, packet)
+        self.semaphore.release()
         if info.num_of_finished == info.end_chunk_num:
             return True
         else:
