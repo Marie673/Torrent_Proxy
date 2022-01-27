@@ -100,11 +100,10 @@ class CefAppConsumer:
 
     def send_interests_with_pipeline(self, info):
         to_index = min(info.end_chunk_num, self.req_tail_index + self.pipeline)
-        for i in range(self.req_tail_index, to_index):
+        for i in range(self.req_tail_index, to_index + 1):
             if info.finished_flag[i]:
                 continue
             self.cef_handle.send_interest(info.name, i)
-            print(i)
             self.req_flag[i] = 1
 
     def send_next_interest(self, info):
