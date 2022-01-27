@@ -5,6 +5,7 @@ import time
 import numpy as np
 from pubsub import pub
 from threading import Thread
+import cefpyco
 import threading
 
 MAX_INTEREST = 1000
@@ -25,7 +26,9 @@ class CefAppConsumer(Thread):
     def __init__(self, cef_handle, name, semaphore,
                  pipeline=1000, timeout_limit=10):
         Thread.__init__(self)
-        self.cef_handle = cef_handle
+        # self.cef_handle = cef_handle
+        self.handle = cefpyco.CefpycoHandle()
+        self.handle.begin()
         self.name = name
         self.semaphore = semaphore
         self.timeout_limit = timeout_limit
