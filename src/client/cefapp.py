@@ -12,6 +12,7 @@ class CefAppRunningInfo(object):
         self.end_chunk_num = end_chunk_num
         self.num_of_finished = 0
         self.finished_flag = np.zeros(end_chunk_num + 1)
+        self.finished_flag[0] = 1
         self.timeout_count = 0
 
 
@@ -61,6 +62,7 @@ class CefAppConsumer:
                 continue
             if packet.name != name:
                 continue
+            self.data_size += packet.payload_len
             pub.sendMessage('PiecesManager.Piece',
                             piece=(packet.chunk_num, 0, packet.payload))
 
