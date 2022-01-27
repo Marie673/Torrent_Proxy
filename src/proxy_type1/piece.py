@@ -61,10 +61,6 @@ class Piece(object):
 
         self.is_full = True
         self.raw_data = data
-        # ここでファイルに書き込み
-        # この部分をDataのプッシュに割り当て
-        # PieceManager.update_bitfieldにて実行
-        pub.sendMessage('PiecesManager.PieceCompleted', piece_index=self.piece_index)
 
         return True
 

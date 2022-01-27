@@ -1,6 +1,7 @@
 import piece
 import bitstring
 from pubsub import pub
+from multiprocessing.managers import BaseManager
 
 
 class PiecesManager(object):

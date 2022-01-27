@@ -1,16 +1,19 @@
 import sys
+import time
+import logging
+import os
+from multiprocessing import Queue
 
 from block import State
-import time
 import peers_manager
 import pieces_manager
 import torrent
 import tracker
-import logging
-import os
 import message
 
-PATH = "/home/marie/Torrent_Proxy/test/testPicture.jpg.torrent"
+
+sys.setcheckinterval(10)
+
 
 class Run(object):
     percentage_completed = -1
@@ -29,10 +32,10 @@ class Run(object):
         logging.info("PiecesManager Started")
 
     def start(self):
+        start_time = prog_time = time.time()
         peers_dict = self.tracker.get_peers_from_trackers()
         self.peers_manager.add_peers(peers_dict.values())
 
-        start_time = time.time()
         while not self.pieces_manager.all_pieces_completed():
             if not self.peers_manager.has_unchoked_peers():
                 time.sleep(1)
@@ -58,10 +61,12 @@ class Run(object):
                 piece_index, block_offset, block_length = data
                 piece_data = message.Request(piece_index, block_offset, block_length).to_bytes()
                 peer.send_to_peer(piece_data)
+                break
 
-            self.display_progression()
-
-            time.sleep(0.1)
+            if time.time() - prog_time > 1:
+                self.display_progression()
+                prog_time = time.time()
+            time.sleep(0.000001)
 
         logging.info("File(s) downloaded successfully.")
         self.display_progression()

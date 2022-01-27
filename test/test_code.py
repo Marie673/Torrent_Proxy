@@ -1,78 +1,181 @@
 import sys
 import time
-from threading import Thread, Event
-
+import numpy as np
 import cefpyco
 
 NAME0='ccnx:/test/1M.dummy'
 NAME1='ccnx:/test/10M.dummy'
 NAME2='ccnx:/test/100M.dummy'
+NAME3='ccnx:/test/1G.dummy'
 
 
-event = Event()
+MAX_INTEREST = 1000
+BLOCK_SIZE = 30
 
-class Cefore(object):
-    def __init__(self, name):
+class CefAppRunningInfo(object):
+    def __init__(self, name, count):
         self.name = name
-        self.handle = cefpyco.CefpycoHandle()
-        self.handle.begin()
-        self.bitfield = []
-        self.data_size = 0
-        self.active_state = True
+        self.count = count
+        self.n_finished = 0
+        self.finished_flag = np.zeros(count)
+        self.timeout_count = 0
 
-        self.t_listener = Thread(target=self.listener)
+class MetaInfoNotResolvedError(Exception):
+    pass
 
-        self.t_listener.start()
+class CefApp(object):
+    def __init__(self, cef_handle, target_name, action_name, timeout_limit):
+        self.cef_handle = cef_handle
+        self.target_name = target_name
+        self.action_name = action_name
+        self.timeout_limit = timeout_limit
 
-    def display_progress(self):
-        count = self.bitfield.count(True)
-        print("[{}/{}]".format(count, len(self.bitfield)))
-
-    def listener(self):
-        print("listener starting")
-        while self.active_state:
-            info = self.handle.receive()
-
-            if not info.is_succeeded:
-                continue
-
-            if info.is_data:
-                if not self.bitfield:
-                    self.bitfield = [False for _ in range(info.end_chunk_num)]
-                    self.bitfield[info.chunk_num] = True
-                    self.data_size += len(info.payload)
-                    event.set()
-                    continue
-
-                if self.bitfield[info.chunk_num] is True:
-                    continue
-
-                self.bitfield[info.chunk_num] = True
-                self.data_size += len(info.payload)
-
-            self.display_progress()
-
-    def run(self):
+    def run(self, name, count=0):
         start_time = time.time()
-        self.handle.send_interest(self.name, 0)
-        event.wait()
-        print("get first chunk")
-        while False in self.bitfield:
-            send_interest_num = 0
-            for chunk_num in range(len(self.bitfield)):
-                if self.bitfield[chunk_num]:
-                    continue
-                else:
-                    send_interest_num += 1
-                    self.handle.send_interest(self.name, chunk_num)
-                    if send_interest_num >= 32:
-                        send_interest_num = 0
-                        continue
+        if count <= 0:
+            count = self.resolve_count(name)
+            if not count:
+                errmsg = "{0}/meta is not resolved.".format(name)
+                raise MetaInfoNotResolvedError(errmsg)
 
-        self.active_state = False
-        end_time = time.time() - start_time
-        print("time:{}[sec] data size: {}[byte]".format(end_time,
-                                                        self.data_size))
+        info = CefAppRunningInfo(name, count)
+        self.on_start(info)
+        while info.timeout_count < self.timeout_limit and self.continues_to_run(info):
+            packet = self.cef_handle.receive()
+            if packet.is_failed:
+                info.timeout_count += 1
+                self.on_rcv_failed(info)
+            elif packet.name == info.name:
+                self.on_rcv_succeeded(info, packet)
+        if info.n_finished == info.count:
+            print("time:".format(time.time() - start_time))
+            self.show_result_on_success(info)
+        else:
+            self.show_result_on_failure(info)
+
+    def resolve_count(self, name):
+        raise NotImplementedError()
+
+    def on_start(self, info):
+        pass
+
+    def on_rcv_failed(self, info):
+        pass
+
+    def on_rcv_succeeded(self, info, packet):
+        pass
+
+    def on_rcv_meta(self, info, packet):
+        pass
+
+    def continues_to_run(self, info):
+        raise NotImplementedError()
+
+    def show_result_on_success(self, info):
+        pass
+
+    def show_result_on_failure(self, info):
+        buf = ""
+        last = -2
+        seq = False
+        miss_count = 0
+        for i in range(info.count):
+            if info.finished_flag[i]:
+                continue
+            miss_count += 1
+            if last == i - 1:
+                if not seq:
+                    buf += "--"
+                seq = True
+            else:
+                if seq:
+                    buf += "#{0}, #{1}".format(last, i)
+                else:
+                    sep = ", " if last >= 0 else ""
+                    buf += "{0}#{1}".format(sep, i)
+                seq = False
+            last = i
+        if seq:
+            buf += "#{0}".format(last)
+
+
+class CefAppConsumer(CefApp):
+    def __init__(self, cef_handle,
+                 pipeline=1000, timeout_limit=10, data_store=True):
+        self.rcv_tail_index = None
+        self.req_tail_index = None
+        self.cob_list = None
+        self.req_flag = None
+        self.pipeline = pipeline
+        self.data_store = data_store
+        self.data_size = 0
+        super(CefAppConsumer, self).__init__(
+            cef_handle, "Data", "receive", timeout_limit)
+
+    @property
+    def data(self):
+        return "".join(self.cob_list) if self.data_store else None
+
+    def resolve_count(self, name):
+        for i in range(self.timeout_limit):
+            self.cef_handle.send_interest(name, 0)
+            packet = self.cef_handle.receive()
+            if packet.is_failed: continue
+            if packet.is_interest_return:
+                continue
+            if packet.name != name: continue
+            return int(packet.end_chunk_num)
+        return None
+
+    def on_start(self, info):
+        self.req_flag = np.zeros(info.count)
+        if self.data_store: self.cob_list = [""] * info.count
+        self.rcv_tail_index = 0
+        self.req_tail_index = 0
+        self.send_interests_with_pipeline(info)
+
+    def show_result_on_success(self, info):
+        print("data size: {}".format(self.data_size))
+
+    def continues_to_run(self, info):
+        return info.n_finished < info.count
+
+    def on_rcv_failed(self, info):
+        self.reset_req_status(info)
+        self.send_interests_with_pipeline(info)
+
+    def on_rcv_succeeded(self, info, packet):
+        c = packet.chunk_num
+        if info.finished_flag[c]: return
+        if self.data_store: self.cob_list[c] = packet.payload
+        self.data_size += packet.payload_len
+        # print(self.data_size)
+        info.finished_flag[c] = 1
+        info.n_finished += 1
+        self.send_next_interest(info)
+
+    def reset_req_status(self, info):
+        self.req_flag = np.zeros(info.count)
+        self.req_tail_index = self.rcv_tail_index
+        while self.req_tail_index < info.count and info.finished_flag[self.req_tail_index]:
+            self.req_tail_index += 1
+
+    def send_interests_with_pipeline(self, info):
+        to_index = min(info.count, self.req_tail_index + self.pipeline)
+        for i in range(self.req_tail_index, to_index):
+            if info.finished_flag[i]: continue
+            self.cef_handle.send_interest(info.name, i)
+            self.req_flag[i] = 1
+
+    def send_next_interest(self, info):
+        while self.rcv_tail_index < info.count and info.finished_flag[self.rcv_tail_index]:
+            self.rcv_tail_index += 1
+        while (self.req_tail_index < info.count and
+               (info.finished_flag[self.req_tail_index] or self.req_flag[self.req_tail_index])):
+            self.req_tail_index += 1
+        if self.req_tail_index < info.count:
+            self.cef_handle.send_interest(info.name, self.req_tail_index)
+            self.req_flag[self.req_tail_index] = 1
 
 
 def main():
@@ -88,11 +191,25 @@ def main():
     elif args[1] == '2':
         name = NAME2
         full_data_size = 1024 * 1024 * 100
+    elif args[1] == '3':
+        name = NAME3
+        full_data_size = 1024 * 1024 * 1024
     else:
         exit(1)
 
-    cef = Cefore(name)
-    cef.run()
+    with cefpyco.create_handle() as h:
+        app = CefAppConsumer(
+            h
+        )
+        try:
+            start_time = time.time()
+            app.run(name)
+            end_time = time.time() - start_time
+            print("time: {}".format(end_time))
+        except MetaInfoNotResolvedError as e:
+            return
+
+
 
 if __name__ == '__main__':
     main()

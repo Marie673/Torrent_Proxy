@@ -3,6 +3,8 @@ import torrent
 import pieces_manager
 from block import State
 import cefore_manager
+import cefpyco
+import cefapp
 
 import os
 import sys
@@ -10,9 +12,9 @@ import time
 import logging
 
 
-UUID = 'client0'
-INIT_MY_NAME = 'ccnx:/' + UUID
+
 PROTOCOL = 'ccnx:/BitTorrent'
+MAX_PIECE = 10
 
 
 class Run(object):
@@ -23,10 +25,10 @@ class Run(object):
         self.torrent = torrent.Torrent().load_from_path(torrent_file_path)
         self.info_hash = str(self.torrent.info_hash.hex())
         self.pieces_manager = pieces_manager.PiecesManager(self.torrent)
-        self.cef_manager = cefore_manager.CefManager(self.torrent)
-        self.handle = self.cef_manager.cef.handle
 
-        self.cef_manager.start()
+        self.handle = cefpyco.CefpycoHandle()
+        self.handle.begin()
+
         logging.info('Cefore Manager Started')
         logging.info("PiecesManager Started")
 
@@ -42,19 +44,18 @@ class Run(object):
 
                 self.pieces_manager.pieces[index].update_block_status()
 
-                data = self.pieces_manager.pieces[index].get_empty_block()
-                if not data:
-                    continue
+                self.pieces_manager.pieces[index].update_block_status()
 
-                interest = '/'.join([PROTOCOL, self.info_hash, 'request', str(index)])
-                # logging.debug('send Interest: {}'.format(interest))
-                self.handle.send_interest(interest)
+                interest = '/'.join([PROTOCOL, self.info_hash, str(index)])
+                app = cefapp.CefAppConsumer(self.handle)
+                state = app.run(interest)
+                self.display_progression()
 
             if self.pieces_manager.all_pieces_completed():
                 break
             self.display_progression()
 
-            time.sleep(3)
+            #time.sleep(3)
 
         logging.info("File(s) downloaded successfully.")
         end_time = time.time() - start_time
@@ -83,7 +84,6 @@ class Run(object):
         self.last_log_line = current_log_line
 
     def _exit_threads(self):
-        self.cef_manager.is_active = False
         exit(0)
 
 

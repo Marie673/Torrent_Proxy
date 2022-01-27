@@ -6,9 +6,8 @@ from threading import Thread
 
 
 class CefManager(object):
-    def __init__(self, jikken):
-        self.cef = cefore_handle.Cef(jikken)
-
+    def __init__(self):
+        self.cef = cefore_handle.Cef()
 
         self.is_active = True
 
@@ -25,14 +24,7 @@ class CefManager(object):
         if info.is_interest:
             # logging.debug('Received Interest')
 
-            if prefix[3] == 'request' or prefix[3] == '6':
-                self.cef.handle_request(info)
-            if prefix[3] == 'torrent':
-                self.cef.handle_torrent(info)
+            self.cef.handle_interest(info)
 
         if info.is_data:
             logging.debug('Received Data')
-
-            if prefix[1] != 'BitTorrent':
-                self.cef.is_torrent(info)
-                return

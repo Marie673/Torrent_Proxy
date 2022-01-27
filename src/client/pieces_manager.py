@@ -7,6 +7,8 @@ class PiecesManager(object):
     def __init__(self, torrent):
         self.torrent = torrent
         self.number_of_pieces = int(torrent.number_of_pieces)
+
+        # 必要？
         self.bitfield = bitstring.BitArray(self.number_of_pieces)
         self.pieces = self._generate_pieces()
         self.files = self._load_files()

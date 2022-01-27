@@ -12,6 +12,7 @@ class Piece(object):
         self.piece_index: int = piece_index
         self.piece_size: int = piece_size
         self.piece_hash: str = piece_hash
+
         self.is_full: bool = False
         self.files = []
         self.raw_data: bytes = b''
@@ -27,10 +28,10 @@ class Piece(object):
 
     def set_block(self, offset, data):
         index = int(offset / BLOCK_SIZE)
-
         if not self.is_full and not self.blocks[index].state == State.FULL:
             self.blocks[index].data = data
             self.blocks[index].state = State.FULL
+
 
     def get_block(self, block_offset, block_length):
         return self.raw_data[block_offset:block_length]
