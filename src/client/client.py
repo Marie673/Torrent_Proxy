@@ -34,11 +34,10 @@ class Run(object):
             # logging.debug('start request pieces')
             for index in range(0, self.torrent.number_of_pieces, MAX_PIECE):
                 for i in (index, MAX_PIECE):
-                    interest = '/'.join([PROTOCOL, self.info_hash, str(index)])
-                    app = cefapp.CefAppConsumer(interest, self.pieces_manager.pieces[index])
+                    interest = '/'.join([PROTOCOL, self.info_hash, str(i)])
+                    app = cefapp.CefAppConsumer(interest, self.pieces_manager.pieces[i])
                     pool.apply_async(app.run)
                 pool.close()
-                pool.join()
 
         logging.info("File(s) downloaded successfully.")
         end_time = time.time() - start_time
