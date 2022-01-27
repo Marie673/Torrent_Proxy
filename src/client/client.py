@@ -32,9 +32,7 @@ class Run(object):
 
     def start(self):
         start_time = time.time()
-        default_port = 9896
         # logging.debug('start request pieces')
-        process = {}
         for index in range(self.torrent.number_of_pieces):
             port = self.get_empty_port()
             if port is None:
@@ -45,7 +43,7 @@ class Run(object):
             app = cefapp.CefAppConsumer(interest, self.pieces_manager.pieces[index], port)
             runner = Process(target=app.run)
             runner.start()
-            process[port] = runner
+            self.process[port] = runner
 
         logging.info("File(s) downloaded successfully.")
         end_time = time.time() - start_time
@@ -83,6 +81,7 @@ class Run(object):
                 if process.is_alive():
                     continue
                 else:
+                    del self.process[port]
                     return port
             time.sleep(0.1)
 
