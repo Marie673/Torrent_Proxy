@@ -8,7 +8,7 @@ import os
 import sys
 import time
 import logging
-
+from multiprocessing import Process
 
 PROTOCOL = 'ccnx:/BitTorrent'
 MAX_PIECE = 10
