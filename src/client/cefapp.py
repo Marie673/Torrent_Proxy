@@ -75,7 +75,7 @@ class CefAppConsumer:
             pub.sendMessage('PiecesManager.Piece',
                             piece=(packet.chunk_num, 0, packet.payload))
 
-            return packet.payload, int(packet.end_chunk_num)
+            return packet.payload, int(packet.end_chunk_num)-1
 
     def on_start(self, info):
         self.req_flag = np.zeros(info.end_chunk_num)
@@ -86,7 +86,6 @@ class CefAppConsumer:
 
     @staticmethod
     def continues_to_run(info):
-        print("{} {}".format(info.num_of_finished, info.end_chunk_num))
         return info.num_of_finished < info.end_chunk_num
 
     def on_rcv_failed(self, info):
