@@ -60,6 +60,7 @@ class Run(object):
                     app = cefapp.CefAppConsumer(self.handle, interest, self.semaphore)
                     self.thread[index] = app
                     app.start()
+                    print(interest)
 
                 if self.pieces_manager.all_pieces_completed():
                     break
