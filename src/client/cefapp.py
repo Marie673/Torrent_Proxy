@@ -75,7 +75,8 @@ class CefAppConsumer:
 
     @staticmethod
     def continues_to_run(info):
-        return info.num_of_finished < info.end_chunk_num
+        print(info.finished_flag)
+        return 0 in info.finished_flag
 
     def on_rcv_failed(self, info):
         self.reset_req_status(info)
@@ -83,7 +84,6 @@ class CefAppConsumer:
 
     def on_rcv_succeeded(self, info, packet):
         piece_index = int(packet.name.split('/')[-1])
-        print(piece_index)
         chunk_num = packet.chunk_num
         if info.finished_flag[chunk_num]: return
         pub.sendMessage('PiecesManager.Piece',
