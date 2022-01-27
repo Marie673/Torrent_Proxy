@@ -83,7 +83,7 @@ class Run(object):
                     continue
                 else:
                     self.process[port].join()
-                    self.process[port].close()
+                    # self.process[port].close()
                     del self.process[port]
                     return port
             time.sleep(0.1)
