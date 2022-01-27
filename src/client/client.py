@@ -50,7 +50,6 @@ class Run(object):
 
         for runner in process:
             runner.join()
-            runner.close()
 
         logging.info("File(s) downloaded successfully.")
         end_time = time.time() - start_time
