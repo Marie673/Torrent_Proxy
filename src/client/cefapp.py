@@ -91,6 +91,7 @@ class CefAppConsumer:
     def on_rcv_succeeded(self, info, packet):
         chunk_num = packet.chunk_num
         if info.finished_flag[chunk_num]: return
+        print("test: {}".format(packet.chunk_num))
         pub.sendMessage('PiecesManager.Piece',
                         piece=(chunk_num, packet.payload_len * chunk_num, packet.payload))
         info.finished_flag[chunk_num] = 1
