@@ -51,11 +51,8 @@ class Run(object):
                 interest = '/'.join([PROTOCOL, self.info_hash, str(index)])
                 app = cefapp.CefAppConsumer(self.handle)
                 state = app.run(interest)
+                print("test")
                 self.display_progression()
-                if state:
-                    pass
-                else:
-                    continue
                 """
                 if not self.req_piece_flg[index]:
                     interest = '/'.join([PROTOCOL, self.info_hash, str(index)])
@@ -64,8 +61,6 @@ class Run(object):
                     thread.start()
                     self.req_piece_flg[index] = True
                 """
-
-                # logging.debug('send Interest: {}'.format(interest))
 
             if self.pieces_manager.all_pieces_completed():
                 break
