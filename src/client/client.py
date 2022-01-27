@@ -37,9 +37,11 @@ class Run(object):
             interests = []
             pieces = []
             for index in range(f_index, MAX_PROCESS):
+                print(index)
                 interest = '/'.join([PROTOCOL, self.info_hash, str(index+0)])
                 interests.append(interest)
                 pieces.append(self.pieces_manager.pieces[index])
+            time.sleep(1)
 
             app = cefapp.CefAppConsumer(interests, pieces)
             runner = Process(target=app.run)
