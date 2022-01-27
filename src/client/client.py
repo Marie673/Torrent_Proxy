@@ -26,6 +26,8 @@ class Run(object):
         self.handle = cefpyco.CefpycoHandle()
         self.handle.begin()
 
+        self.req_flg = []
+
         logging.info('Cefore Manager Started')
         logging.info("PiecesManager Started")
 
@@ -44,8 +46,11 @@ class Run(object):
                 # あらかじめピースを要求して取得しておいてもらう
                 to_index = min(self.torrent.number_of_pieces, index+MAX_PIECE)
                 for i in range(index+1, to_index+1):
+                    if i in self.req_flg:
+                        continue
                     sub_interest = '/'.join([PROTOCOL, self.info_hash, str(index)])
                     self.handle.send_interest(sub_interest, 0)
+                    self.req_flg.append(i)
                 # 1つの完全なピース取得開始
                 app.run()
                 self.display_progression()
