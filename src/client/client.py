@@ -46,6 +46,7 @@ class Run(object):
                 pool.apply_async(app.run)
                 self.req_flg[index] = 1
 
+            pool.join()
             if self.pieces_manager.all_pieces_completed():
                 break
             self.display_progression()

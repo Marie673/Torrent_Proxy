@@ -64,7 +64,6 @@ class CefAppConsumer:
                 continue
             self.data_size += packet.payload_len
             piece_index = int(packet.name.split('/')[-1])
-            print("test")
             pub.sendMessage('PiecesManager.Piece',
                             piece=(piece_index, 0, packet.payload))
 
