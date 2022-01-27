@@ -40,35 +40,8 @@ class Run(object):
             runner0 = Process(target=app.run)
             runner0.start()
 
-            interest = '/'.join([PROTOCOL, self.info_hash, str(index + 1)])
-            app = cefapp.CefAppConsumer(interest, self.pieces_manager.pieces[index + 1],
-                                        self.default_port+1)
-            runner1 = Process(target=app.run)
-            runner1.start()
-
-            interest = '/'.join([PROTOCOL, self.info_hash, str(index + 2)])
-            app = cefapp.CefAppConsumer(interest, self.pieces_manager.pieces[index + 2],
-                                        self.default_port+2)
-            runner2 = Process(target=app.run)
-            runner2.start()
-
-            interest = '/'.join([PROTOCOL, self.info_hash, str(index + 3)])
-            app = cefapp.CefAppConsumer(interest, self.pieces_manager.pieces[index + 3],
-                                        self.default_port+3)
-            runner3 = Process(target=app.run)
-            runner3.start()
-
-            interest = '/'.join([PROTOCOL, self.info_hash, str(index + 4)])
-            app = cefapp.CefAppConsumer(interest, self.pieces_manager.pieces[index + 4],
-                                        self.default_port+4)
-            runner4 = Process(target=app.run)
-            runner4.start()
-
             runner0.join()
-            runner1.join()
-            runner2.join()
-            runner3.join()
-            runner4.join()
+
 
         logging.info("File(s) downloaded successfully.")
         end_time = time.time() - start_time
