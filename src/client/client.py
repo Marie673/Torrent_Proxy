@@ -1,8 +1,6 @@
 #!/usr/bin/env python3.9
 import torrent
 import pieces_manager
-from block import State
-import cefore_manager
 import cefpyco
 import cefapp
 
@@ -10,8 +8,6 @@ import os
 import sys
 import time
 import logging
-from threading import Thread, BoundedSemaphore
-import numpy
 
 
 PROTOCOL = 'ccnx:/BitTorrent'
