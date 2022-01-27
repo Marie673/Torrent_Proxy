@@ -41,6 +41,8 @@ class Run(object):
     def listener(self):
         while True:
             packet  = self.handle.receive()
+            if packet.is_failed:
+                continue
             index = int(packet.name.split('/')[-1])
 
             pipe = self.pipes[index]
