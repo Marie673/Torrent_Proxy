@@ -32,6 +32,7 @@ class Piece(object):
         if not self.is_full and not self.blocks[index].state == State.FULL:
             self.blocks[index].data = data
             self.blocks[index].state = State.FULL
+        print(self.blocks)
 
     def get_block(self, block_offset, block_length):
         return self.raw_data[block_offset:block_length]

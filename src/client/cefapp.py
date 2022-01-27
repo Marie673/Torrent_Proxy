@@ -84,7 +84,7 @@ class CefAppConsumer:
 
     def on_rcv_succeeded(self, info, packet):
         piece_index = int(packet.name.split('/')[-1])
-        print(piece_index)
+
         chunk_num = packet.chunk_num
         if info.finished_flag[chunk_num]: return
         pub.sendMessage('PiecesManager.Piece',
