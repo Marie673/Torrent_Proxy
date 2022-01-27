@@ -33,18 +33,42 @@ class Run(object):
     def start(self):
         start_time = time.time()
         # logging.debug('start request pieces')
-        for index in range(self.torrent.number_of_pieces):
-            port = self.get_empty_port()
-            if port is None:
-                # all port is used
-                port = self.wait_empty_port()
+        for index in range(0,self.torrent.number_of_pieces, 5):
+            interest = '/'.join([PROTOCOL, self.info_hash, str(index+0)])
+            app = cefapp.CefAppConsumer(interest, self.pieces_manager.pieces[index+0],
+                                        self.default_port+0)
+            runner0 = Process(target=app.run)
+            runner0.start()
 
-            interest = '/'.join([PROTOCOL, self.info_hash, str(index)])
-            print("{}:{}".format(port, interest))
-            app = cefapp.CefAppConsumer(interest, self.pieces_manager.pieces[index], port)
-            runner = Process(target=app.run)
-            runner.start()
-            self.process[port] = runner
+            interest = '/'.join([PROTOCOL, self.info_hash, str(index + 1)])
+            app = cefapp.CefAppConsumer(interest, self.pieces_manager.pieces[index + 1],
+                                        self.default_port + 1)
+            runner1 = Process(target=app.run)
+            runner1.start()
+
+            interest = '/'.join([PROTOCOL, self.info_hash, str(index + 2)])
+            app = cefapp.CefAppConsumer(interest, self.pieces_manager.pieces[index + 2],
+                                        self.default_port + 2)
+            runner2 = Process(target=app.run)
+            runner2.start()
+
+            interest = '/'.join([PROTOCOL, self.info_hash, str(index + 3)])
+            app = cefapp.CefAppConsumer(interest, self.pieces_manager.pieces[index + 3],
+                                        self.default_port + 3)
+            runner3 = Process(target=app.run)
+            runner3.start()
+
+            interest = '/'.join([PROTOCOL, self.info_hash, str(index + 4)])
+            app = cefapp.CefAppConsumer(interest, self.pieces_manager.pieces[index + 4],
+                                        self.default_port + 4)
+            runner4 = Process(target=app.run)
+            runner4.start()
+
+            runner0.join()
+            runner1.join()
+            runner2.join()
+            runner3.join()
+            runner4.join()
 
         logging.info("File(s) downloaded successfully.")
         end_time = time.time() - start_time
