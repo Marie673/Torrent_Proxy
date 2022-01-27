@@ -7,11 +7,11 @@ import os
 import sys
 import time
 import logging
-from multiprocessing import Pool, Process
+from multiprocessing import Process
 import numpy
 
 PROTOCOL = 'ccnx:/BitTorrent'
-MAX_PIECE = 1
+MAX_PIECE = 5
 
 
 class Run(object):
@@ -31,19 +31,21 @@ class Run(object):
     default_port = 9896
     def start(self):
         start_time = time.time()
-        with Pool(MAX_PIECE) as pool:
-            # logging.debug('start request pieces')
-            for index in range(0, self.torrent.number_of_pieces, MAX_PIECE):
-                default_port = 9896
-                for i in range(index, MAX_PIECE):
-                    interest = '/'.join([PROTOCOL, self.info_hash, str(i)])
-                    app = cefapp.CefAppConsumer(interest, self.pieces_manager.pieces[i],default_port+i)
-                    p = Process(target=app.run)
-                    p.start()
-                    p.join()
-                    pool.apply_async(app.run)
-                pool.close()
-                pool.join()
+
+        # logging.debug('start request pieces')
+        for index in range(0, self.torrent.number_of_pieces, MAX_PIECE):
+            default_port = 9896
+            process = []
+            for i in range(index, MAX_PIECE):
+                interest = '/'.join([PROTOCOL, self.info_hash, str(i)])
+                app = cefapp.CefAppConsumer(interest, self.pieces_manager.pieces[i],default_port+i)
+                p = Process(target=app.run)
+                p.start()
+                process.append(p)
+            for i in range(len(process)):
+                process[i].join()
+                del process[i]
+
 
         logging.info("File(s) downloaded successfully.")
         end_time = time.time() - start_time
