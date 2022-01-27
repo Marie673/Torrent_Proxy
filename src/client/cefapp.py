@@ -18,7 +18,7 @@ class CefAppRunningInfo(object):
 
 class CefAppConsumer:
     def __init__(self, cef_handle,
-                 pipeline=1000, timeout_limit=10):
+                 pipeline=1000, timeout_limit=1):
         self.cef_handle = cef_handle
         self.timeout_limit = timeout_limit
         self.rcv_tail_index = None
