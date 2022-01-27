@@ -46,6 +46,7 @@ class Run(object):
                     continue
 
                 interest = '/'.join([PROTOCOL, self.info_hash, str(index)])
+                print(interest)
                 app = cefapp.CefAppConsumer(self.handle, interest, self.semaphore)
                 app.start()
 
