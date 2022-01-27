@@ -92,7 +92,6 @@ class CefAppConsumer:
         piece_index = int(packet.name.split('/')[-1])
         chunk_num = packet.chunk_num
         if info.finished_flag[chunk_num]: return
-        print("test: {}".format(packet.chunk_num))
         pub.sendMessage('PiecesManager.Piece',
                         piece=(piece_index, packet.payload_len * chunk_num, packet.payload))
         info.finished_flag[chunk_num] = 1
