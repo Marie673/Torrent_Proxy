@@ -82,8 +82,8 @@ class Run(object):
                 if process.is_alive():
                     continue
                 else:
-                    self.process[port].close()
                     self.process[port].join()
+                    self.process[port].close()
                     del self.process[port]
                     return port
             time.sleep(0.1)
