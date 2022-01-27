@@ -10,8 +10,7 @@ import os
 import sys
 import time
 import logging
-from threading import Thread
-from concurrent.futures import ThreadPoolExecutor
+from threading import Thread, BoundedSemaphore
 import numpy
 
 
@@ -31,7 +30,6 @@ class Run(object):
         self.handle = cefpyco.CefpycoHandle()
         self.handle.begin()
 
-        self.thread = ThreadPoolExecutor(max_workers=MAX_PIECE)
         self.req_piece_flg = numpy.zeros(self.torrent.number_of_pieces)
         self.downloading_piece_num = 0
 
@@ -50,11 +48,18 @@ class Run(object):
 
                 self.pieces_manager.pieces[index].update_block_status()
 
+                interest = '/'.join([PROTOCOL, self.info_hash, str(index)])
+                app = cefapp.CefAppConsumer(self.handle)
+                app.run(interest)
+                self.display_progression()
+                """
                 if not self.req_piece_flg[index]:
                     interest = '/'.join([PROTOCOL, self.info_hash, str(index)])
                     cef = cefapp.CefAppConsumer(self.handle)
-                    self.thread.submit(cef.run, interest)
+                    thread = Thread(target=cef.run, args=interest)
+                    thread.start()
                     self.req_piece_flg[index] = True
+                """
 
                 # logging.debug('send Interest: {}'.format(interest))
 
@@ -62,7 +67,7 @@ class Run(object):
                 break
             self.display_progression()
 
-            time.sleep(3)
+            #time.sleep(3)
 
         logging.info("File(s) downloaded successfully.")
         end_time = time.time() - start_time
