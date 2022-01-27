@@ -93,7 +93,6 @@ class Run(object):
         self.last_log_line = current_log_line
 
     def _exit_threads(self):
-        self.cef_manager.is_active = False
         exit(0)
 
 
