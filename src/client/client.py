@@ -54,6 +54,8 @@ class Run(object):
                         else:
                             del self.thread[index]
 
+                    if len(self.thread) > MAX_PIECE:
+                        continue
                     interest = '/'.join([PROTOCOL, self.info_hash, str(index)])
                     app = cefapp.CefAppConsumer(self.handle, interest, self.semaphore)
                     self.thread[index] = app
