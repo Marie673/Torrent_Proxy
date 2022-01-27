@@ -1,5 +1,7 @@
 import ctypes
 import logging
+import time
+
 import numpy as np
 from pubsub import pub
 from threading import Thread
@@ -33,6 +35,7 @@ class CefAppConsumer(Thread):
         self.pipeline = pipeline
 
         self.active = True
+        self.start_time = time.time()
         # test
         self.data_size = 0
 

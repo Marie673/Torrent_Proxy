@@ -48,7 +48,11 @@ class Run(object):
                         continue
 
                     if index in self.thread:
-                        continue
+                        thread: Thread = self.thread[index]
+                        if thread.isAlive():
+                            continue
+                        else:
+                            del self.thread[index]
 
                     interest = '/'.join([PROTOCOL, self.info_hash, str(index)])
                     app = cefapp.CefAppConsumer(self.handle, interest, self.semaphore)
@@ -69,6 +73,8 @@ class Run(object):
             self._exit_threads()
 
         except KeyboardInterrupt:
+            print("Keyboard Interrupt")
+            print("Stopping threads")
             for index in self.thread:
                 self.thread[index].active = False
                 self.thread[index].join()
