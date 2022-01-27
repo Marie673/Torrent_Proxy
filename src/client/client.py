@@ -49,7 +49,7 @@ class Run(object):
 
                     if index in self.thread:
                         thread: Thread = self.thread[index]
-                        if thread.isAlive():
+                        if thread.is_alive():
                             continue
                         else:
                             del self.thread[index]
