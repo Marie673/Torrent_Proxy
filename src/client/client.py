@@ -39,9 +39,9 @@ class Run(object):
                                         self.default_port)
             runner0 = Process(target=app.run)
             runner0.start()
-
-            runner0.join()
             runner0.close()
+            runner0.join()
+
 
 
         logging.info("File(s) downloaded successfully.")
