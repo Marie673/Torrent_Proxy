@@ -15,7 +15,7 @@ import numpy
 
 
 PROTOCOL = 'ccnx:/BitTorrent'
-MAX_PIECE = 10
+MAX_PIECE = 3
 
 
 class Run(object):
@@ -31,7 +31,7 @@ class Run(object):
         self.handle.begin()
 
         self.thread = {}
-        self.semaphore = BoundedSemaphore(30)
+        self.semaphore = BoundedSemaphore(MAX_PIECE)
 
         logging.info('Cefore Manager Started')
         logging.info("PiecesManager Started")
