@@ -59,6 +59,7 @@ class CefAppConsumer:
     def get_first_chunk(self, name) -> (bytes, int):
         while True:
             self.cef_handle.send_interest(name, 0)
+            print(name)
             packet = self.cef_handle.receive()
             if packet.is_failed:
                 continue
