@@ -54,7 +54,7 @@ class CefAppConsumer(Process):
             return False
 
     def on_start(self):
-        self.req_flag = np.zeros()
+        self.req_flag = np.zeros(self.all_block_count)
         self.rcv_tail_index = 0
         self.req_tail_index = 0
         self.send_interests_with_pipeline()
