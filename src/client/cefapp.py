@@ -90,6 +90,5 @@ class CefAppConsumer(Process):
 
         if packet.chunk_num == 0:
             self.get_follow_pieces(piece_index)
-        else:
-            self.pieces_manager.pieces[piece_index].update_block_status()
+        elif packet.chunk_num == packet.end_chunk_num:
             self.get_first_chunks()
