@@ -98,6 +98,10 @@ class CefAppConsumer(Process):
     def on_rcv_succeeded(self, packet):
         piece_index = int(packet.name.split('/')[-1])
         chunk = packet.chunk_num
+
+        piece = (piece_index, chunk*CHUNK_SIZE, packet.payload)
+        self.pieces_manager.receive_block_piece(piece)
+
         if chunk == 0:
             self.get_follow_pieces(piece_index)
         else:
