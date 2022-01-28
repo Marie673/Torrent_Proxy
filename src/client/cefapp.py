@@ -58,39 +58,51 @@ class CefAppConsumer(Process):
         count = 0
         for piece_index in range(self.number_of_pieces):
             piece = self.pieces[piece_index]
+
+            # have first chunk
             if piece.is_full or piece.blocks[0].state == State.FULL:
                 continue
-
-            if count > MAX_PIECE:
-                return
 
             interest = self.create_interest(piece_index)
             self.cef_handle.send_interest(interest, 0)
             count += 1
+
+            if count > MAX_PIECE:
+                return
+
+    def get_follow_pieces(self, piece_index):
+        piece = self.pieces[piece_index]
+        for chunk in range(len(piece.blocks)):
+            if piece.blocks[chunk].state == State.FULL:
+                continue
+            interest = self.create_interest(piece_index)
+            self.cef_handle.send_interest(interest, chunk)
 
     def on_rcv_failed(self):
         for piece_index in range(self.number_of_pieces):
             piece = self.pieces[piece_index]
             if piece.is_full:
                 continue
-            for chunk in range(self.chunk_count):
-                block = piece.blocks[chunk]
-                if block.state == State.FULL:
-                    continue
-                else:
-                    interest = self.create_interest(piece_index)
-                    self.cef_handle.send_interest(interest, chunk)
+
+            # have first chunk
+            # proxy have a piece
+            if piece.blocks[0].state == State.FULL:
+                interest = self.create_interest(piece_index)
+                self.get_follow_pieces(piece_index)
+
+            # send first chunk interest
+            interest = self.create_interest(piece_index)
+            self.cef_handle.send_interest(piece_index, 0)
+
 
     def on_rcv_succeeded(self, packet):
         piece_index = packet.name.split('/')[-1]
-        chunk_num = packet.chunk_num
-        piece = (piece_index, chunk_num*CHUNK_SIZE, packet.payload)
-        self.pieces_manager.receive_block_piece(piece)
-
-        if chunk_num != packet.end_chunk_num:
-            self.cef_handle.send_interest(packet.name, chunk_num + 1)
+        chunk = packet.chunk_num
+        if chunk == 0:
+            self.get_follow_pieces(piece_index)
         else:
-            self.get_first_chunk()
+            if self.pieces[piece_index].is_full:
+                self.get_first_chunk()
 
     def display_progression(self):
 
