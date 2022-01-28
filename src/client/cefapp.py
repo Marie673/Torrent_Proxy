@@ -66,7 +66,6 @@ class CefAppConsumer(Process):
             piece.update_block_status()
 
             interest = '/'.join([self.name, str(index)])
-            print(interest)
             self.cef_handle.send_interest(interest, 0)
             return
 
