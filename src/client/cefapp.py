@@ -77,8 +77,7 @@ class CefAppConsumer(Process):
         return self.pieces_manager.number_of_pieces != self.pieces_manager.complete_pieces
 
     def on_rcv_failed(self):
-        pass
-        # self.get_first_chunks()
+        self.get_first_chunks()
 
     def on_rcv_succeeded(self, packet):
         # logging.debug("{} Chunk={}".format(packet.name, packet.chunk_num))
