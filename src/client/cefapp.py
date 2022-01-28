@@ -67,6 +67,7 @@ class CefAppConsumer(Process):
             interest = '/'.join([self.name, str(index)])
             for chunk in range(self.chunk_count):
                 self.cef_handle.send_interest(interest, chunk)
+                print("{} Chunk={}".format(interest, chunk))
             return
 
     def continues_to_run(self):
