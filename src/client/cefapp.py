@@ -22,15 +22,17 @@ class CefAppConsumer(Process):
         self.pieces_manager: PiecesManager = pieces_manager
         self.name: [str] = '/'.join([PROTOCOL,
                                      self.pieces_manager.torrent.info_hash_str])
-
-        self.chunk_count = self.pieces_manager.torrent.piece_length // CHUNK_SIZE
+        self.number_of_pieces = self.pieces_manager.number_of_pieces
+        self.piece_length = self.pieces_manager.torrent.piece_length
+        self.chunk_count = self.piece_length // CHUNK_SIZE
+        self.all_block_count = self.number_of_pieces * self.chunk_count
 
         self.timeout_count = 0
         self.timeout_limit = timeout_limit
 
         self.rcv_tail_index = None
         self.req_tail_index = None
-        self.req_flag = None
+        self.req_flag = np.zeros(self.all_block_count)
         self.pipeline = pipeline
 
         # test
@@ -38,7 +40,6 @@ class CefAppConsumer(Process):
 
     def run(self):
         self.on_start()
-
         while self.timeout_count < self.timeout_limit and self.continues_to_run():
             packet = self.cef_handle.receive()
             if packet.is_failed:
@@ -53,31 +54,38 @@ class CefAppConsumer(Process):
             return False
 
     def on_start(self):
-        for index in range(MAX_PIECE):
+        self.req_flag = np.zeros()
+        self.rcv_tail_index = 0
+        self.req_tail_index = 0
+        self.send_interests_with_pipeline()
+
+    def send_interests_with_pipeline(self):
+        to_index = min(self.all_block_count, self.req_tail_index + self.pipeline)
+        for i in range(self.req_tail_index, to_index):
+            index = i // self.piece_length
+            chunk = (i % self.piece_length) // CHUNK_SIZE
+            if self.pieces_manager.pieces[index].is_full: continue
             interest = '/'.join([self.name, str(index)])
-            self.cef_handle.send_interest(interest, 0)
+            self.cef_handle.send_interest(interest, chunk)
+            self.req_flag[i] = 1
 
-    def get_first_chunks(self):
-        for piece in self.pieces_manager.pieces:
-            index = piece.piece_index
-            if piece.is_full:
-                continue
-            piece.update_block_status()
-
+    def send_next_interest(self):
+        while self.req_tail_index < self.all_block_count and self.pieces_manager.bitfield[self.rcv_tail_index]:
+            self.req_tail_index += 1
+        while (self.req_tail_index < self.all_block_count and
+                self.pieces_manager.bitfield[self.req_tail_index] or self.req_flag[self.req_tail_index]):
+            self.req_tail_index += 1
+        if self.req_tail_index < self.all_block_count:
+            index = self.req_tail_index //self.piece_length
+            chunk = (self.req_tail_index % self.piece_length) // CHUNK_SIZE
             interest = '/'.join([self.name, str(index)])
-            self.cef_handle.send_interest(interest, 0)
-            return
-
-    def get_follow_pieces(self, piece_index):
-        for chunk in range(1, self.chunk_count):
-            interest = '/'.join([self.name, str(piece_index)])
             self.cef_handle.send_interest(interest, chunk)
 
     def continues_to_run(self):
         return self.pieces_manager.number_of_pieces != self.pieces_manager.complete_pieces
 
     def on_rcv_failed(self):
-        self.get_first_chunks()
+        self.reset_req_status()
 
     def on_rcv_succeeded(self, packet):
         # logging.debug("{} Chunk={}".format(packet.name, packet.chunk_num))
@@ -85,10 +93,13 @@ class CefAppConsumer(Process):
         piece_offset = packet.chunk_num * CHUNK_SIZE
         piece_data = packet.payload
         piece = piece_index, piece_offset, piece_data
-
         self.pieces_manager.receive_block_piece(piece)
 
-        if packet.chunk_num == 0:
-            self.get_follow_pieces(piece_index)
-        elif self.pieces_manager.pieces[piece_index].is_full:
-            self.get_first_chunks()
+        self.send_next_interest()
+
+    def reset_req_status(self):
+        self.req_flag = np.zeros(self.all_block_count)
+        self.req_tail_index = self.rcv_tail_index
+        while self.req_tail_index < self.all_block_count \
+                and self.pieces_manager.bitfield[self.req_tail_index]:
+            self.req_tail_index += 1
