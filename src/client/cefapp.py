@@ -58,6 +58,7 @@ class CefAppConsumer(Process):
             self.req_flag[index] = 1
             for chunk in range(self.chunk_count):
                 self.cef_handle.send_interest(interest, chunk)
+                print("{} Chunk={}".format(interest, chunk))
 
     def send_next_interest(self):
         for index in range(self.number_of_pieces):
