@@ -61,6 +61,7 @@ class Piece(object):
             self._init_blocks()
             return False
 
+        print("complete piece: {}".format(self.piece_index))
         self.is_full = True
         self.raw_data = data
         self._write_piece_on_disk()

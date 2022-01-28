@@ -92,4 +92,5 @@ class CefAppConsumer(Process):
         if piece_index == 0:
             self.get_follow_pieces(piece_index)
         else:
+            self.pieces_manager.pieces[piece_index].update_block_status()
             self.get_first_chunks()
