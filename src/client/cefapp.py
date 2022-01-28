@@ -57,9 +57,12 @@ class CefAppConsumer(Process):
             self.get_first_chunks()
 
     def get_first_chunks(self):
-        for index in range(self.pieces_manager.number_of_pieces):
-            if self.pieces_manager.bitfield[index] == 1:
+        for piece in self.pieces_manager.pieces:
+            index = piece.piece_index
+            if piece.is_full:
                 continue
+            piece.update_block_status()
+
             interest = '/'.join([self.name, str(index)])
             self.cef_handle.send_interest(interest, 0)
             return
