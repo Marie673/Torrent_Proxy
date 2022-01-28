@@ -25,16 +25,15 @@ class CefAppConsumer(Process):
         self.number_of_pieces = self.pieces_manager.number_of_pieces
         self.piece_length = self.pieces_manager.torrent.piece_length
         self.chunk_count = self.piece_length // CHUNK_SIZE
-        self.all_block_count = self.number_of_pieces * self.chunk_count
 
         self.timeout_count = 0
         self.timeout_limit = timeout_limit
 
         self.rcv_tail_index = None
         self.req_tail_index = None
-        self.req_flag = np.zeros(self.all_block_count)
         self.pipeline = pipeline
 
+        self.req_flag = np.zeros(self.number_of_pieces)
         # test
         self.data_size = 0
 
@@ -54,32 +53,20 @@ class CefAppConsumer(Process):
             return False
 
     def on_start(self):
-        self.req_flag = np.zeros(self.all_block_count)
-        self.rcv_tail_index = 0
-        self.req_tail_index = 0
-        self.send_interests_with_pipeline()
-
-    def send_interests_with_pipeline(self):
-        to_index = min(self.all_block_count, self.req_tail_index + self.pipeline)
-        for i in range(self.req_tail_index, to_index):
-            index = i // self.piece_length
-            chunk = (i % self.piece_length) // CHUNK_SIZE
-            if self.pieces_manager.pieces[index].is_full: continue
+        for index in range(MAX_PIECE):
             interest = '/'.join([self.name, str(index)])
-            self.cef_handle.send_interest(interest, chunk)
-            self.req_flag[i] = 1
+            self.req_flag[index] = 1
+            for chunk in range(self.chunk_count):
+                self.cef_handle.send_interest(interest, chunk)
 
     def send_next_interest(self):
-        while self.req_tail_index < self.all_block_count and self.pieces_manager.bitfield[self.rcv_tail_index]:
-            self.req_tail_index += 1
-        while (self.req_tail_index < self.all_block_count and
-                self.pieces_manager.bitfield[self.req_tail_index] or self.req_flag[self.req_tail_index]):
-            self.req_tail_index += 1
-        if self.req_tail_index < self.all_block_count:
-            index = self.req_tail_index //self.piece_length
-            chunk = (self.req_tail_index % self.piece_length) // CHUNK_SIZE
+        for index in range(self.number_of_pieces):
+            if self.req_flag[index] == 1:
+                continue
             interest = '/'.join([self.name, str(index)])
-            self.cef_handle.send_interest(interest, chunk)
+            for chunk in range(self.chunk_count):
+                self.cef_handle.send_interest(interest, chunk)
+            return
 
     def continues_to_run(self):
         return self.pieces_manager.number_of_pieces != self.pieces_manager.complete_pieces
@@ -98,8 +85,4 @@ class CefAppConsumer(Process):
         self.send_next_interest()
 
     def reset_req_status(self):
-        self.req_flag = np.zeros(self.all_block_count)
-        self.req_tail_index = self.rcv_tail_index
-        while self.req_tail_index < self.all_block_count \
-                and self.pieces_manager.bitfield[self.req_tail_index]:
-            self.req_tail_index += 1
+        self.req_flag = self.pieces_manager.bitfield
