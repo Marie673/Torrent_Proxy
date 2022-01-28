@@ -80,6 +80,7 @@ class CefAppConsumer(Process):
         self.get_first_chunks()
 
     def on_rcv_succeeded(self, packet):
+        print("{} Chunk={}".format(packet.name, packet.chunk_num))
         piece_index = int(packet.name.split('/')[-1])
         piece_offset = packet.chunk_num * CHUNK_SIZE
         piece_data = packet.payload
