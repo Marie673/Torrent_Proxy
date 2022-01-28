@@ -24,6 +24,7 @@ class CefAppConsumer(Process):
         self.pieces: [Piece] = pieces_manager.pieces
         self.name: [str] = '/'.join([PROTOCOL,
                                      self.pieces_manager.torrent.info_hash_str])
+        self.info_hash = self.pieces_manager.torrent.info_hash_str
         self.number_of_pieces = self.pieces_manager.number_of_pieces
         self.piece_length = self.pieces_manager.torrent.piece_length
         self.chunk_count = self.piece_length // CHUNK_SIZE
@@ -43,7 +44,7 @@ class CefAppConsumer(Process):
             packet = self.cef_handle.receive()
             if packet.is_failed:
                 self.on_rcv_failed()
-            elif packet.name.split('/')[:3] == self.name:
+            elif packet.name.split('/')[2] == self.info_hash:
                 self.on_rcv_succeeded(packet)
             self.display_progression()
         if self.pieces_manager.complete_pieces == self.number_of_pieces:
@@ -93,7 +94,6 @@ class CefAppConsumer(Process):
             # send first chunk interest
             interest = self.create_interest(piece_index)
             self.cef_handle.send_interest(piece_index, 0)
-
 
     def on_rcv_succeeded(self, packet):
         piece_index = packet.name.split('/')[-1]
