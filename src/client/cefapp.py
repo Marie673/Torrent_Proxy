@@ -96,7 +96,7 @@ class CefAppConsumer(Process):
             self.cef_handle.send_interest(piece_index, 0)
 
     def on_rcv_succeeded(self, packet):
-        piece_index = packet.name.split('/')[-1]
+        piece_index = int(packet.name.split('/')[-1])
         chunk = packet.chunk_num
         if chunk == 0:
             self.get_follow_pieces(piece_index)
