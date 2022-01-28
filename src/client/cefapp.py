@@ -5,6 +5,7 @@ import cefpyco
 from multiprocessing import Process
 from piece import Piece
 from pieces_manager import PiecesManager
+from block import State
 
 
 PROTOCOL = 'ccnx:/BitTorrent'
@@ -18,8 +19,8 @@ class CefAppConsumer(Process):
         Process.__init__(self)
         self.cef_handle = cefpyco.CefpycoHandle()
         self.cef_handle.begin()
-
         self.pieces_manager: PiecesManager = pieces_manager
+        self.pieces: [Piece] = pieces_manager.pieces
         self.name: [str] = '/'.join([PROTOCOL,
                                      self.pieces_manager.torrent.info_hash_str])
         self.number_of_pieces = self.pieces_manager.number_of_pieces
@@ -29,8 +30,6 @@ class CefAppConsumer(Process):
         self.timeout_count = 0
         self.timeout_limit = timeout_limit
 
-        self.rcv_tail_index = None
-        self.req_tail_index = None
         self.pipeline = pipeline
 
         self.req_flag = np.zeros(self.number_of_pieces)
@@ -38,54 +37,50 @@ class CefAppConsumer(Process):
         self.data_size = 0
 
     def run(self):
-        self.on_start()
-        while self.timeout_count < self.timeout_limit and self.continues_to_run():
+        self.get_first_chunk()
+        while self.pieces_manager.complete_pieces != self.number_of_pieces:
             packet = self.cef_handle.receive()
             if packet.is_failed:
-                # info.timeout_count += 1
                 self.on_rcv_failed()
-            elif packet.name.split('/')[2] == self.pieces_manager.torrent.info_hash_str:
+            elif packet.name.split('/')[:3] == self.name:
                 self.on_rcv_succeeded(packet)
-        if self.pieces_manager.number_of_pieces == self.pieces_manager.complete_pieces:
-            print("success download")
+
+        if self.pieces_manager.complete_pieces == self.number_of_pieces:
             return True
         else:
             return False
 
-    def on_start(self):
-        for index in range(MAX_PIECE):
-            interest = '/'.join([self.name, str(index)])
-            self.req_flag[index] = 1
-            for chunk in range(self.chunk_count):
-                self.cef_handle.send_interest(interest, chunk)
-                print("{} Chunk={}".format(interest, chunk))
+    def create_interest(self, index):
+        return '/'.join([self.name, str(index)])
 
-    def send_next_interest(self):
-        for index in range(self.number_of_pieces):
-            if self.req_flag[index] == 1:
+    def get_first_chunk(self):
+        for piece_index in range(self.number_of_pieces):
+            piece = self.pieces[piece_index]
+            if piece.is_full or piece.blocks[0].state == State.FULL:
                 continue
-            interest = '/'.join([self.name, str(index)])
-            for chunk in range(self.chunk_count):
-                self.cef_handle.send_interest(interest, chunk)
-                print("{} Chunk={}".format(interest, chunk))
-            return
-
-    def continues_to_run(self):
-        return self.pieces_manager.number_of_pieces != self.pieces_manager.complete_pieces
+            interest = self.create_interest(piece_index)
+            self.cef_handle.send_interest(interest, 0)
 
     def on_rcv_failed(self):
-        self.reset_req_status()
+        for piece_index in range(self.number_of_pieces):
+            piece = self.pieces[piece_index]
+            if piece.is_full:
+                continue
+            for chunk in range(self.chunk_count):
+                block = piece.blocks[chunk]
+                if block.state == State.FULL:
+                    continue
+                else:
+                    interest = self.create_interest(piece_index)
+                    self.cef_handle.send_interest(interest, chunk)
 
     def on_rcv_succeeded(self, packet):
-        # logging.debug("{} Chunk={}".format(packet.name, packet.chunk_num))
-        piece_index = int(packet.name.split('/')[-1])
-        piece_offset = packet.chunk_num * CHUNK_SIZE
-        piece_data = packet.payload
-        piece = piece_index, piece_offset, piece_data
+        piece_index = packet.name.split('/')[-1]
+        chunk_num = packet.chunk_num
+        piece = (piece_index, chunk_num*CHUNK_SIZE, packet.payload)
         self.pieces_manager.receive_block_piece(piece)
 
-        if self.pieces_manager.bitfield[piece_index] == 1:
-            self.send_next_interest()
-
-    def reset_req_status(self):
-        self.req_flag = self.pieces_manager.bitfield
+        if chunk_num != packet.end_chunk_num:
+            self.cef_handle.send_interest(packet.name, chunk_num + 1)
+        else:
+            self.get_first_chunk()
