@@ -9,7 +9,7 @@ from pieces_manager import PiecesManager
 
 PROTOCOL = 'ccnx:/BitTorrent'
 CHUNK_SIZE = 1024 * 4
-MAX_PIECE=10
+MAX_PIECE=5
 
 
 class CefAppConsumer(Process):
