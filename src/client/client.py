@@ -31,7 +31,8 @@ class Run(object):
         start_time = time.time()
         # logging.debug('start request pieces')
 
-
+        consumer = cefapp.CefAppConsumer(self.pieces_manager)
+        consumer.run()
 
         logging.info("File(s) downloaded successfully.")
         end_time = time.time() - start_time
