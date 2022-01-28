@@ -53,8 +53,10 @@ class CefAppConsumer(Process):
             return False
 
     def on_start(self):
-        for _ in range(MAX_PIECE):
-            self.get_first_chunks()
+        for index in range(MAX_PIECE):
+            interest = '/'.join([self.name, str(index)])
+            self.cef_handle.send_interest(interest, 0)
+            return
 
     def get_first_chunks(self):
         for piece in self.pieces_manager.pieces:
