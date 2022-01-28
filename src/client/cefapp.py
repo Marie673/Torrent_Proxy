@@ -83,7 +83,8 @@ class CefAppConsumer(Process):
         piece = piece_index, piece_offset, piece_data
         self.pieces_manager.receive_block_piece(piece)
 
-        self.send_next_interest()
+        if self.pieces_manager.bitfield[piece_index] == 1:
+            self.send_next_interest()
 
     def reset_req_status(self):
         self.req_flag = self.pieces_manager.bitfield
