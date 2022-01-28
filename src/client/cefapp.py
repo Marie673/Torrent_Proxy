@@ -77,6 +77,7 @@ class CefAppConsumer(Process):
             if piece.blocks[chunk].state == State.FULL:
                 continue
             interest = self.create_interest(piece_index)
+            print(interest)
             self.cef_handle.send_interest(interest, chunk)
 
     def on_rcv_failed(self):
