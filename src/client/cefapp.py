@@ -93,7 +93,7 @@ class CefAppConsumer(Process):
 
             # send first chunk interest
             interest = self.create_interest(piece_index)
-            self.cef_handle.send_interest(piece_index, 0)
+            self.cef_handle.send_interest(interest, 0)
 
     def on_rcv_succeeded(self, packet):
         piece_index = int(packet.name.split('/')[-1])
