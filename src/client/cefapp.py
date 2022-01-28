@@ -80,6 +80,7 @@ class CefAppConsumer(Process):
             self.cef_handle.send_interest(interest, chunk)
 
     def on_rcv_failed(self):
+        print("receive failed")
         count = 0
         for piece_index in range(self.number_of_pieces):
             piece = self.pieces[piece_index]
