@@ -7,11 +7,9 @@ import os
 import sys
 import time
 import logging
-from multiprocessing import Process
 import numpy
 
 PROTOCOL = 'ccnx:/BitTorrent'
-MAX_PROCESS = 30
 
 
 class Run(object):
@@ -32,26 +30,8 @@ class Run(object):
     def start(self):
         start_time = time.time()
         # logging.debug('start request pieces')
-        process = []
-        works = self.torrent.number_of_pieces // MAX_PROCESS
 
-        for process_index in range(MAX_PROCESS):
-            interests = []
-            pieces = []
-            start = process_index * works
-            end = start + works
-            for index in range(start, end):
-                interest = '/'.join([PROTOCOL, self.info_hash, str(index+0)])
-                interests.append(interest)
-                pieces.append(self.pieces_manager.pieces[index])
-            time.sleep(1)
 
-            app = cefapp.CefAppConsumer(interests, pieces)
-            app.start()
-            process.append(app)
-
-        for runner in process:
-            runner.join()
 
         logging.info("File(s) downloaded successfully.")
         end_time = time.time() - start_time
@@ -71,28 +51,6 @@ class Run(object):
 
     def _exit_threads(self):
         exit(0)
-
-    def get_empty_port(self):
-        for i in range(MAX_PIECE):
-            port = i + self.default_port
-            if port not in self.process:
-                return port
-
-        return None
-
-    def wait_empty_port(self):
-        while True:
-            for i in range(MAX_PIECE):
-                port = i + self.default_port
-                process: Process = self.process[port]
-                if process.is_alive():
-                    continue
-                else:
-                    self.process[port].join()
-                    # self.process[port].close()
-                    del self.process[port]
-                    return port
-            time.sleep(0.1)
 
 
 def main():

@@ -4,27 +4,30 @@ from pubsub import pub
 import cefpyco
 from multiprocessing import Process
 from piece import Piece
+from pieces_manager import PiecesManager
 
-class CefAppRunningInfo(object):
-    def __init__(self, name, end_chunk_num):
-        self.name = name
-        self.end_chunk_num = end_chunk_num
-        self.num_of_finished = 0
-        self.finished_flag = np.zeros(end_chunk_num + 1)
-        self.finished_flag[0] = 1
-        self.timeout_count = 0
+
+PROTOCOL = 'ccnx:/BitTorrent'
+CHUNK_SIZE = 1024 * 4
+MAX_PIECE=30
 
 
 class CefAppConsumer(Process):
-    def __init__(self, names, pieces,
+    def __init__(self, pieces_manager,
                  pipeline=1000, timeout_limit=10):
         Process.__init__(self)
         self.cef_handle = cefpyco.CefpycoHandle()
         self.cef_handle.begin()
 
-        self.pieces: [Piece]= pieces
-        self.names: [str] = names
+        self.pieces_manager: PiecesManager = pieces_manager
+        self.name: [str] = '/'.join([PROTOCOL,
+                                     self.pieces_manager.torrent.info_hash_str])
+
+        self.chunk_count = self.pieces_manager.torrent.piece_length // CHUNK_SIZE
+
+        self.timeout_count = 0
         self.timeout_limit = timeout_limit
+
         self.rcv_tail_index = None
         self.req_tail_index = None
         self.req_flag = None
@@ -34,101 +37,53 @@ class CefAppConsumer(Process):
         self.data_size = 0
 
     def run(self):
-        for index in range(len(self.names)):
-            self.download(self.names[index], self.pieces[index])
+        self.on_start()
 
-    def download(self, name, piece):
-        _, end_chunk_num = self.get_first_chunk(name, piece)
-        if end_chunk_num is None:
-            logging.error("failed to get_first_chunk")
-            return
-        info = CefAppRunningInfo(name, end_chunk_num)
-        self.on_start(info)
-        while info.timeout_count < self.timeout_limit and self.continues_to_run(info):
+        while self.timeout_count < self.timeout_limit and self.continues_to_run():
             packet = self.cef_handle.receive()
             if packet.is_failed:
                 # info.timeout_count += 1
-                self.on_rcv_failed(info)
-            elif packet.name == info.name:
-                self.on_rcv_succeeded(info, packet, piece)
-        if info.num_of_finished == info.end_chunk_num:
-            print("success download piece: {}".format(piece.piece_index))
+                self.on_rcv_failed()
+            elif packet.name.split('/')[2] == self.pieces_manager.torrent.info_hash_str:
+                self.on_rcv_succeeded(packet)
+        if self.pieces_manager.number_of_pieces == self.pieces_manager.complete_pieces:
+            print("success download")
             return True
         else:
             return False
 
-    # return first_chunk_payload and end_chunk_num
-    def get_first_chunk(self, name, piece) -> (bytes, int):
-        while True:
-            self.cef_handle.send_interest(name, 0)
-            packet = self.cef_handle.receive()
-            if packet.is_failed:
+    def on_start(self):
+        for _ in range(MAX_PIECE):
+            self.get_first_chunks()
+
+    def get_first_chunks(self):
+        for index in range(self.pieces_manager.number_of_pieces):
+            if self.pieces_manager.bitfield[index] == 1:
                 continue
-            if packet.is_interest_return:
-                continue
-            if packet.name != name:
-                continue
-            self.data_size += packet.payload_len
-            piece_index = int(packet.name.split('/')[-1])
-            """pub.sendMessage('PiecesManager.Piece',
-                            piece=(piece_index, 0, packet.payload))
-            """
-            piece.set_block(0, packet.payload)
-            return packet.payload, packet.end_chunk_num
+            interest = '/'.join([self.name, str(index)])
+            self.cef_handle.send_interest(interest, 0)
+            return
 
-    def on_start(self, info):
-        self.req_flag = np.zeros(info.end_chunk_num + 1)
-        self.req_flag[0] = 1
-        self.rcv_tail_index = 1
-        self.req_tail_index = 1
-        self.send_interests_with_pipeline(info)
+    def get_follow_pieces(self, piece_index):
+        for chunk in range(1, self.chunk_count):
+            interest = '/'.join([self.name, str(piece_index)])
+            self.cef_handle.send_interest(interest, chunk)
 
-    @staticmethod
-    def continues_to_run(info):
-        return 0 in info.finished_flag
+    def continues_to_run(self):
+        return self.pieces_manager.number_of_pieces != self.pieces_manager.complete_pieces
 
-    def on_rcv_failed(self, info):
-        self.reset_req_status(info)
-        self.send_interests_with_pipeline(info)
+    def on_rcv_failed(self):
+        self.get_first_chunks()
 
-    def on_rcv_succeeded(self, info, packet, piece):
+    def on_rcv_succeeded(self, packet):
         piece_index = int(packet.name.split('/')[-1])
+        piece_offset = packet.chunk_num * CHUNK_SIZE
+        piece_data = packet.payload
+        piece = piece_index, piece_offset, piece_data
 
-        chunk_num = packet.chunk_num
-        if info.finished_flag[chunk_num]: return
-        piece.set_block(packet.payload_len * chunk_num, packet.payload)
-        if piece.are_all_blocks_full():
-            if piece.set_to_full():
-                pass
-        """pub.sendMessage('PiecesManager.Piece',
-                        piece=(piece_index, packet.payload_len * chunk_num, packet.payload))
-        """
-        info.finished_flag[chunk_num] = 1
-        info.num_of_finished += 1
-        self.data_size += packet.payload_len
+        self.pieces_manager.receive_block_piece(piece)
 
-        self.send_next_interest(info)
-
-    def reset_req_status(self, info):
-        self.req_flag = np.zeros(info.end_chunk_num + 1)
-        self.req_tail_index = self.rcv_tail_index
-        while self.req_tail_index < info.end_chunk_num and info.finished_flag[self.req_tail_index]:
-            self.req_tail_index += 1
-
-    def send_interests_with_pipeline(self, info):
-        to_index = min(info.end_chunk_num, self.req_tail_index + self.pipeline)
-        for i in range(self.req_tail_index, to_index + 1):
-            if info.finished_flag[i]:
-                continue
-            self.cef_handle.send_interest(info.name, i)
-            self.req_flag[i] = 1
-
-    def send_next_interest(self, info):
-        while self.rcv_tail_index < info.end_chunk_num and info.finished_flag[self.rcv_tail_index]:
-            self.rcv_tail_index += 1
-        while (self.req_tail_index < info.end_chunk_num and
-               (info.finished_flag[self.req_tail_index] or self.req_flag[self.req_tail_index])):
-            self.req_tail_index += 1
-        if self.req_tail_index < info.end_chunk_num:
-            self.cef_handle.send_interest(info.name, self.req_tail_index)
-            self.req_flag[self.req_tail_index] = 1
+        if piece_index == 0:
+            self.get_follow_pieces(piece_index)
+        else:
+            self.get_first_chunks()
