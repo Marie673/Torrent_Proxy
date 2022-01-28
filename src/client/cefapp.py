@@ -14,6 +14,7 @@ MAX_PIECE=20
 
 
 class CefAppConsumer(Process):
+    last_log_line = ""
     def __init__(self, pieces_manager,
                  pipeline=1000, timeout_limit=10):
         Process.__init__(self)
@@ -44,7 +45,7 @@ class CefAppConsumer(Process):
                 self.on_rcv_failed()
             elif packet.name.split('/')[:3] == self.name:
                 self.on_rcv_succeeded(packet)
-
+            self.display_progression()
         if self.pieces_manager.complete_pieces == self.number_of_pieces:
             return True
         else:
@@ -90,3 +91,13 @@ class CefAppConsumer(Process):
             self.cef_handle.send_interest(packet.name, chunk_num + 1)
         else:
             self.get_first_chunk()
+
+    def display_progression(self):
+
+        current_log_line = "{}/{} pieces" \
+            .format(self.pieces_manager.complete_pieces,
+                    self.pieces_manager.number_of_pieces)
+        if current_log_line != self.last_log_line:
+            print(current_log_line)
+
+        self.last_log_line = current_log_line
