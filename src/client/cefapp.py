@@ -97,6 +97,7 @@ class CefAppConsumer(Process):
                 # send first chunk interest
                 interest = self.create_interest(piece_index)
                 self.cef_handle.send_interest(interest, 0)
+                print("{}".format(interest))
                 count += 1
 
             if count > MAX_PIECE:
