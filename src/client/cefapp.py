@@ -46,7 +46,7 @@ class CefAppConsumer(Process):
                 self.on_rcv_failed()
             elif packet.name.split('/')[2] == self.info_hash:
                 self.on_rcv_succeeded(packet)
-            self.display_progression()
+            # self.display_progression()
         if self.pieces_manager.complete_pieces == self.number_of_pieces:
             return True
         else:
@@ -77,7 +77,6 @@ class CefAppConsumer(Process):
             if piece.blocks[chunk].state == State.FULL:
                 continue
             interest = self.create_interest(piece_index)
-            print(interest)
             self.cef_handle.send_interest(interest, chunk)
 
     def on_rcv_failed(self):
