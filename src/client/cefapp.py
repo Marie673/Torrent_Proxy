@@ -54,12 +54,18 @@ class CefAppConsumer(Process):
         return '/'.join([self.name, str(index)])
 
     def get_first_chunk(self):
+        count = 0
         for piece_index in range(self.number_of_pieces):
             piece = self.pieces[piece_index]
             if piece.is_full or piece.blocks[0].state == State.FULL:
                 continue
+
+            if count > MAX_PIECE:
+                return
+
             interest = self.create_interest(piece_index)
             self.cef_handle.send_interest(interest, 0)
+            count += 1
 
     def on_rcv_failed(self):
         for piece_index in range(self.number_of_pieces):
