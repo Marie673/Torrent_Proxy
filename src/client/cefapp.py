@@ -10,7 +10,7 @@ from block import State
 
 PROTOCOL = 'ccnx:/BitTorrent'
 CHUNK_SIZE = 1024 * 4
-MAX_PIECE=1000
+MAX_PIECE=30
 
 
 class CefAppConsumer(Process):
@@ -89,6 +89,7 @@ class CefAppConsumer(Process):
 
     def on_rcv_failed(self):
         logging.debug("receive failed")
+        req_piece = 0
         for piece_index in range(self.number_of_pieces):
             piece = self.pieces[piece_index]
             if piece.is_full:
@@ -98,14 +99,16 @@ class CefAppConsumer(Process):
             # proxy have a piece
             if piece.blocks[0].state == State.FULL:
                 self.get_follow_pieces(piece_index)
+                req_piece += 1
                 logging.debug("get follow pieces")
             else:
                 # send first chunk interest
                 interest = self.create_interest(piece_index, 0)
                 self.interests.append(interest)
+                req_piece += 1
                 logging.debug("send first chunk")
 
-            if len(self.interests) >= MAX_PIECE:
+            if req_piece >= MAX_PIECE:
                 self.send_interests()
                 return
 
@@ -121,6 +124,8 @@ class CefAppConsumer(Process):
         else:
             if self.pieces[piece_index].is_full:
                 self.get_first_chunk()
+            else:
+                self.get_follow_pieces(piece_index)
 
     def display_progression(self):
 
