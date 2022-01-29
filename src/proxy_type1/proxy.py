@@ -63,8 +63,6 @@ class Run(object):
             self.handle.send_data(name=name, payload=payload,
                         chunk_num=chunk, end_chunk_num=end_chunk_num, cache_time=cache_time)
 
-
-
     def handle_interest(self, packet):
 
         prefix = packet.name.split("/")

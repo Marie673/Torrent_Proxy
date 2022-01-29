@@ -30,6 +30,8 @@ class Run(Process):
 
 
     def run(self):
+        os.makedirs("tmp/" + self.torrent.info_hash_str, exist_ok=True)
+
         self.peers_manager.start()
         logging.info("PeersManager Started")
         peers_dict = self.tracker.get_peers_from_trackers()
@@ -42,13 +44,17 @@ class Run(Process):
 
             while not self.request_q.empty():
                 request_index = self.request_q.get()
-                tmp_path = "tmp/" + self.torrent.info_hash_str + '.' + str(request_index)
-                if not os.path.exists(tmp_path) and request_index not in self.request:
-                    self.request.append(request_index)
+                tmp_path = '/'.join(["tmp", self.torrent.info_hash_str, str(request_index)])
+                if os.path.exists(tmp_path):
+                    self.request.remove(request_index)
+                    continue
+                if request_index in self.request:
+                    continue
+                self.request.append(request_index)
 
             for index in self.request:
                 # print(self.request)
-                tmp_path = "tmp/" + self.torrent.info_hash_str + '.' + str(index)
+                tmp_path = '/'.join(["tmp", self.torrent.info_hash_str, str(index)])
                 if os.path.exists(tmp_path):
                     self.request.remove(index)
                     continue
