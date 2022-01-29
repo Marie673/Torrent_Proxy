@@ -79,7 +79,7 @@ class Run(object):
         if info_hash not in self.download_process:
             self.create_new_process(info_hash)
 
-        if piece_index == 0:
+        if packet.chunk_num == 0:
             self.request_q[info_hash].put(piece_index)
 
     def start(self):
