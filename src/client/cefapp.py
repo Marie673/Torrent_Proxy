@@ -10,7 +10,7 @@ from block import State
 
 PROTOCOL = 'ccnx:/BitTorrent'
 CHUNK_SIZE = 1024 * 4
-MAX_PIECE=10
+MAX_PIECE=1000
 
 
 class CefAppConsumer(Process):
@@ -40,7 +40,7 @@ class CefAppConsumer(Process):
         self.data_size = 0
 
     def run(self):
-        self.get_first_chunk()
+        self.on_start()
         while self.pieces_manager.complete_pieces != self.number_of_pieces:
             packet = self.cef_handle.receive()
             if packet.is_failed:
@@ -53,74 +53,61 @@ class CefAppConsumer(Process):
         else:
             return False
 
-    def send_interests(self):
-        for interest in self.interests:
-            name, chunk_num = interest
-            self.cef_handle.send_interest(name, chunk_num)
-        self.interests = []
+    def on_start(self):
+        count = min(MAX_PIECE, len(self.pieces))
+        for piece_index in range(count):
+            interest = self.create_interest(piece_index, 0)
+            name, chunk = interest
+            self.cef_handle.send_interest(name, chunk)
 
     def create_interest(self, index, chunk_num):
         name = '/'.join([self.name, str(index)])
         interest = (name, chunk_num)
         return interest
 
-    def get_first_chunk(self):
-        for piece_index in range(self.number_of_pieces):
-            piece = self.pieces[piece_index]
-            # have first chunk
-            if piece.is_full or piece.blocks[0].state == State.FULL:
-                continue
-
-            interest = self.create_interest(piece_index, 0)
-            self.interests.append(interest)
-
-            if len(self.interests) >= MAX_PIECE:
-                self.send_interests()
-                return
-
-    def get_follow_pieces(self, piece_index):
-        piece = self.pieces[piece_index]
-        for chunk in range(len(piece.blocks)):
-            if piece.blocks[chunk].state == State.FULL:
-                continue
-            interest = self.create_interest(piece_index, chunk)
-            self.interests.append(interest)
-
     def on_rcv_failed(self):
         logging.debug("receive failed")
-        req_piece = 0
-        for piece_index in range(self.number_of_pieces):
-            piece = self.pieces[piece_index]
+        count = 0
+        for piece in self.pieces:
+            piece_index = piece.piece_index
+
             if piece.is_full:
                 continue
 
-            # have first chunk
-            # proxy have a piece
-            if piece.blocks[0].state == State.FULL:
-                self.get_follow_pieces(piece_index)
-                req_piece += 1
-            else:
-                # send first chunk interest
-                interest = self.create_interest(piece_index, 0)
-                self.interests.append(interest)
-                req_piece += 1
+            chunk = self.search_empty_block(piece_index)
+            interest = self.create_interest(piece_index, chunk)
+            name, chunk = interest
+            self.cef_handle.send_interest(name, chunk)
+            count += 1
 
-            if req_piece >= MAX_PIECE:
-                self.send_interests()
-                return
+            if count >= MAX_PIECE:
+                break
+
+    def search_empty_block(self, piece_index):
+        piece = self.pieces[piece_index]
+        for index in range(piece.number_of_blocks):
+            if piece.blocks[index].state != State.FULL:
+                return  index
+        return None
 
     def on_rcv_succeeded(self, packet):
         piece_index = int(packet.name.split('/')[-1])
         chunk = packet.chunk_num
 
-        piece = (piece_index, chunk*CHUNK_SIZE, packet.payload)
-        self.pieces_manager.receive_block_piece(piece)
+        piece_data = (piece_index, chunk*CHUNK_SIZE, packet.payload)
+        self.pieces_manager.receive_block_piece(piece_data)
 
-        if chunk == 0:
-            self.get_follow_pieces(piece_index)
-        elif chunk == packet.end_chunk_num:
+        if self.pieces[piece_index].is_full:
             interest = self.create_interest(piece_index + 1, 0)
-            self.interests.append(interest)
+        else:
+            if chunk == packet.end_chunk_num:
+                chunk = self.search_empty_block(piece_index)
+                interest = self.create_interest(piece_index, chunk)
+            else:
+                interest = self.create_interest(piece_index, chunk + 1)
+
+        name, chunk = interest
+        self.cef_handle.send_interest(name, chunk)
 
     def display_progression(self):
 
