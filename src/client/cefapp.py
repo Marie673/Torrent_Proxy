@@ -67,12 +67,12 @@ class CefAppConsumer(Process):
     def get_first_chunk(self):
         for piece_index in range(self.number_of_pieces):
             piece = self.pieces[piece_index]
-
             # have first chunk
             if piece.is_full or piece.blocks[0].state == State.FULL:
                 continue
 
             interest = self.create_interest(piece_index, 0)
+            print(piece_index)
             self.interests.append(interest)
 
             if len(self.interests) >= MAX_PIECE:
