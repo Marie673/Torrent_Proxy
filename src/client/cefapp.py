@@ -36,6 +36,7 @@ class CefAppConsumer(Process):
 
         self.req_flag = np.zeros(self.number_of_pieces)
         # test
+        self.interests = []
         self.data_size = 0
 
     def run(self):
@@ -52,11 +53,18 @@ class CefAppConsumer(Process):
         else:
             return False
 
-    def create_interest(self, index):
-        return '/'.join([self.name, str(index)])
+    def send_interests(self):
+        for interest in self.interests:
+            name, chunk_num = interest
+            self.cef_handle.send_interest(name, chunk_num)
+        self.interests = []
+
+    def create_interest(self, index, chunk_num):
+        name = '/'.join([self.name, str(index)])
+        interest = (name, chunk_num)
+        return interest
 
     def get_first_chunk(self):
-        count = 0
         for piece_index in range(self.number_of_pieces):
             piece = self.pieces[piece_index]
 
@@ -64,11 +72,11 @@ class CefAppConsumer(Process):
             if piece.is_full or piece.blocks[0].state == State.FULL:
                 continue
 
-            interest = self.create_interest(piece_index)
-            self.cef_handle.send_interest(interest, 0)
-            count += 1
+            interest = self.create_interest(piece_index, 0)
+            self.interests.append(interest)
 
-            if count > MAX_PIECE:
+            if len(self.interests) >= MAX_PIECE:
+                self.send_interests()
                 return
 
     def get_follow_pieces(self, piece_index):
@@ -76,12 +84,11 @@ class CefAppConsumer(Process):
         for chunk in range(len(piece.blocks)):
             if piece.blocks[chunk].state == State.FULL:
                 continue
-            interest = self.create_interest(piece_index)
-            self.cef_handle.send_interest(interest, chunk)
+            interest = self.create_interest(piece_index, chunk)
+            self.interests.append(interest)
 
     def on_rcv_failed(self):
         logging.debug("receive failed")
-        count = 0
         for piece_index in range(self.number_of_pieces):
             piece = self.pieces[piece_index]
             if piece.is_full:
@@ -90,19 +97,17 @@ class CefAppConsumer(Process):
             # have first chunk
             # proxy have a piece
             if piece.blocks[0].state == State.FULL:
-                interest = self.create_interest(piece_index)
                 self.get_follow_pieces(piece_index)
                 logging.debug("get follow pieces")
-                count += 1
             else:
                 # send first chunk interest
-                interest = self.create_interest(piece_index)
-                self.cef_handle.send_interest(interest, 0)
+                interest = self.create_interest(piece_index, 0)
+                self.interests.append(interest)
                 logging.debug("send first chunk")
-                count += 1
 
-            if count > MAX_PIECE:
-                break
+            if len(self.interests) >= MAX_PIECE:
+                self.send_interests()
+                return
 
     def on_rcv_succeeded(self, packet):
         piece_index = int(packet.name.split('/')[-1])
