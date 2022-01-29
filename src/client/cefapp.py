@@ -10,7 +10,7 @@ from block import State
 
 PROTOCOL = 'ccnx:/BitTorrent'
 CHUNK_SIZE = 1024 * 4
-MAX_PIECE=100
+MAX_PIECE=1000
 
 
 class CefAppConsumer(Process):
@@ -110,7 +110,6 @@ class CefAppConsumer(Process):
         if self.pieces[piece_index].is_full:
             self.display_progression()
             next_piece_index = self.search_next_piece()
-            print("next {}".format(next_piece_index)) # test
             if next_piece_index is None:
                 return
             interest = self.create_interest(next_piece_index, 0)
