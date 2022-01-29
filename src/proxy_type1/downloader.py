@@ -41,6 +41,7 @@ class Run(Process):
                 continue
 
             while not self.request_q.empty():
+                print("test")
                 request_index = self.request_q.get()
                 tmp_path = "tmp/" + self.torrent.info_hash_str + '.' + str(request_index)
                 if not os.path.exists(tmp_path) and request_index not in self.request:
