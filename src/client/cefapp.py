@@ -10,7 +10,7 @@ from block import State
 
 PROTOCOL = 'ccnx:/BitTorrent'
 CHUNK_SIZE = 1024 * 4
-MAX_PIECE=350
+MAX_PIECE=300
 
 
 class CefAppConsumer(Process):
@@ -53,7 +53,6 @@ class CefAppConsumer(Process):
 
     def on_start(self):
         count = min(MAX_PIECE, len(self.pieces))
-        print(count) #test
         for piece_index in range(count):
             interest = self.create_interest(piece_index, 0)
             name, chunk = interest
