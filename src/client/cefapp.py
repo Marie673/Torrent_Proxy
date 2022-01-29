@@ -100,13 +100,11 @@ class CefAppConsumer(Process):
             if piece.blocks[0].state == State.FULL:
                 self.get_follow_pieces(piece_index)
                 req_piece += 1
-                logging.debug("get follow pieces")
             else:
                 # send first chunk interest
                 interest = self.create_interest(piece_index, 0)
                 self.interests.append(interest)
                 req_piece += 1
-                logging.debug("send first chunk")
 
             if req_piece >= MAX_PIECE:
                 self.send_interests()
