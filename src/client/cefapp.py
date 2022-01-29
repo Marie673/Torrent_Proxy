@@ -110,6 +110,7 @@ class CefAppConsumer(Process):
                 return
             interest = self.create_interest(next_piece_index, 0)
         else:
+            print("{} {}".format(piece_index, chunk))
             if chunk == packet.end_chunk_num:
                 chunk = self.search_empty_block(piece_index)
                 interest = self.create_interest(piece_index, chunk)
