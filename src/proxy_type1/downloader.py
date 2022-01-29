@@ -53,7 +53,7 @@ class Run(Process):
                 self.request.append(request_index)
 
             for index in self.request:
-                # print(self.request)
+                print(self.request)
                 tmp_path = '/'.join(["tmp", self.torrent.info_hash_str, str(index)])
                 if os.path.exists(tmp_path):
                     self.request.remove(index)
