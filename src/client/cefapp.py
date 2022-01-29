@@ -54,6 +54,7 @@ class CefAppConsumer(Process):
 
     def on_start(self):
         count = min(MAX_PIECE, len(self.pieces))
+        print(count) #test
         for piece_index in range(count):
             interest = self.create_interest(piece_index, 0)
             name, chunk = interest
@@ -106,11 +107,11 @@ class CefAppConsumer(Process):
         if self.pieces[piece_index].is_full:
             self.display_progression()
             next_piece_index = self.search_next_piece()
+            print("next {}".format(next_piece_index)) # test
             if next_piece_index is None:
                 return
             interest = self.create_interest(next_piece_index, 0)
         else:
-            print("{} {}".format(piece_index, chunk))
             if chunk == packet.end_chunk_num:
                 chunk = self.search_empty_block(piece_index)
                 interest = self.create_interest(piece_index, chunk)
