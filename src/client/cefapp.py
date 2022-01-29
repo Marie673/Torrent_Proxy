@@ -64,6 +64,20 @@ class CefAppConsumer(Process):
         interest = (name, chunk_num)
         return interest
 
+    def search_next_piece(self):
+        for piece in self.pieces:
+            if piece.blocks[0].state == State.FULL:
+                continue
+            return piece.piece_index
+        return None
+
+    def search_empty_block(self, piece_index):
+        piece = self.pieces[piece_index]
+        for index in range(piece.number_of_blocks):
+            if piece.blocks[index].state != State.FULL:
+                return  index
+        return None
+
     def on_rcv_failed(self):
         logging.debug("receive failed")
         count = 0
@@ -82,13 +96,6 @@ class CefAppConsumer(Process):
             if count >= MAX_PIECE:
                 break
 
-    def search_empty_block(self, piece_index):
-        piece = self.pieces[piece_index]
-        for index in range(piece.number_of_blocks):
-            if piece.blocks[index].state != State.FULL:
-                return  index
-        return None
-
     def on_rcv_succeeded(self, packet):
         piece_index = int(packet.name.split('/')[-1])
         chunk = packet.chunk_num
@@ -98,7 +105,8 @@ class CefAppConsumer(Process):
 
         if self.pieces[piece_index].is_full:
             self.display_progression()
-            interest = self.create_interest(piece_index + 1, 0)
+            next_piece_index = self.search_next_piece()
+            interest = self.create_interest(next_piece_index, 0)
         else:
             if chunk == packet.end_chunk_num:
                 chunk = self.search_empty_block(piece_index)
