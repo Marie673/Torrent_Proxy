@@ -45,8 +45,6 @@ class Run(Process):
                 tmp_path = "tmp/" + self.torrent.info_hash_str + '.' + str(request_index)
                 if not os.path.exists(tmp_path) and request_index not in self.request:
                     self.request.append(request_index)
-                    print("get new request: {}".format(request_index)) # test
-
 
             for index in self.request:
 
