@@ -122,8 +122,6 @@ class CefAppConsumer(Process):
         else:
             if self.pieces[piece_index].is_full:
                 self.get_first_chunk()
-            else:
-                self.get_follow_pieces(piece_index)
 
     def display_progression(self):
 
