@@ -75,7 +75,6 @@ class CefAppConsumer(Process):
             self.interests.append(interest)
 
             if len(self.interests) >= MAX_PIECE:
-                logging.debug(self.interests)
                 self.send_interests()
                 return
 
@@ -119,9 +118,9 @@ class CefAppConsumer(Process):
 
         if chunk == 0:
             self.get_follow_pieces(piece_index)
-        else:
-            if self.pieces[piece_index].is_full:
-                self.get_first_chunk()
+        elif chunk == packet.end_chunk_num:
+            interest = self.create_interest(piece_index + 1, 0)
+            self.interests.append(interest)
 
     def display_progression(self):
 
