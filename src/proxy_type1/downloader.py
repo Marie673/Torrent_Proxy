@@ -28,17 +28,6 @@ class Run(Process):
 
         logging.info("PiecesManager Started")
 
-    def queue_manager(self):
-        while True:
-            if self.request_q.empty():
-                continue
-
-            index = self.request_q.get()
-            if index in self.request:
-                continue
-            else:
-                self.request.append(index)
-
 
     def run(self):
         self.peers_manager.start()
@@ -51,12 +40,12 @@ class Run(Process):
                 time.sleep(1)
                 continue
 
-            if not self.request_q.empty():
+            while not self.request_q.empty():
                 request_index = self.request_q.get()
                 tmp_path = "tmp/" + self.torrent.info_hash_str + '.' + str(request_index)
-                if not os.path.exists(tmp_path):
+                if not os.path.exists(tmp_path) and request_index not in self.request:
                     self.request.append(request_index)
-                    print("get new request: {}".format(request_index))
+                    print("get new request: {}".format(request_index)) # test
 
 
             for index in self.request:
