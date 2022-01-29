@@ -75,7 +75,7 @@ class CefAppConsumer(Process):
             self.interests.append(interest)
 
             if len(self.interests) >= MAX_PIECE:
-                print(self.interests)
+                logging.debug(self.interests)
                 self.send_interests()
                 return
 
