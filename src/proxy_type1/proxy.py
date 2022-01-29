@@ -57,7 +57,7 @@ class Run(object):
         with open(file_name, "rb") as file:
             file.seek(seek)
             payload = file.read(SIZE)
-            # logging.debug("send data; name:{} chunk:{}".format(name, chunk))
+            logging.debug("name:{} chunk:{}".format(name, chunk))
             self.handle.send_data(name=name, payload=payload,
                         chunk_num=chunk, end_chunk_num=end_chunk_num, cache_time=cache_time)
 
