@@ -47,7 +47,7 @@ class Run(Process):
                     self.request.append(request_index)
 
             for index in self.request:
-                print(self.request)
+                # print(self.request)
                 if self.pieces_manager.pieces[index].is_full:
                     piece = self.pieces_manager.pieces[index]
                     raw_data = piece.raw_data
@@ -68,7 +68,7 @@ class Run(Process):
                 data = self.pieces_manager.pieces[index].get_empty_block()
                 if not data:
                     continue
-
+                print(data)
                 piece_index, block_offset, block_length = data
                 piece_data = message.Request(piece_index, block_offset, block_length).to_bytes()
                 peer.send_to_peer(piece_data)
