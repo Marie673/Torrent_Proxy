@@ -57,14 +57,13 @@ class Run(object):
         with open(file_name, "rb") as file:
             file.seek(seek)
             payload = file.read(SIZE)
-            logging.debug("{} {}".format(name, chunk))
+            logging.debug("send data; name:{} chunk:{}".format(name, chunk))
             self.handle.send_data(name=name, payload=payload,
                         chunk_num=chunk, end_chunk_num=end_chunk_num, cache_time=cache_time)
 
 
     def handle_interest(self, packet):
-        if packet.chunk_num == 0:
-            print(packet.name)
+
         prefix = packet.name.split("/")
         info_hash = prefix[2]
         piece_index = int(prefix[3])
