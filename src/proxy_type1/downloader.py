@@ -68,10 +68,8 @@ class Run(Process):
                     with open(tmp_path, "wb") as file:
                         file.write(raw_data)
                     self.request.remove(index)
-                    print("remove request: {}".format(index))
+                    print("remove request: {}".format(index)) # test
                     self.pieces_manager.pieces[index] = Piece(index, piece.piece_size, piece.piece_hash)
-
-                    print("complete piece: {}".format(index))
                     continue
 
                 peer = self.peers_manager.get_random_peer_having_piece(index)
@@ -86,7 +84,6 @@ class Run(Process):
 
                 piece_index, block_offset, block_length = data
                 piece_data = message.Request(piece_index, block_offset, block_length).to_bytes()
-                if block_offset == 0:
                 peer.send_to_peer(piece_data)
 
             time.sleep(0.00001)
