@@ -33,7 +33,6 @@ class CefAppConsumer(Process):
         self.timeout_limit = timeout_limit
 
         self.pipeline = pipeline
-
         self.req_flag = np.zeros(self.number_of_pieces)
         # test
         self.interests = []
@@ -58,6 +57,7 @@ class CefAppConsumer(Process):
         for piece_index in range(count):
             interest = self.create_interest(piece_index, 0)
             name, chunk = interest
+            self.req_flag[piece_index] = 1
             self.cef_handle.send_interest(name, chunk)
 
     def create_interest(self, index, chunk_num):
@@ -66,10 +66,10 @@ class CefAppConsumer(Process):
         return interest
 
     def search_next_piece(self):
-        for piece in self.pieces:
-            if piece.blocks[0].state == State.FULL:
+        for piece_index in range(len(self.pieces)):
+            if self.req_flag[piece_index] == 1:
                 continue
-            return piece.piece_index
+            return piece_index
         return None
 
     def search_empty_block(self, piece_index):
@@ -82,14 +82,17 @@ class CefAppConsumer(Process):
     def on_rcv_failed(self):
         logging.debug("receive failed")
         count = 0
+        self.req_flag = np.zeros(self.pieces_manager.number_of_pieces)
         for piece in self.pieces:
             piece_index = piece.piece_index
 
             if piece.is_full:
+                self.req_flag[piece_index] = 1
                 continue
 
             chunk = self.search_empty_block(piece_index)
             interest = self.create_interest(piece_index, chunk)
+            self.req_flag[piece_index] = 1
             name, chunk = interest
             self.cef_handle.send_interest(name, chunk)
             count += 1
@@ -111,6 +114,7 @@ class CefAppConsumer(Process):
             if next_piece_index is None:
                 return
             interest = self.create_interest(next_piece_index, 0)
+            self.req_flag[next_piece_index] = 1
         else:
             if chunk == packet.end_chunk_num:
                 chunk = self.search_empty_block(piece_index)
