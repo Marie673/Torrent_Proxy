@@ -109,7 +109,6 @@ class CefAppConsumer(Process):
         chunk = packet.chunk_num
 
         piece = (piece_index, chunk*CHUNK_SIZE, packet.payload)
-        print("{} {} {}".format(piece_index, chunk, chunk*CHUNK_SIZE))
         self.pieces_manager.receive_block_piece(piece)
 
         if chunk == 0:
