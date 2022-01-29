@@ -106,6 +106,8 @@ class CefAppConsumer(Process):
         if self.pieces[piece_index].is_full:
             self.display_progression()
             next_piece_index = self.search_next_piece()
+            if next_piece_index is None:
+                return
             interest = self.create_interest(next_piece_index, 0)
         else:
             if chunk == packet.end_chunk_num:
