@@ -61,7 +61,6 @@ class Piece(object):
 
         self.is_full = True
         self.raw_data = data
-        print("test")
         return True
 
     def _init_blocks(self):
