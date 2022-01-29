@@ -72,11 +72,10 @@ class CefAppConsumer(Process):
                 continue
 
             interest = self.create_interest(piece_index, 0)
-            print(piece_index)
             self.interests.append(interest)
 
             if len(self.interests) >= MAX_PIECE:
-                print(interest)
+                print(self.interests)
                 self.send_interests()
                 return
 
