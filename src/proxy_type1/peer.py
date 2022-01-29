@@ -135,6 +135,7 @@ class Peer(object):
         """
         :type message: message.Piece
         """
+        print("{} {}".format(message.piece_index, message.block_offset))
         pub.sendMessage('PiecesManager.Piece', piece=(message.piece_index, message.block_offset, message.block))
 
     def handle_cancel(self):
