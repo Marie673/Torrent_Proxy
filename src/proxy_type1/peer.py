@@ -43,6 +43,7 @@ class Peer(object):
         return True
 
     def send_to_peer(self, msg):
+        print("test")
         try:
             self.socket.send(msg)
             self.last_call = time.time()
