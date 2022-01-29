@@ -80,7 +80,7 @@ class CefAppConsumer(Process):
             self.cef_handle.send_interest(interest, chunk)
 
     def on_rcv_failed(self):
-        print("receive failed")
+        logging.debug("receive failed")
         count = 0
         for piece_index in range(self.number_of_pieces):
             piece = self.pieces[piece_index]
@@ -92,11 +92,13 @@ class CefAppConsumer(Process):
             if piece.blocks[0].state == State.FULL:
                 interest = self.create_interest(piece_index)
                 self.get_follow_pieces(piece_index)
+                logging.debug("get follow pieces")
                 count += 1
             else:
                 # send first chunk interest
                 interest = self.create_interest(piece_index)
                 self.cef_handle.send_interest(interest, 0)
+                logging.debug("send first chunk")
                 count += 1
 
             if count > MAX_PIECE:
