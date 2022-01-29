@@ -46,7 +46,8 @@ class Run(Process):
                 request_index = self.request_q.get()
                 tmp_path = '/'.join(["tmp", self.torrent.info_hash_str, str(request_index)])
                 if os.path.exists(tmp_path):
-                    self.request.remove(request_index)
+                    if request_index in self.request:
+                        self.request.remove(request_index)
                     continue
                 if request_index in self.request:
                     continue
