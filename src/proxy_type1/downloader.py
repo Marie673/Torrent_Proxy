@@ -48,15 +48,9 @@ class Run(Process):
 
             for index in self.request:
                 # print(self.request)
-                if self.pieces_manager.pieces[index].is_full:
-                    piece = self.pieces_manager.pieces[index]
-                    raw_data = piece.raw_data
-                    tmp_path = "tmp/" + self.torrent.info_hash_str + '.' + str(index)
-                    with open(tmp_path, "wb") as file:
-                        file.write(raw_data)
+                tmp_path = "tmp/" + self.torrent.info_hash_str + '.' + str(index)
+                if os.path.exists(tmp_path):
                     self.request.remove(index)
-                    print("remove request: {}".format(index)) # test
-                    self.pieces_manager.pieces[index] = Piece(index, piece.piece_size, piece.piece_hash)
                     continue
 
                 peer = self.peers_manager.get_random_peer_having_piece(index)
@@ -68,7 +62,6 @@ class Run(Process):
                 data = self.pieces_manager.pieces[index].get_empty_block()
                 if not data:
                     continue
-                print(data)
                 piece_index, block_offset, block_length = data
                 piece_data = message.Request(piece_index, block_offset, block_length).to_bytes()
                 peer.send_to_peer(piece_data)

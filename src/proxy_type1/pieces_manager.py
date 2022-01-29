@@ -23,7 +23,8 @@ class PiecesManager(object):
 
         if self.pieces[piece_index].are_all_blocks_full():
             if self.pieces[piece_index].set_to_full():
-                pass
+                tmp_path = "tmp/" * self.torrent.info_hash_str + "." + str(piece_index)
+                self.pieces[piece_index].write_piece_on_disk(tmp_path)
 
     def get_block(self, piece_index, block_offset, block_length):
         for piece in self.pieces:
