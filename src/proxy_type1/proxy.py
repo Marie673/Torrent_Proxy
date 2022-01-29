@@ -4,7 +4,6 @@ import sys
 import cefpyco
 from multiprocessing import Queue
 
-import cefore_manager
 import downloader
 import torrent
 
@@ -47,15 +46,18 @@ class Run(object):
         print('new process is running')
 
     def send_file(self, info, file_name):
-        cache_time = 100  # 1時間
+        name = info.name
+        chunk = info.chunk_num
+
         file_size = os.path.getsize(file_name)
         end_chunk_num = file_size // SIZE - 1
-        chunk = info.chunk_num
+        cache_time = 100
         seek = chunk * SIZE
-        name = info.name
+
         with open(file_name, "rb") as file:
             file.seek(seek)
             payload = file.read(SIZE)
+            logging.debug("{} {}".format(name, chunk))
             self.handle.send_data(name=name, payload=payload,
                         chunk_num=chunk, end_chunk_num=end_chunk_num, cache_time=cache_time)
 
