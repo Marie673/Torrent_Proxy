@@ -10,7 +10,7 @@ from multiprocessing import Process, Queue
 import os
 
 
-MAX_PIECE = 100
+MAX_PIECE = 50
 
 
 class Run(Process):
