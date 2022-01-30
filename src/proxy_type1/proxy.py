@@ -69,7 +69,7 @@ class Run(object):
         info_hash = prefix[2]
         piece_index = int(prefix[3])
 
-        tmp_path = "tmp/" + info_hash + '.' + str(piece_index)
+        tmp_path = '/'.join(['tmp', info_hash, piece_index])
         if os.path.exists(tmp_path):
             self.send_file(packet, tmp_path)
             return
