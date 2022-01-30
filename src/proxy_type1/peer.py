@@ -45,7 +45,6 @@ class Peer(object):
     def send_to_peer(self, msg):
         try:
             self.socket.send(msg)
-            print("send message")
             self.last_call = time.time()
         except Exception as e:
             self.healthy = False
