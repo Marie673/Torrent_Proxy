@@ -73,7 +73,7 @@ class Run(Process):
                 piece_data = message.Request(piece_index, block_offset, block_length).to_bytes()
                 peer.send_to_peer(piece_data)
 
-            time.sleep(0.5)
+            time.sleep(1)
 
     def display_progression(self):
         new_progression = 0
