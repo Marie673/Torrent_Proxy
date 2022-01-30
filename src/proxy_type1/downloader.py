@@ -72,7 +72,7 @@ class Run(Process):
                 piece_index, block_offset, block_length = data
                 piece_data = message.Request(piece_index, block_offset, block_length).to_bytes()
                 peer.send_to_peer(piece_data)
-                time.sleep(0.00001)
+                time.sleep(0.01)
 
             time.sleep(0.00001)
 
