@@ -10,6 +10,9 @@ from multiprocessing import Process, Queue
 import os
 
 
+MAX_PIECE = 100
+
+
 class Run(Process):
     percentage_completed = -1
 
@@ -53,7 +56,7 @@ class Run(Process):
                     continue
                 self.request.append(request_index)
 
-            for index in self.request:
+            for index in self.request[:MAX_PIECE]:
                 # print(self.request)
                 tmp_path = '/'.join(["tmp", self.torrent.info_hash_str, str(index)])
                 if os.path.exists(tmp_path):
@@ -73,7 +76,7 @@ class Run(Process):
                 piece_data = message.Request(piece_index, block_offset, block_length).to_bytes()
                 peer.send_to_peer(piece_data)
 
-            time.sleep(1)
+            time.sleep(0.1)
 
     def display_progression(self):
         new_progression = 0
