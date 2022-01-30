@@ -101,7 +101,6 @@ class PeersManager(Thread):
 
                 try:
                     payload = self._read_from_socket(socket)
-                    print("get payload")
                 except Exception as e:
                     logging.error("Recv failed %s" % e.__str__())
                     self.remove_peer(peer)
