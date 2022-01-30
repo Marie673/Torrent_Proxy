@@ -89,7 +89,7 @@ class PeersManager(Thread):
         return data
 
     def run(self):
-        while self.is_active:
+        while True:
             read = [peer.socket for peer in self.peers]
             read_list, _, _ = select.select(read, [], [], 1)
 
@@ -101,6 +101,7 @@ class PeersManager(Thread):
 
                 try:
                     payload = self._read_from_socket(socket)
+                    print("get payload")
                 except Exception as e:
                     logging.error("Recv failed %s" % e.__str__())
                     self.remove_peer(peer)
