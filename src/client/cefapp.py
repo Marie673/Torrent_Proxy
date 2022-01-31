@@ -117,7 +117,7 @@ class CefAppConsumer(Process):
             if piece.is_full:
                 continue
 
-            if piece.blocks[0].FULL == State.FULL:
+            if piece.blocks[0].state == State.FULL:
                 chunk = self.search_empty_block(piece.piece_index)
                 if chunk is None:
                     continue
