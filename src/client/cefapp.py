@@ -95,14 +95,14 @@ class CefAppConsumer(Process):
 
         if self.pieces[piece_index].is_full:
             self.display_progression()
-            self.send_with_pipeline()
-            """
+            self.req_flag[piece_index] = 0
             next_piece_index = self.search_next_piece()
             if next_piece_index is None:
                 return
             interest = self.create_interest(next_piece_index, 0)
             self.req_flag[next_piece_index] = 1
-            """
+            
+            self.get_before_piece()
         else:
             if chunk == packet.end_chunk_num:
                 chunk = self.search_empty_block(piece_index)
@@ -131,6 +131,13 @@ class CefAppConsumer(Process):
             self.req_flag[chunk] = 1
             self.cef_handle.send_interest(name=name, chunk_num=chunk, lifetime=10000)
             count += 1
+            
+    def self.get_before_piece(self, index):
+        for i in range(index):
+            if self.req_flag[i] == 1:
+                interest = self.create_interest(i, 0)
+                name, chunk = interest
+                self.cef_handle.send_interest(name=name, chunk_num=chunk, lifetime=10000)
 
     def display_progression(self):
 
