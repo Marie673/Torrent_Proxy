@@ -77,7 +77,10 @@ class Run(object):
             self.create_new_process(info_hash)
 
         if packet.chunk_num == 0:
+            print(packet.name)
             self.request_q[info_hash].put(piece_index)
+        else:
+            print("test")
 
     def start(self):
         while True:
