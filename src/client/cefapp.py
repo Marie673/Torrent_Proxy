@@ -81,7 +81,6 @@ class CefAppConsumer(Process):
         return None
 
     def on_rcv_failed(self):
-        logging.debug("receive failed")
         self.req_flag = np.zeros(self.pieces_manager.number_of_pieces)
 
         self.send_with_pipeline()
