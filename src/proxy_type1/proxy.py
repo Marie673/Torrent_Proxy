@@ -68,10 +68,11 @@ class Run(object):
         info_hash = prefix[2]
         piece_index = int(prefix[3])
 
-        tmp_path = '/'.join(['tmp', info_hash, str(piece_index)])
-        if os.path.exists(tmp_path):
-            self.send_file(packet, tmp_path)
-            return
+        if packet.chunk_num == 0:
+            tmp_path = '/'.join(['tmp', info_hash, str(piece_index)])
+            if os.path.exists(tmp_path):
+                self.send_file(packet, tmp_path)
+                return
 
         if info_hash not in self.download_process:
             self.create_new_process(info_hash)
