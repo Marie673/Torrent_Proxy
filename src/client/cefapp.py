@@ -54,11 +54,10 @@ class CefAppConsumer(Process):
     def on_start(self):
         count = min(MAX_PIECE, len(self.pieces))
         for piece_index in range(count):
-            for chunk in range(self.chunk_count):
-                interest = self.create_interest(piece_index, chunk)
-                name, chunk = interest
-                self.req_flag[piece_index] = 1
-                self.cef_handle.send_interest(name, chunk)
+            interest = self.create_interest(piece_index, 0)
+            name, chunk = interest
+            self.req_flag[piece_index] = 1
+            self.cef_handle.send_interest(name, chunk)
 
     def create_interest(self, index, chunk_num):
         name = '/'.join([self.name, str(index)])

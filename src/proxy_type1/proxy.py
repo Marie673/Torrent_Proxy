@@ -56,11 +56,12 @@ class Run(object):
         cache_time = 1000
         seek = chunk * SIZE
 
-        for chunk in range(end_chunk_num + 1):
-            with open(file_name, "rb") as file:
-                payload = file.read(SIZE)
-                self.handle.send_data(name=name, payload=payload,
-                                      chunk_num=chunk, end_chunk_num=end_chunk_num, cache_time=cache_time)
+        with open(file_name, "rb") as file:
+            file.seek(seek)
+            payload = file.read(SIZE)
+            # logging.debug("name:{} chunk:{}".format(name, chunk))
+            self.handle.send_data(name=name, payload=payload,
+                                  chunk_num=chunk, end_chunk_num=end_chunk_num, cache_time=cache_time)
 
     def handle_interest(self, packet):
 
@@ -68,12 +69,9 @@ class Run(object):
         info_hash = prefix[2]
         piece_index = int(prefix[3])
 
-        if packet.chunk_num == 0:
-            tmp_path = '/'.join(['tmp', info_hash, str(piece_index)])
-            if os.path.exists(tmp_path):
-                self.send_file(packet, tmp_path)
-                return
-        else:
+        tmp_path = '/'.join(['tmp', info_hash, str(piece_index)])
+        if os.path.exists(tmp_path):
+            self.send_file(packet, tmp_path)
             return
 
         if info_hash not in self.download_process:
