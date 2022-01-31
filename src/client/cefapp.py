@@ -90,13 +90,6 @@ class CefAppConsumer(Process):
         piece_index = int(packet.name.split('/')[-1])
         chunk = packet.chunk_num
 
-        if piece_index == self.last_piece_index:
-            self.req_flag = np.zeros(self.pieces_manager.number_of_pieces)
-            self.send_with_pipeline()
-            return
-        else:
-            self.last_piece_index = piece_index
-
         piece_data = (piece_index, chunk*CHUNK_SIZE, packet.payload)
         self.pieces_manager.receive_block_piece(piece_data)
 
