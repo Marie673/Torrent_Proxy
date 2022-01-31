@@ -44,7 +44,7 @@ class CefAppConsumer(Process):
     def run(self):
         self.on_start()
         while self.pieces_manager.complete_pieces != self.number_of_pieces:
-            packet = self.cef_handle.receive(timeout_ms=500)
+            packet = self.cef_handle.receive(timeout_ms=1000)
             if packet.is_failed:
                 self.on_rcv_failed()
             elif packet.name.split('/')[2] == self.info_hash:
@@ -124,6 +124,7 @@ class CefAppConsumer(Process):
                 continue
 
             interest = self.create_interest(piece.piece_index, chunk)
+            print(interest)
             name, chunk = interest
             self.req_flag[chunk] = 1
             self.cef_handle.send_interest(name, chunk)
