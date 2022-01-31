@@ -124,7 +124,6 @@ class CefAppConsumer(Process):
                 continue
 
             interest = self.create_interest(piece.piece_index, chunk)
-            print(interest)
             name, chunk = interest
             self.req_flag[chunk] = 1
             self.cef_handle.send_interest(name=name, chunk_num=chunk, lifetime=10000)
