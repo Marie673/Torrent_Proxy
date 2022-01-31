@@ -132,7 +132,7 @@ class CefAppConsumer(Process):
             self.cef_handle.send_interest(name=name, chunk_num=chunk, lifetime=10000)
             count += 1
             
-    def self.get_before_piece(self, index):
+    def get_before_piece(self, index):
         for i in range(index):
             if self.req_flag[i] == 1:
                 interest = self.create_interest(i, 0)
