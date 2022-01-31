@@ -54,6 +54,9 @@ class Run(Process):
                 if request_index in self.request:
                     continue
                 self.request.append(request_index)
+                # test
+                if self.request_q.empty():
+                    print(self.request)
 
             for index in self.request[:MAX_PIECE]:
                 # print(self.request)
