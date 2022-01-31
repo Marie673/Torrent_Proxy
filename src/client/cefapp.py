@@ -110,8 +110,8 @@ class CefAppConsumer(Process):
             else:
                 interest = self.create_interest(piece_index, chunk + 1)
 
-        name, chunk = interest
-        self.cef_handle.send_interest(name, chunk)
+            name, chunk = interest
+            self.cef_handle.send_interest(name, chunk)
 
     def send_with_pipeline(self):
         count = 0
