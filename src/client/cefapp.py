@@ -127,7 +127,7 @@ class CefAppConsumer(Process):
             print(interest)
             name, chunk = interest
             self.req_flag[chunk] = 1
-            self.cef_handle.send_interest(name, chunk)
+            self.cef_handle.send_interest(name=name, chunk_num=chunk, lifetime=10000)
             count += 1
 
     def display_progression(self):
