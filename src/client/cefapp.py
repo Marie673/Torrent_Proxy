@@ -117,19 +117,14 @@ class CefAppConsumer(Process):
             if piece.is_full:
                 continue
 
-            if piece.blocks[0].state == State.FULL:
-                chunk = self.search_empty_block(piece.piece_index)
-                if chunk is None:
-                    continue
-                interest = self.create_interest(piece.piece_index, chunk)
-                name, chunk = interest
-                self.cef_handle.send_interest(name, chunk)
-                count += 1
-            else:
-                interest = self.create_interest(piece.piece_index, 0)
-                name, _ = interest
-                self.cef_handle.send_interest(name, 0)
-                count += 1
+            chunk = self.search_empty_block(piece.piece_index)
+            if chunk is None:
+                return
+
+            interest = self.create_interest(piece.piece_index, chunk)
+            name, chunk = interest
+            self.cef_handle.send_interest(name, chunk)
+            count += 1
 
     def display_progression(self):
 
