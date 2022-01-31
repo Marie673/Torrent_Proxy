@@ -66,7 +66,7 @@ class CefAppConsumer(Process):
 
     def search_next_piece(self):
         for piece_index in range(len(self.pieces)):
-            if self.req_flag[piece_index] == 1:
+            if self.req_flag[piece_index] == 1 or self.pieces[piece_index].is_full:
                 continue
             return piece_index
         return None
@@ -80,24 +80,9 @@ class CefAppConsumer(Process):
 
     def on_rcv_failed(self):
         logging.debug("receive failed")
-        count = 0
         self.req_flag = np.zeros(self.pieces_manager.number_of_pieces)
-        for piece in self.pieces:
-            piece_index = piece.piece_index
 
-            if piece.is_full:
-                self.req_flag[piece_index] = 1
-                continue
-
-            chunk = self.search_empty_block(piece_index)
-            interest = self.create_interest(piece_index, chunk)
-            self.req_flag[piece_index] = 1
-            name, chunk = interest
-            self.cef_handle.send_interest(name, chunk)
-            count += 1
-
-            if count >= MAX_PIECE:
-                break
+        self.send_with_pipeline()
 
     def on_rcv_succeeded(self, packet):
         piece_index = int(packet.name.split('/')[-1])
@@ -122,6 +107,29 @@ class CefAppConsumer(Process):
 
         name, chunk = interest
         self.cef_handle.send_interest(name, chunk)
+
+    def send_with_pipeline(self):
+        count = 0
+        for piece in self.pieces:
+            if count >= MAX_PIECE:
+                break
+
+            if piece.is_full:
+                continue
+
+            if piece.blocks[0].FULL == State.FULL:
+                chunk = self.search_empty_block(piece.piece_index)
+                if chunk is None:
+                    continue
+                interest = self.create_interest(piece.piece_index, chunk)
+                name, chunk = interest
+                self.cef_handle.send_interest(name, chunk)
+                count += 1
+            else:
+                interest = self.create_interest(piece.piece_index, 0)
+                name, _ = interest
+                self.cef_handle.send_interest(name, 0)
+                count += 1
 
     def display_progression(self):
 
