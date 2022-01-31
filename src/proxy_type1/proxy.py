@@ -53,15 +53,14 @@ class Run(object):
 
         file_size = os.path.getsize(file_name)
         end_chunk_num = file_size // SIZE - 1
-        cache_time = 100
+        cache_time = 1000
         seek = chunk * SIZE
 
-        with open(file_name, "rb") as file:
-            file.seek(seek)
-            payload = file.read(SIZE)
-            # logging.debug("name:{} chunk:{}".format(name, chunk))
-            self.handle.send_data(name=name, payload=payload,
-                        chunk_num=chunk, end_chunk_num=end_chunk_num, cache_time=cache_time)
+        for chunk in range(end_chunk_num + 1):
+            with open(file_name, "rb") as file:
+                payload = file.read(SIZE)
+                self.handle.send_data(name=name, payload=payload,
+                                      chunk_num=chunk, end_chunk_num=end_chunk_num, cache_time=cache_time)
 
     def handle_interest(self, packet):
 

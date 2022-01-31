@@ -9,7 +9,7 @@ import message
 from multiprocessing import Process, Queue
 import os
 
-
+CHUNK_SIZE = 1024 * 4
 MAX_PIECE = 50
 
 
@@ -30,7 +30,6 @@ class Run(Process):
         self.request = []
 
         logging.info("PiecesManager Started")
-
 
     def run(self):
         os.makedirs("tmp/" + self.torrent.info_hash_str, exist_ok=True)
