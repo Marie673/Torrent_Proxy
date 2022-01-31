@@ -69,10 +69,6 @@ class Run(object):
         info_hash = prefix[2]
         piece_index = int(prefix[3])
 
-        # test
-        if packet.chunk_num == 0:
-            print(packet.name)
-
         tmp_path = '/'.join(['tmp', info_hash, str(piece_index)])
         if os.path.exists(tmp_path):
             self.send_file(packet, tmp_path)
