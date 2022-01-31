@@ -102,7 +102,7 @@ class CefAppConsumer(Process):
             interest = self.create_interest(next_piece_index, 0)
             self.req_flag[next_piece_index] = 1
             
-            self.get_before_piece()
+            self.get_before_piece(piece_index)
         else:
             if chunk == packet.end_chunk_num:
                 chunk = self.search_empty_block(piece_index)
