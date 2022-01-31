@@ -53,7 +53,7 @@ class Run(object):
 
         file_size = os.path.getsize(file_name)
         end_chunk_num = file_size // SIZE - 1
-        cache_time = 1000
+        cache_time = 10000
         seek = chunk * SIZE
 
         with open(file_name, "rb") as file:
