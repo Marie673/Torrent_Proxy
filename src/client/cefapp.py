@@ -119,7 +119,7 @@ class CefAppConsumer(Process):
 
             chunk = self.search_empty_block(piece.piece_index)
             if chunk is None:
-                return
+                continue
 
             interest = self.create_interest(piece.piece_index, chunk)
             name, chunk = interest
