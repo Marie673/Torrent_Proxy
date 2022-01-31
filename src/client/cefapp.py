@@ -95,11 +95,14 @@ class CefAppConsumer(Process):
 
         if self.pieces[piece_index].is_full:
             self.display_progression()
+            self.send_with_pipeline()
+            """
             next_piece_index = self.search_next_piece()
             if next_piece_index is None:
                 return
             interest = self.create_interest(next_piece_index, 0)
             self.req_flag[next_piece_index] = 1
+            """
         else:
             if chunk == packet.end_chunk_num:
                 chunk = self.search_empty_block(piece_index)
