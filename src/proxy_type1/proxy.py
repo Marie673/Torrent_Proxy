@@ -73,6 +73,8 @@ class Run(object):
             if os.path.exists(tmp_path):
                 self.send_file(packet, tmp_path)
                 return
+        else:
+            return
 
         if info_hash not in self.download_process:
             self.create_new_process(info_hash)
@@ -80,8 +82,6 @@ class Run(object):
         if packet.chunk_num == 0:
             print(packet.name)
             self.request_q[info_hash].put(piece_index)
-        else:
-            print("test")
 
     def start(self):
         while True:
