@@ -34,6 +34,7 @@ class CefAppConsumer(Process):
         self.timeout_count = 0
         self.timeout_limit = timeout_limit
 
+        self.last_piece_index = None
         self.pipeline = pipeline
         self.req_flag = np.zeros(self.number_of_pieces)
         # test
@@ -88,6 +89,11 @@ class CefAppConsumer(Process):
     def on_rcv_succeeded(self, packet):
         piece_index = int(packet.name.split('/')[-1])
         chunk = packet.chunk_num
+
+        if piece_index == self.last_piece_index:
+            self.req_flag = np.zeros(self.pieces_manager.number_of_pieces)
+            self.send_with_pipeline()
+            return
 
         piece_data = (piece_index, chunk*CHUNK_SIZE, packet.payload)
         self.pieces_manager.receive_block_piece(piece_data)
