@@ -12,7 +12,7 @@ from block import State
 
 PROTOCOL = 'ccnx:/BitTorrent'
 CHUNK_SIZE = 1024 * 4
-MAX_PIECE=100
+MAX_PIECE=200
 
 
 class CefAppConsumer(Process):
