@@ -72,7 +72,6 @@ class Run(object):
         # test
         if packet.chunk_num == 0:
             print(packet.name)
-            self.request_q[info_hash].put(piece_index)
 
         tmp_path = '/'.join(['tmp', info_hash, str(piece_index)])
         if os.path.exists(tmp_path):
@@ -83,7 +82,6 @@ class Run(object):
             self.create_new_process(info_hash)
 
         if packet.chunk_num == 0:
-            print(packet.name)
             self.request_q[info_hash].put(piece_index)
 
     def start(self):
