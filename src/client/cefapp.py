@@ -41,7 +41,7 @@ class CefAppConsumer(Process):
     def run(self):
         self.on_start()
         while self.pieces_manager.complete_pieces != self.number_of_pieces:
-            packet = self.cef_handle.receive()
+            packet = self.cef_handle.receive(timeout_ms=1000)
             if packet.is_failed:
                 self.on_rcv_failed()
             elif packet.name.split('/')[2] == self.info_hash:
