@@ -64,20 +64,19 @@ class Run(Process):
                 if os.path.exists(tmp_path):
                     self.request.remove(index)
                     continue
-                piece = self.pieces_manager.pieces[index]
-                for i in range(piece.number_of_blocks):
-                    peer = self.peers_manager.get_random_peer_having_piece(index)
-                    if not peer:
-                        continue
+                    
+                peer = self.peers_manager.get_random_peer_having_piece(index)
+                if not peer:
+                    continue
 
-                    self.pieces_manager.pieces[index].update_block_status()
+                self.pieces_manager.pieces[index].update_block_status()
 
-                    data = self.pieces_manager.pieces[index].get_empty_block()
-                    if not data:
-                        continue
-                    piece_index, block_offset, block_length = data
-                    piece_data = message.Request(piece_index, block_offset, block_length).to_bytes()
-                    peer.send_to_peer(piece_data)
+                data = self.pieces_manager.pieces[index].get_empty_block()
+                if not data:
+                    continue
+                piece_index, block_offset, block_length = data
+                piece_data = message.Request(piece_index, block_offset, block_length).to_bytes()
+                peer.send_to_peer(piece_data)
 
             time.sleep(0.2)
 
