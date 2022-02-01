@@ -47,7 +47,7 @@ class Run(object):
                     continue
 
                 interest = '/'.join([PROTOCOL, self.info_hash, str(index)])
-                # logging.debug('send Interest: {}'.format(interest))
+                logging.debug('send Interest: {}'.format(interest))
                 self.handle.send_interest(interest)
 
             if self.pieces_manager.all_pieces_completed():
