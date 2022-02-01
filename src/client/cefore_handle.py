@@ -28,7 +28,7 @@ class Cef(object):
         index = int(prefix[3])
         chunk_num = info.chunk_num
         offset = chunk_num * len(info.payload)
-
+        logging.debug("{}".format(index))
         pub.sendMessage('PiecesManager.Piece', piece=(index, offset, info.payload))
 
     def handle_torrent(self, info):
