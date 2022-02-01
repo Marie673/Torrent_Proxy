@@ -25,7 +25,7 @@ class Cef(object):
 
     def handle_piece(self, info: cefpyco.core.CcnPacketInfo):
         prefix = info.name.split('/')
-        index = int(prefix[4])
+        index = int(prefix[3])
         chunk_num = info.chunk_num
         offset = chunk_num * len(info.payload)
 
