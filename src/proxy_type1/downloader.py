@@ -9,6 +9,9 @@ import message
 from multiprocessing import Process, Queue
 import os
 
+CHUNK_SIZE = 1024 * 4
+MAX_PIECE = 50
+
 
 class Run(Process):
     percentage_completed = -1
@@ -28,19 +31,9 @@ class Run(Process):
 
         logging.info("PiecesManager Started")
 
-    def queue_manager(self):
-        while True:
-            if self.request_q.empty():
-                continue
-
-            index = self.request_q.get()
-            if index in self.request:
-                continue
-            else:
-                self.request.append(index)
-
-
     def run(self):
+        os.makedirs("tmp/" + self.torrent.info_hash_str, exist_ok=True)
+
         self.peers_manager.start()
         logging.info("PeersManager Started")
         peers_dict = self.tracker.get_peers_from_trackers()
@@ -51,28 +44,27 @@ class Run(Process):
                 time.sleep(1)
                 continue
 
-            if not self.request_q.empty():
+            while not self.request_q.empty():
                 request_index = self.request_q.get()
-                tmp_path = "tmp/" + self.torrent.info_hash_str + '.' + str(request_index)
-                if not os.path.exists(tmp_path):
-                    self.request.append(request_index)
-                    print("get new request: {}".format(request_index))
-
-
-            for index in self.request:
-
-                if self.pieces_manager.pieces[index].is_full:
-                    piece = self.pieces_manager.pieces[index]
-                    raw_data = piece.raw_data
-                    tmp_path = "tmp/" + self.torrent.info_hash_str + '.' + str(index)
-                    with open(tmp_path, "wb") as file:
-                        file.write(raw_data)
-                    self.request.remove(index)
-                    self.pieces_manager.pieces[index] = Piece(index, piece.piece_size, piece.piece_hash)
-
-                    print("complete piece: {}".format(index))
+                tmp_path = '/'.join(["tmp", self.torrent.info_hash_str, str(request_index)])
+                if os.path.exists(tmp_path):
+                    if request_index in self.request:
+                        self.request.remove(request_index)
                     continue
+                if request_index in self.request:
+                    continue
+                self.request.append(request_index)
+                # test
+                if self.request_q.empty():
+                    print(self.request)
 
+            for index in self.request[:MAX_PIECE]:
+                # print(self.request)
+                tmp_path = '/'.join(["tmp", self.torrent.info_hash_str, str(index)])
+                if os.path.exists(tmp_path):
+                    self.request.remove(index)
+                    continue
+                    
                 peer = self.peers_manager.get_random_peer_having_piece(index)
                 if not peer:
                     continue
@@ -82,14 +74,11 @@ class Run(Process):
                 data = self.pieces_manager.pieces[index].get_empty_block()
                 if not data:
                     continue
-
                 piece_index, block_offset, block_length = data
                 piece_data = message.Request(piece_index, block_offset, block_length).to_bytes()
-                if block_offset == 0:
-                    print("download piece: {}".format(piece_index))
                 peer.send_to_peer(piece_data)
 
-            time.sleep(0.00001)
+            time.sleep(0.2)
 
     def display_progression(self):
         new_progression = 0

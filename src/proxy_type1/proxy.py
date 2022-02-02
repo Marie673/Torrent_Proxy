@@ -1,10 +1,11 @@
 import logging
 import os.path
 import sys
+import time
+
 import cefpyco
 from multiprocessing import Queue
 
-import cefore_manager
 import downloader
 import torrent
 
@@ -47,18 +48,20 @@ class Run(object):
         print('new process is running')
 
     def send_file(self, info, file_name):
-        cache_time = 100  # 1時間
+        name = info.name
+        chunk = info.chunk_num
+
         file_size = os.path.getsize(file_name)
         end_chunk_num = file_size // SIZE - 1
-        chunk = info.chunk_num
+        cache_time = 10000
         seek = chunk * SIZE
-        name = info.name
+
         with open(file_name, "rb") as file:
             file.seek(seek)
             payload = file.read(SIZE)
+            # logging.debug("name:{} chunk:{}".format(name, chunk))
             self.handle.send_data(name=name, payload=payload,
-                        chunk_num=chunk, end_chunk_num=end_chunk_num, cache_time=cache_time)
-
+                                  chunk_num=chunk, end_chunk_num=end_chunk_num, cache_time=cache_time)
 
     def handle_interest(self, packet):
 
@@ -66,7 +69,7 @@ class Run(object):
         info_hash = prefix[2]
         piece_index = int(prefix[3])
 
-        tmp_path = "tmp/" + info_hash + '.' + str(piece_index)
+        tmp_path = '/'.join(['tmp', info_hash, str(piece_index)])
         if os.path.exists(tmp_path):
             self.send_file(packet, tmp_path)
             return
@@ -74,7 +77,8 @@ class Run(object):
         if info_hash not in self.download_process:
             self.create_new_process(info_hash)
 
-        self.request_q[info_hash].put(piece_index)
+        if packet.chunk_num == 0:
+            self.request_q[info_hash].put(piece_index)
 
     def start(self):
         while True:

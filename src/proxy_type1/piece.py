@@ -61,7 +61,6 @@ class Piece(object):
 
         self.is_full = True
         self.raw_data = data
-
         return True
 
     def _init_blocks(self):
@@ -78,24 +77,9 @@ class Piece(object):
         else:
             self.blocks.append(Block(block_size=int(self.piece_size)))
 
-    def _write_piece_on_disk(self):
-        for file in self.files:
-            path_file = file["path"]
-            file_offset = file["fileOffset"]
-            piece_offset = file["pieceOffset"]
-            length = file["length"]
-
-            try:
-                f = open(path_file, 'r+b')  # Already existing file
-            except IOError:
-                f = open(path_file, 'wb')  # New file
-            except Exception:
-                logging.exception("Can't write to file")
-                return
-
-            f.seek(file_offset)
-            f.write(self.raw_data[piece_offset:piece_offset + length])
-            f.close()
+    def write_piece_on_disk(self, tmp_path):
+        with open(tmp_path, "wb") as file:
+            file.write(self.raw_data)
 
     def _merge_blocks(self):
         buf = b''

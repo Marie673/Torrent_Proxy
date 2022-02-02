@@ -1,117 +1,150 @@
 import logging
+import time
+
 import numpy as np
 from pubsub import pub
+import cefpyco
+from multiprocessing import Process
+from piece import Piece
+from pieces_manager import PiecesManager
+from block import State
 
 
-class CefAppRunningInfo(object):
-    def __init__(self, name, end_chunk_num):
-        self.name = name
-        self.end_chunk_num = end_chunk_num
-        self.num_of_finished = 0
-        self.finished_flag = np.zeros(end_chunk_num + 1)
-        self.finished_flag[0] = 1
-        self.timeout_count = 0
+PROTOCOL = 'ccnx:/BitTorrent'
+CHUNK_SIZE = 1024 * 4
+MAX_PIECE=1000
 
 
-class CefAppConsumer:
-    def __init__(self, cef_handle,
+class CefAppConsumer(Process):
+    last_log_line = ""
+    def __init__(self, pieces_manager,
                  pipeline=1000, timeout_limit=10):
-        self.cef_handle = cef_handle
-        self.timeout_limit = timeout_limit
-        self.rcv_tail_index = None
-        self.req_tail_index = None
-        self.req_flag = None
-        self.pipeline = pipeline
+        Process.__init__(self)
+        self.cef_handle = cefpyco.CefpycoHandle()
+        self.cef_handle.begin()
+        self.pieces_manager: PiecesManager = pieces_manager
+        self.pieces: [Piece] = pieces_manager.pieces
+        self.name: [str] = '/'.join([PROTOCOL,
+                                     self.pieces_manager.torrent.info_hash_str])
+        self.info_hash = self.pieces_manager.torrent.info_hash_str
+        self.number_of_pieces = self.pieces_manager.number_of_pieces
+        self.piece_length = self.pieces_manager.torrent.piece_length
+        self.chunk_count = self.piece_length // CHUNK_SIZE
 
+        self.timeout_count = 0
+        self.timeout_limit = timeout_limit
+
+        self.last_piece_index = None
+        self.pipeline = pipeline
+        self.req_flag = np.zeros(self.number_of_pieces)
         # test
+        self.interests = []
         self.data_size = 0
 
-
-    def run(self, name):
-        _, end_chunk_num = self.get_first_chunk(name)
-        if end_chunk_num is None:
-            logging.error("failed to get_first_chunk")
-            return
-        info = CefAppRunningInfo(name, end_chunk_num)
-        self.on_start(info)
-        while info.timeout_count < self.timeout_limit and self.continues_to_run(info):
-            packet = self.cef_handle.receive()
+    def run(self):
+        self.on_start()
+        while self.pieces_manager.complete_pieces != self.number_of_pieces:
+            packet = self.cef_handle.receive(timeout_ms=1000)
             if packet.is_failed:
-                info.timeout_count += 1
-                self.on_rcv_failed(info)
-            elif packet.name == info.name:
-                self.on_rcv_succeeded(info, packet)
-        if info.num_of_finished == info.end_chunk_num:
+                self.on_rcv_failed()
+            elif packet.name.split('/')[2] == self.info_hash:
+                self.on_rcv_succeeded(packet)
+        if self.pieces_manager.complete_pieces == self.number_of_pieces:
             return True
         else:
             return False
 
-    # return first_chunk_payload and end_chunk_num
-    def get_first_chunk(self, name) -> (bytes, int):
-        while True:
-            self.cef_handle.send_interest(name, 0)
-            packet = self.cef_handle.receive()
-            if packet.is_failed:
+    def on_start(self):
+        count = min(MAX_PIECE, len(self.pieces))
+        for piece_index in range(count):
+            interest = self.create_interest(piece_index, 0)
+            name, chunk = interest
+            self.req_flag[piece_index] = 1
+            self.cef_handle.send_interest(name, chunk)
+
+    def create_interest(self, index, chunk_num):
+        name = '/'.join([self.name, str(index)])
+        interest = (name, chunk_num)
+        return interest
+
+    def search_next_piece(self):
+        for piece_index in range(len(self.pieces)):
+            if self.req_flag[piece_index] == 1 or self.pieces[piece_index].is_full:
                 continue
-            if packet.is_interest_return:
-                continue
-            if packet.name != name:
-                continue
-            self.data_size += packet.payload_len
-            piece_index = int(packet.name.split('/')[-1])
-            pub.sendMessage('PiecesManager.Piece',
-                            piece=(piece_index, 0, packet.payload))
+            return piece_index
+        return None
 
-            return packet.payload, packet.end_chunk_num
+    def search_empty_block(self, piece_index):
+        piece = self.pieces[piece_index]
+        for index in range(piece.number_of_blocks):
+            if piece.blocks[index].state != State.FULL:
+                return  index
+        return None
 
-    def on_start(self, info):
-        self.req_flag = np.zeros(info.end_chunk_num + 1)
-        self.req_flag[0] = 1
-        self.rcv_tail_index = 1
-        self.req_tail_index = 1
-        self.send_interests_with_pipeline(info)
+    def on_rcv_failed(self):
+        self.req_flag = np.zeros(self.pieces_manager.number_of_pieces)
 
-    @staticmethod
-    def continues_to_run(info):
-        return 0 in info.finished_flag
+        self.send_with_pipeline()
 
-    def on_rcv_failed(self, info):
-        self.reset_req_status(info)
-        self.send_interests_with_pipeline(info)
-
-    def on_rcv_succeeded(self, info, packet):
+    def on_rcv_succeeded(self, packet):
         piece_index = int(packet.name.split('/')[-1])
+        chunk = packet.chunk_num
 
-        chunk_num = packet.chunk_num
-        if info.finished_flag[chunk_num]: return
-        pub.sendMessage('PiecesManager.Piece',
-                        piece=(piece_index, packet.payload_len * chunk_num, packet.payload))
-        info.finished_flag[chunk_num] = 1
-        info.num_of_finished += 1
-        self.data_size += packet.payload_len
+        piece_data = (piece_index, chunk*CHUNK_SIZE, packet.payload)
+        self.pieces_manager.receive_block_piece(piece_data)
 
-        self.send_next_interest(info)
+        if self.pieces[piece_index].is_full:
+            self.display_progression()
+            self.req_flag[piece_index] = 0
+            next_piece_index = self.search_next_piece()
+            if next_piece_index is None:
+                return
+            interest = self.create_interest(next_piece_index, 0)
+            self.req_flag[next_piece_index] = 1
+            
+            self.get_before_piece(piece_index)
+        else:
+            if chunk == packet.end_chunk_num:
+                chunk = self.search_empty_block(piece_index)
+                interest = self.create_interest(piece_index, chunk)
+            else:
+                interest = self.create_interest(piece_index, chunk + 1)
 
-    def reset_req_status(self, info):
-        self.req_flag = np.zeros(info.end_chunk_num + 1)
-        self.req_tail_index = self.rcv_tail_index
-        while self.req_tail_index < info.end_chunk_num and info.finished_flag[self.req_tail_index]:
-            self.req_tail_index += 1
+            name, chunk = interest
+            self.cef_handle.send_interest(name=name, chunk_num=chunk, lifetime=10000)
 
-    def send_interests_with_pipeline(self, info):
-        to_index = min(info.end_chunk_num, self.req_tail_index + self.pipeline)
-        for i in range(self.req_tail_index, to_index + 1):
-            if info.finished_flag[i]:
+    def send_with_pipeline(self):
+        count = 0
+        for piece in self.pieces:
+            if count >= MAX_PIECE:
+                break
+
+            if piece.is_full:
                 continue
-            self.cef_handle.send_interest(info.name, i)
-            self.req_flag[i] = 1
 
-    def send_next_interest(self, info):
-        while self.rcv_tail_index < info.end_chunk_num and info.finished_flag[self.rcv_tail_index]:
-            self.rcv_tail_index += 1
-        while (self.req_tail_index < info.end_chunk_num and
-               (info.finished_flag[self.req_tail_index] or self.req_flag[self.req_tail_index])):
-            self.req_tail_index += 1
-        if self.req_tail_index < info.end_chunk_num:
-            self.cef_handle.send_interest(info.name, self.req_tail_index)
-            self.req_flag[self.req_tail_index] = 1
+            chunk = self.search_empty_block(piece.piece_index)
+            if chunk is None:
+                continue
+
+            interest = self.create_interest(piece.piece_index, chunk)
+            name, chunk = interest
+            self.req_flag[chunk] = 1
+            self.cef_handle.send_interest(name=name, chunk_num=chunk, lifetime=10000)
+            count += 1
+            
+    def get_before_piece(self, index):
+        for i in range(index):
+            if self.req_flag[i] == 1:
+                interest = self.create_interest(i, 0)
+                name, chunk = interest
+                self.cef_handle.send_interest(name=name, chunk_num=chunk, lifetime=10000)
+
+    def display_progression(self):
+
+        current_log_line = "{}/{} pieces" \
+            .format(self.pieces_manager.complete_pieces,
+                    self.pieces_manager.number_of_pieces)
+        if current_log_line != self.last_log_line:
+            print(current_log_line)
+
+        self.last_log_line = current_log_line

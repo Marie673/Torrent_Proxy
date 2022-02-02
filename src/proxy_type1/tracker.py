@@ -33,8 +33,6 @@ class Tracker(object):
     def get_peers_from_trackers(self):
         s = SockAddr("10.0.2.3", 53117)
         self.dict_sock_addr[s.__hash__()] = s
-        s = SockAddr("10.0.2.4", 53117)
-        self.dict_sock_addr[s.__hash__()] = s
         """ 実験用につきコメント化 ↑実験用
         for i, tracker in enumerate(self.torrent.announce_list):
             if len(self.dict_sock_addr) >= MAX_PEERS_TRY_CONNECT:
