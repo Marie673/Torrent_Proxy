@@ -58,6 +58,7 @@ class CefAppConsumer:
         while True:
             packet = self.cef_handle.receive(timeout_ms=10000)
             if packet.is_failed:
+                self.get_pieces_first_chunk()
                 continue
             else:
                 self.on_rcv_succeeded(packet)
