@@ -76,7 +76,6 @@ class CefAppConsumer:
     def get_piece(self, index):
         name = self.create_interest(index)
         for chunk in range(1, self.chunk_num):
-            print("{} {}".format(name, chunk))
             self.cef_handle.send_interest(name, chunk)
 
     def on_rcv_failed(self):
