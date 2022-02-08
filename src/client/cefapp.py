@@ -92,6 +92,6 @@ class CefAppConsumer:
             .format(self.pieces_manager.complete_pieces,
                     self.pieces_manager.number_of_pieces)
         if current_log_line != self.last_log_line:
-            print(current_log_line)
+            logging.info(current_log_line)
 
         self.last_log_line = current_log_line
