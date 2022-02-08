@@ -54,35 +54,25 @@ class CefAppConsumer:
         return name
 
     def on_start(self):
-        self.get_pieces_first_chunk()
+        name = self.create_interest(0)
+        self.cef_handle.send_interest(name, 0)
         while True:
             packet = self.cef_handle.receive(timeout_ms=10000)
             if packet.is_failed:
-                self.get_pieces_first_chunk()
+                self.cef_handle.send_interest(name, 0)
                 continue
             else:
                 self.on_rcv_succeeded(packet)
                 piece_index = int(packet.name.split('/')[-1])
                 self.get_piece(piece_index)
 
-    def get_pieces_first_chunk(self):
-        if 0 not in self.bitfield:
-            return
-        start = self.bitfield.index(0)
-        end = min(self.number_of_pieces, start + (MAX_PIECE * 2))
-        for index in range(start, end):
-            if self.bitfield[index] == 0:
-                name = self.create_interest(index)
-                self.cef_handle.send_interest(name, 0)
-
     def get_piece(self, index):
         name = self.create_interest(index)
-        for chunk in range(1, self.chunk_num):
+        for chunk in range(self.chunk_num):
             logging.debug("{} {}".format(name, chunk))
             self.cef_handle.send_interest(name, chunk)
 
     def on_rcv_failed(self):
-        self.get_pieces_first_chunk()
         for piece in self.pieces:
             if piece.is_full:
                 continue
@@ -105,11 +95,6 @@ class CefAppConsumer:
             next_piece_index = piece_index + 1
             if next_piece_index < self.number_of_pieces:
                 self.get_piece(next_piece_index)
-
-            next_first_piece_index = piece_index + MAX_PIECE
-            if next_first_piece_index < self.number_of_pieces:
-                name = self.create_interest(next_first_piece_index)
-                self.cef_handle.send_interest(name, 0)
 
     def display_progression(self):
 
