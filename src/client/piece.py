@@ -28,6 +28,7 @@ class Piece(object):
 
     def set_block(self, offset, data):
         index = int(offset / BLOCK_SIZE)
+        logging.debug("{} {}".format(index, len(self.blocks)))
         if not self.is_full and not self.blocks[index].state == State.FULL:
             self.blocks[index].data = data
             self.blocks[index].state = State.FULL
