@@ -18,7 +18,6 @@ class PiecesManager(object):
 
     def receive_block_piece(self, piece):
         piece_index, piece_offset, piece_data = piece
-        # print("{} {}".format(piece_index, piece_offset))
         self.pieces[piece_index].set_block(piece_offset, piece_data)
 
         if self.pieces[piece_index].are_all_blocks_full():

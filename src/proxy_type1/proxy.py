@@ -1,13 +1,11 @@
 import logging
 import os.path
 import sys
-import time
-
-import cefpyco
 from multiprocessing import Queue
+import cefpyco
 
 import downloader
-import torrent
+from torrent import Torrent
 
 PATH = ["/home/marie/Torrent_Proxy/test/1M.dummy.torrent",
         "/home/marie/Torrent_Proxy/test/10M.dummy.torrent",
@@ -26,7 +24,7 @@ class Run(object):
 
         self.torrent = {}
         for path in PATH:
-            t = torrent.Torrent()
+            t = Torrent()
             t.load_from_path(path)
             self.torrent[t.info_hash_str] = t
 
@@ -36,15 +34,12 @@ class Run(object):
 
     def create_new_process(self, info_hash):
         request_q = Queue()
-        piece_q = Queue()
         self.request_q[info_hash] = request_q
-        self.piece_q[info_hash] = piece_q
-        queue = [request_q, piece_q]
-        process = downloader.Run(self.torrent[info_hash], queue)
-        self.request_q[info_hash] = request_q
-        self.piece_q[info_hash] = piece_q
-        self.download_process[info_hash] = process
+
+        process = downloader.Run(self.torrent[info_hash], request_q)
         process.start()
+
+        self.download_process[info_hash] = process
         print('new process is running')
 
     def send_file(self, info, file_name):
@@ -64,10 +59,11 @@ class Run(object):
                                   chunk_num=chunk, end_chunk_num=end_chunk_num, cache_time=cache_time)
 
     def handle_interest(self, packet):
-
         prefix = packet.name.split("/")
         info_hash = prefix[2]
         piece_index = int(prefix[3])
+        if prefix[0] != 'ccnx:' and prefix[1] != 'BitTorrent':
+            return
 
         tmp_path = '/'.join(['tmp', info_hash, str(piece_index)])
         if os.path.exists(tmp_path):
@@ -76,9 +72,10 @@ class Run(object):
 
         if info_hash not in self.download_process:
             self.create_new_process(info_hash)
-
-        if packet.chunk_num == 0:
             self.request_q[info_hash].put(piece_index)
+        else:
+            if packet.chunk_num == 0:
+                self.request_q[info_hash].put(piece_index)
 
     def start(self):
         while True:

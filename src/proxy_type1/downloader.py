@@ -1,13 +1,14 @@
-from block import State
 import time
-import peers_manager
-import pieces_manager
-from piece import Piece
-import tracker
 import logging
-import message
 from multiprocessing import Process, Queue
 import os
+
+import peers_manager
+import pieces_manager
+import tracker
+import message
+
+
 
 CHUNK_SIZE = 1024 * 4
 MAX_PIECE = 50
@@ -16,7 +17,7 @@ MAX_PIECE = 50
 class Run(Process):
     percentage_completed = -1
 
-    def __init__(self, torrent, queue):
+    def __init__(self, torrent, request_q):
         Process.__init__(self)
         self.torrent = torrent
         self.tracker = tracker.Tracker(self.torrent)
@@ -24,9 +25,7 @@ class Run(Process):
         self.pieces_manager = pieces_manager.PiecesManager(self.torrent)
         self.peers_manager = peers_manager.PeersManager(self.torrent, self.pieces_manager)
 
-        self.request_q: Queue = queue[0]
-        self.piece_q: Queue = queue[1]
-
+        self.request_q: Queue = request_q
         self.request = []
 
         logging.info("PiecesManager Started")
@@ -46,22 +45,16 @@ class Run(Process):
 
             while not self.request_q.empty():
                 request_index = self.request_q.get()
-                tmp_path = '/'.join(["tmp", self.torrent.info_hash_str, str(request_index)])
-                if os.path.exists(tmp_path):
-                    if request_index in self.request:
-                        self.request.remove(request_index)
-                    continue
                 if request_index in self.request:
                     continue
                 self.request.append(request_index)
 
             for index in self.request[:MAX_PIECE]:
                 # print(self.request)
-                tmp_path = '/'.join(["tmp", self.torrent.info_hash_str, str(index)])
-                if os.path.exists(tmp_path):
-                    self.request.remove(index)
-                    continue
                 piece = self.pieces_manager.pieces[index]
+                if piece.is_full:
+                    self.request.remove(index)
+
                 for i in range(piece.number_of_blocks):
                     peer = self.peers_manager.get_random_peer_having_piece(index)
                     if not peer:
@@ -76,17 +69,4 @@ class Run(Process):
                     piece_data = message.Request(piece_index, block_offset, block_length).to_bytes()
                     peer.send_to_peer(piece_data)
 
-            time.sleep(0.2)
-
-    def display_progression(self):
-        new_progression = 0
-
-        for i in range(self.pieces_manager.number_of_pieces):
-            for j in range(self.pieces_manager.pieces[i].number_of_blocks):
-                if self.pieces_manager.pieces[i].blocks[j].state == State.FULL:
-                    new_progression += len(self.pieces_manager.pieces[i].blocks[j].data)
-
-        if new_progression == self.percentage_completed:
-            return
-
-        self.percentage_completed = new_progression
+                time.sleep(0.02)

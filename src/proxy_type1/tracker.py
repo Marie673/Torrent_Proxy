@@ -12,6 +12,8 @@ from urllib.parse import urlparse
 MAX_PEERS_TRY_CONNECT = 30
 MAX_PEERS_CONNECTED = 8
 
+DEBUG = 1
+
 
 class SockAddr:
     def __init__(self, ip, port, allowed=True):
@@ -31,9 +33,12 @@ class Tracker(object):
         self.dict_sock_addr = {}
 
     def get_peers_from_trackers(self):
-        s = SockAddr("10.0.3.4", 53117)
-        self.dict_sock_addr[s.__hash__()] = s
-        """ 実験用につきコメント化 ↑実験用
+        if DEBUG == 1:
+            s = SockAddr("10.0.3.4", 53117)
+            self.dict_sock_addr[s.__hash__()] = s
+            self.try_peer_connect()
+            return
+
         for i, tracker in enumerate(self.torrent.announce_list):
             if len(self.dict_sock_addr) >= MAX_PEERS_TRY_CONNECT:
                 break
@@ -54,7 +59,6 @@ class Tracker(object):
 
             else:
                 logging.error("unknown scheme for: %s " % tracker_url)
-        """
 
         self.try_peer_connect()
 
