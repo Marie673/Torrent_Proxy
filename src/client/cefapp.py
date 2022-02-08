@@ -32,7 +32,7 @@ class CefAppConsumer:
         self.name: [str] = '/'.join([PROTOCOL,
                                      self.pieces_manager.torrent.info_hash_str])
 
-        self.bitfield: list = numpy.zeros(self.number_of_pieces)
+        self.bitfield = [0 for _ in range(self.number_of_pieces)]
         # test
         self.data_size = 0
 
