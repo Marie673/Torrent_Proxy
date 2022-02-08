@@ -34,6 +34,12 @@ class Tracker(object):
 
     def get_peers_from_trackers(self):
         if DEBUG == 1:
+            s = SockAddr("10.0.2.3", 53117)
+            self.dict_sock_addr[s.__hash__()] = s
+            s = SockAddr("10.0.2.4", 53117)
+            self.dict_sock_addr[s.__hash__()] = s
+            s = SockAddr("10.0.3.3", 53117)
+            self.dict_sock_addr[s.__hash__()] = s
             s = SockAddr("10.0.3.4", 53117)
             self.dict_sock_addr[s.__hash__()] = s
             self.try_peer_connect()
