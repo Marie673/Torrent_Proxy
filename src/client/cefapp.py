@@ -66,6 +66,8 @@ class CefAppConsumer:
                 self.get_piece(piece_index)
 
     def get_pieces_first_chunk(self):
+        if 0 not in self.bitfield:
+            return
         start = self.bitfield.index(0)
         end = min(self.number_of_pieces, start + (MAX_PIECE * 2))
         for index in range(start, end):
@@ -100,6 +102,11 @@ class CefAppConsumer:
             next_piece_index = piece_index + 1
             if next_piece_index < self.number_of_pieces:
                 self.get_piece(next_piece_index)
+
+            next_first_piece_index = piece_index + MAX_PIECE
+            if next_first_piece_index < self.number_of_pieces:
+                name = self.create_interest(next_first_piece_index)
+                self.cef_handle.send_interest(name, 0)
 
     def display_progression(self):
 
