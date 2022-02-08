@@ -100,9 +100,6 @@ class CefAppConsumer:
             if next_piece_index < self.number_of_pieces:
                 self.get_piece(next_piece_index)
 
-    def send_with_pipeline(self):
-
-
     def display_progression(self):
 
         current_log_line = "{}/{} pieces" \
