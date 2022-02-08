@@ -54,17 +54,7 @@ class CefAppConsumer:
         return name
 
     def on_start(self):
-        name = self.create_interest(0)
-        self.cef_handle.send_interest(name, 0)
-        while True:
-            packet = self.cef_handle.receive(timeout_ms=10000)
-            if packet.is_failed:
-                self.cef_handle.send_interest(name, 0)
-                continue
-            else:
-                self.on_rcv_succeeded(packet)
-                piece_index = int(packet.name.split('/')[-1])
-                self.get_piece(piece_index)
+        self.get_piece(0)
 
     def get_piece(self, index):
         name = self.create_interest(index)
