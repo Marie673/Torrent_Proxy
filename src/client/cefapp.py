@@ -27,7 +27,7 @@ class CefAppConsumer:
         self.info_hash = self.pieces_manager.torrent.info_hash_str
         self.number_of_pieces = self.pieces_manager.number_of_pieces
         self.piece_length = self.pieces_manager.torrent.piece_length
-        self.chunk_num = self.piece_length // CHUNK_SIZE + 1
+        self.chunk_num = self.piece_length // CHUNK_SIZE
 
         self.name: [str] = '/'.join([PROTOCOL,
                                      self.pieces_manager.torrent.info_hash_str])
