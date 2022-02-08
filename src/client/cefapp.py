@@ -91,7 +91,7 @@ class CefAppConsumer:
 
         if chunk == 0:
             self.bitfield[piece_index] = 1
-
+        logging.debug("{} {}".format(piece_index, chunk*CHUNK_SIZE))
         piece_data = (piece_index, chunk*CHUNK_SIZE, packet.payload)
         self.pieces_manager.receive_block_piece(piece_data)
 
