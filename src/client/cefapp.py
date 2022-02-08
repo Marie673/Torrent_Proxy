@@ -98,6 +98,8 @@ class CefAppConsumer:
         piece_data = (piece_index, chunk*CHUNK_SIZE, packet.payload)
         self.pieces_manager.receive_block_piece(piece_data)
 
+        self.display_progression()
+
         if chunk == packet.end_chunk_num:
             next_piece_index = piece_index + 1
             if next_piece_index < self.number_of_pieces:
