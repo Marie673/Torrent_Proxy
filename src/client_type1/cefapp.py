@@ -70,6 +70,13 @@ class CefAppConsumer:
         for piece in self.pieces:
             if piece.is_full:
                 continue
+            index = piece.piece_index
+            name = self.create_interest(index)
+            self.cef_handle.send_interest(name, 0)
+
+        for piece in self.pieces:
+            if piece.is_full:
+                continue
             self.get_piece(piece.piece_index)
             return
 
