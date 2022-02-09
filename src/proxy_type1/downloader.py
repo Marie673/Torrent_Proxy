@@ -54,6 +54,7 @@ class Run(Process):
                 piece = self.pieces_manager.pieces[index]
                 if piece.is_full:
                     self.request.remove(index)
+                    continue
 
                 for i in range(piece.number_of_blocks):
                     peer = self.peers_manager.get_random_peer_having_piece(index)

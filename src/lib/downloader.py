@@ -42,8 +42,8 @@ class Run(object):
                 logging.info("No unchocked peers")
                 continue
 
-            for piece in self.pieces_manager.pieces:
-                index = piece.piece_index
+            for index in range(self.pieces_manager.number_of_pieces):
+                piece = self.pieces_manager.pieces[index]
 
                 if self.pieces_manager.pieces[index].is_full:
                     continue
