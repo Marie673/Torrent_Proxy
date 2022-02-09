@@ -52,7 +52,7 @@ class Peer(object):
 
     def is_eligible(self):
         now = time.time()
-        return (now - self.last_call) > 0.001
+        return (now - self.last_call) > 0.00125
 
     def has_piece(self, index):
         return self.bit_field[index]
