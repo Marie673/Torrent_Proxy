@@ -54,10 +54,13 @@ class CefAppConsumer:
         return name
 
     def on_start(self):
+        start = time.time()
         for piece in self.pieces:
             index = piece.piece_index
             name = self.create_interest(index)
             self.cef_handle.send_interest(name, 0)
+        end = time.time() - start
+        print(end)
         self.get_piece(0)
 
     def get_piece(self, index):
