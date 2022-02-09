@@ -66,7 +66,6 @@ class Run(object):
             if time.time() - prog_time > 1:
                 self.display_progression()
                 prog_time = time.time()
-            time.sleep(0.000001)
 
         logging.info("File(s) downloaded successfully.")
         self.display_progression()
