@@ -54,13 +54,10 @@ class CefAppConsumer:
         return name
 
     def on_start(self):
-        start = time.time()
         for piece in self.pieces:
             index = piece.piece_index
             name = self.create_interest(index)
             self.cef_handle.send_interest(name, 0)
-        end = time.time() - start
-        print(end)
         self.get_piece(0)
 
     def get_piece(self, index):
@@ -70,8 +67,9 @@ class CefAppConsumer:
             self.cef_handle.send_interest(name, chunk)
 
     def on_rcv_failed(self):
+        logging.debug("on rcv failed")
         for piece in self.pieces:
-            if piece.is_full:
+            if piece.is_full or piece.blocks[0].state == State.FULL:
                 continue
             index = piece.piece_index
             name = self.create_interest(index)
