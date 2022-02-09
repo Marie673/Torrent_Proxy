@@ -64,10 +64,6 @@ class Run(object):
                     peer.send_to_peer(piece_data)
                     time.sleep(0.001)
 
-                if time.time() - prog_time > 1:
-                    self.display_progression()
-                    prog_time = time.time()
-
         logging.info("File(s) downloaded successfully.")
         self.display_progression()
         end_time = time.time() - start_time
