@@ -58,6 +58,8 @@ class CefAppConsumer:
             index = piece.piece_index
             name = self.create_interest(index)
             self.cef_handle.send_interest(name, 0)
+            if index >= MAX_PIECE:
+                break
         self.get_piece(0)
 
     def get_piece(self, index):
@@ -68,12 +70,6 @@ class CefAppConsumer:
 
     def on_rcv_failed(self):
         logging.debug("on rcv failed")
-        for piece in self.pieces:
-            if piece.is_full or piece.blocks[0].state == State.FULL:
-                continue
-            index = piece.piece_index
-            name = self.create_interest(index)
-            self.cef_handle.send_interest(name, 0)
 
         for piece in self.pieces:
             if piece.is_full:
@@ -87,6 +83,9 @@ class CefAppConsumer:
 
         if chunk == 0:
             self.bitfield[piece_index] = 1
+            if piece_index + MAX_PIECE < self.number_of_pieces:
+                name = self.create_interest(piece_index + MAX_PIECE)
+                self.cef_handle.send_interest(name, 0)
         # logging.debug("{} {}".format(piece_index, chunk*CHUNK_SIZE))
         piece_data = (piece_index, chunk*CHUNK_SIZE, packet.payload)
         self.pieces_manager.receive_block_piece(piece_data)
