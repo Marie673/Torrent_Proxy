@@ -102,8 +102,6 @@ class Piece(object):
             f.seek(file_offset)
             f.write(self.raw_data[piece_offset:piece_offset + length])
             f.close()
-            del self.raw_data
-            gc.collect()
 
     def _merge_blocks(self):
         buf = b''
