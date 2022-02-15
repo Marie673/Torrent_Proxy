@@ -38,8 +38,6 @@ class Run(object):
         end_time = time.time() - start_time
         print("time: {0}".format(end_time) + "[sec]")
 
-        self._exit_threads()
-
     def display_progression(self):
 
         current_log_line = "{}/{} pieces" \
@@ -49,9 +47,6 @@ class Run(object):
             print(current_log_line)
 
         self.last_log_line = current_log_line
-
-    def _exit_threads(self):
-        exit(0)
 
 
 def main():

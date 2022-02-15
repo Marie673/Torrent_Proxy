@@ -12,10 +12,10 @@ class Piece(object):
         self.piece_size: int = piece_size
         self.piece_hash: str = piece_hash
         self.is_full: bool = False
+        self.files = []
         self.raw_data: bytes = b''
         self.number_of_blocks: int = int(math.ceil(float(piece_size) / BLOCK_SIZE))
         self.blocks: list[Block] = []
-        self.tmp_path = ''
 
         self._init_blocks()
 
@@ -61,12 +61,6 @@ class Piece(object):
 
         self.is_full = True
         self.raw_data = data
-        # ここでファイルに書き込み
-        # この部分をDataのプッシュに割り当て
-        # PieceManager.update_bitfieldにて実行
-        self._write_piece_on_disk()
-        pub.sendMessage('PiecesManager.PieceCompleted', piece_index=self.piece_index)
-
         return True
 
     def _init_blocks(self):
@@ -83,19 +77,9 @@ class Piece(object):
         else:
             self.blocks.append(Block(block_size=int(self.piece_size)))
 
-    def _write_piece_on_disk(self):
-        tmp_path = self.tmp_path + '_' + str(self.piece_index)
-
-        try:
-            f = open(tmp_path, 'r+b')  # Already existing file
-        except IOError:
-            f = open(tmp_path, 'wb')  # New file
-        except Exception:
-            logging.exception("Can't write to file")
-            return
-
-        f.write(self.raw_data)
-        f.close()
+    def write_piece_on_disk(self, tmp_path):
+        with open(tmp_path, "wb") as file:
+            file.write(self.raw_data)
 
     def _merge_blocks(self):
         buf = b''

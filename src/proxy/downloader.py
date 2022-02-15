@@ -1,123 +1,72 @@
-from block import State
 import time
+import logging
+from multiprocessing import Process, Queue
+import os
+
 import peers_manager
 import pieces_manager
-import torrent
 import tracker
-import logging
-import os
 import message
-from multiprocessing import Process, managers
 
 
-PATH = ["/home/marie/Torrent_Proxy/test/1M.dummy.torrent",
-        "/home/marie/Torrent_Proxy/test/10M.dummy.torrent",
-        "/home/marie/Torrent_Proxy/test/100M.dummy.torrent",
-        "/home/marie/Torrent_Proxy/test/1G.dummy.torrent",
-        "/home/marie/Torrent_Proxy/test/10G.dummy.torrent"]
-BITFIELD = 0
-PIECES = 1
+
+CHUNK_SIZE = 1024 * 4
+MAX_PIECE = 50
 
 
 class Run(Process):
     percentage_completed = -1
-    last_log_line = ""
 
-
-    def __init__(self, m_list, jikken):
+    def __init__(self, torrent, request_q):
         Process.__init__(self)
-        self.torrent = torrent.Torrent().load_from_path(PATH[jikken])
+        self.torrent = torrent
         self.tracker = tracker.Tracker(self.torrent)
 
         self.pieces_manager = pieces_manager.PiecesManager(self.torrent)
         self.peers_manager = peers_manager.PeersManager(self.torrent, self.pieces_manager)
 
-        self.m_list = m_list
-        bitfield = [False for _ in range(self.pieces_manager.number_of_pieces)]
-        self.m_list[0] = bitfield
+        self.request_q: Queue = request_q
+        self.request = []
 
         logging.info("PiecesManager Started")
 
     def run(self):
+        os.makedirs("tmp/" + self.torrent.info_hash_str, exist_ok=True)
+
         self.peers_manager.start()
         logging.info("PeersManager Started")
         peers_dict = self.tracker.get_peers_from_trackers()
         self.peers_manager.add_peers(peers_dict.values())
 
-        start_time = time.time()
-
-        while not self.pieces_manager.all_pieces_completed():
+        while True:
             if not self.peers_manager.has_unchoked_peers():
                 time.sleep(1)
-                logging.info("No unchocked peers")
                 continue
 
-            for piece in self.pieces_manager.pieces:
-                index = piece.piece_index
+            while not self.request_q.empty():
+                request_index = self.request_q.get()
+                if request_index in self.request:
+                    continue
+                self.request.append(request_index)
 
-                if self.pieces_manager.pieces[index].is_full:
-                    bitfield = self.m_list[BITFIELD]
-                    if not bitfield[index]:
-                        bitfield[index] = True
-                        self.m_list[BITFIELD] = bitfield
+            for index in self.request[:MAX_PIECE]:
+                # print(self.request)
+                piece = self.pieces_manager.pieces[index]
+                if piece.is_full:
+                    self.request.remove(index)
                     continue
 
-                peer = self.peers_manager.get_random_peer_having_piece(index)
-                if not peer:
-                    continue
+                for i in range(piece.number_of_blocks):
+                    peer = self.peers_manager.get_random_peer_having_piece(index)
+                    if not peer:
+                        continue
 
-                self.pieces_manager.pieces[index].update_block_status()
+                    self.pieces_manager.pieces[index].update_block_status()
 
-                data = self.pieces_manager.pieces[index].get_empty_block()
-                if not data:
-                    continue
-
-                piece_index, block_offset, block_length = data
-                piece_data = message.Request(piece_index, block_offset, block_length).to_bytes()
-                peer.send_to_peer(piece_data)
-
-            self.display_progression()
-
-            time.sleep(0.1)
-
-        bitfield = [True for _ in range(self.pieces_manager.number_of_pieces)]
-        self.m_list[BITFIELD] = bitfield
-
-        logging.info("File(s) downloaded successfully.")
-        end_time = time.time() - start_time
-        print("time: {0}".format(end_time) + "[sec]")
-        self.display_progression()
-        time.sleep(60)
-        tmp_path = 'tmp/*'
-        os.remove(tmp_path)
-        self._exit_threads()
-
-    def display_progression(self):
-        new_progression = 0
-
-        for i in range(self.pieces_manager.number_of_pieces):
-            for j in range(self.pieces_manager.pieces[i].number_of_blocks):
-                if self.pieces_manager.pieces[i].blocks[j].state == State.FULL:
-                    new_progression += len(self.pieces_manager.pieces[i].blocks[j].data)
-
-        if new_progression == self.percentage_completed:
-            return
-
-        number_of_peers = self.peers_manager.unchoked_peers_count()
-        percentage_completed = float((float(new_progression) / self.torrent.total_length) * 100)
-
-        current_log_line = "Connected peers: {} - {}% completed | {}/{} pieces" \
-            .format(number_of_peers,
-                    round(percentage_completed, 2),
-                    self.pieces_manager.complete_pieces,
-                    self.pieces_manager.number_of_pieces)
-        if current_log_line != self.last_log_line:
-            print(current_log_line)
-
-        self.last_log_line = current_log_line
-        self.percentage_completed = new_progression
-
-    def _exit_threads(self):
-        self.peers_manager.is_active = False
-        os._exit(0)
-
+                    data = self.pieces_manager.pieces[index].get_empty_block()
+                    if not data:
+                        continue
+                    piece_index, block_offset, block_length = data
+                    piece_data = message.Request(piece_index, block_offset, block_length).to_bytes()
+                    peer.send_to_peer(piece_data)
+                    time.sleep(0.001)

@@ -89,7 +89,7 @@ class PeersManager(Thread):
         return data
 
     def run(self):
-        while self.is_active:
+        while True:
             read = [peer.socket for peer in self.peers]
             read_list, _, _ = select.select(read, [], [], 1)
 

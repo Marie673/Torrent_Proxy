@@ -42,31 +42,27 @@ class Run(object):
                 logging.info("No unchocked peers")
                 continue
 
-            for piece in self.pieces_manager.pieces:
-                index = piece.piece_index
+            for index in range(self.pieces_manager.number_of_pieces):
+                piece = self.pieces_manager.pieces[index]
 
                 if self.pieces_manager.pieces[index].is_full:
                     continue
 
-                peer = self.peers_manager.get_random_peer_having_piece(index)
-                if not peer:
-                    continue
+                for i in range(piece.number_of_blocks):
+                    peer = self.peers_manager.get_random_peer_having_piece(index)
+                    if not peer:
+                        continue
 
-                self.pieces_manager.pieces[index].update_block_status()
+                    self.pieces_manager.pieces[index].update_block_status()
 
-                data = self.pieces_manager.pieces[index].get_empty_block()
-                if not data:
-                    continue
+                    data = self.pieces_manager.pieces[index].get_empty_block()
+                    if not data:
+                        continue
 
-                piece_index, block_offset, block_length = data
-                piece_data = message.Request(piece_index, block_offset, block_length).to_bytes()
-                peer.send_to_peer(piece_data)
-                break
-
-            if time.time() - prog_time > 1:
-                self.display_progression()
-                prog_time = time.time()
-            time.sleep(0.000001)
+                    piece_index, block_offset, block_length = data
+                    piece_data = message.Request(piece_index, block_offset, block_length).to_bytes()
+                    peer.send_to_peer(piece_data)
+                    time.sleep(0.0001)
 
         logging.info("File(s) downloaded successfully.")
         self.display_progression()
