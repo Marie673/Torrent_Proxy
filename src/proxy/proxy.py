@@ -4,7 +4,7 @@ import sys
 from multiprocessing import Queue
 import cefpyco
 
-import downloader
+import bittorrent_process
 from torrent import Torrent
 
 PATH = ["/home/marie/Torrent_Proxy/test/1M.dummy.torrent",
@@ -13,71 +13,19 @@ PATH = ["/home/marie/Torrent_Proxy/test/1M.dummy.torrent",
         "/home/marie/Torrent_Proxy/test/1G.dummy.torrent",
         "/home/marie/Torrent_Proxy/test/10G.dummy.torrent"]
 
-
 SIZE = 1024 * 4
 
-class Run(object):
+torrent = []
+bittorrent_process_queues = []
+
+
+class CefManager(object):
     def __init__(self):
         self.handle = cefpyco.CefpycoHandle()
         self.handle.begin()
-        self.handle.register('ccnx:/BitTorrent')
+        self.handle.register('ccn:/BitTorrent')
 
-        self.torrent = {}
-        for path in PATH:
-            t = Torrent()
-            t.load_from_path(path)
-            self.torrent[t.info_hash_str] = t
-
-        self.download_process = {}
-        self.request_q = {}
-        self.piece_q = {}
-
-    def create_new_process(self, info_hash):
-        request_q = Queue()
-        self.request_q[info_hash] = request_q
-
-        process = downloader.Run(self.torrent[info_hash], request_q)
-        process.start()
-
-        self.download_process[info_hash] = process
-        print('new process is running')
-
-    def send_file(self, info, file_name):
-        name = info.name
-        chunk = info.chunk_num
-
-        file_size = os.path.getsize(file_name)
-        end_chunk_num = file_size // SIZE - 1
-        cache_time = 10000
-        seek = chunk * SIZE
-
-        with open(file_name, "rb") as file:
-            file.seek(seek)
-            payload = file.read(SIZE)
-            # logging.debug("name:{} chunk:{}".format(name, chunk))
-            self.handle.send_data(name=name, payload=payload,
-                                  chunk_num=chunk, end_chunk_num=end_chunk_num, cache_time=cache_time)
-
-    def handle_interest(self, packet):
-        prefix = packet.name.split("/")
-        info_hash = prefix[2]
-        piece_index = int(prefix[3])
-        if prefix[0] != 'ccnx:' and prefix[1] != 'BitTorrent':
-            return
-
-        tmp_path = '/'.join(['tmp', info_hash, str(piece_index)])
-        if os.path.exists(tmp_path):
-            self.send_file(packet, tmp_path)
-            return
-
-        if info_hash not in self.download_process:
-            self.create_new_process(info_hash)
-            self.request_q[info_hash].put(piece_index)
-        else:
-            if packet.chunk_num == 0:
-                self.request_q[info_hash].put(piece_index)
-
-    def start(self):
+    def listening(self):
         while True:
             packet = self.handle.receive()
             if packet.is_failed:
@@ -85,13 +33,48 @@ class Run(object):
             if packet.is_interest:
                 self.handle_interest(packet)
 
+    def handle_interest(self, packet):
+
+        # parse interest name
+        prefix = packet.name.split("/")
+        info_hash = prefix[2]
+        piece_index = int(prefix[3])
+
+        if prefix[0] != 'ccnx:' and prefix[1] != 'BitTorrent':
+            return
+
+        if info_hash not in bittorrent_process_queues:
+            if info_hash not in torrent:
+                return
+            else:
+                self.create_new_bittorrent_process(info_hash)
+
+        queue: Queue = bittorrent_process_queues[info_hash]
+        queue.put(piece_index)
+
+    @staticmethod
+    def create_new_bittorrent_process(self, info_hash):
+        queue = Queue()
+        bittorrent_process_queues[info_hash] = queue
+
+        process = bittorrent_process.Run(torrent[info_hash], queue)
+        process.start()
+
+    def send_piece_data(self, info_hash, index):
+        pass
+
+    def queue_manager(self):
+        for info_hash, queue in bittorrent_process_queues:
+            while not queue.empty():
+                index = queue.get()
+                self.send_piece_data(info_hash, index)
+
 
 
 def main():
-
-    run = Run()
+    cef_manager = CefManager()
     try:
-        run.start()
+        cef_manager.listening()
     except KeyboardInterrupt:
         sys.exit(0)
 

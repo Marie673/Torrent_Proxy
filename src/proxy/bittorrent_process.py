@@ -1,14 +1,13 @@
 import time
 import logging
 from multiprocessing import Process, Queue
+import threading
 import os
 
 import peers_manager
 import pieces_manager
 import tracker
 import message
-
-
 
 CHUNK_SIZE = 1024 * 4
 MAX_PIECE = 50
@@ -28,7 +27,15 @@ class Run(Process):
         self.request_q: Queue = request_q
         self.request = []
 
+        self.healthy = True
         logging.info("PiecesManager Started")
+
+    def queue_manager(self):
+        while self.healthy:
+            req = self.request_q.get()
+            self.request.append(req)
+            # QUEUE監視スレッド立てる予定の関数
+
 
     def run(self):
         os.makedirs("tmp/" + self.torrent.info_hash_str, exist_ok=True)
