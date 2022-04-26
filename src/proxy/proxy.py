@@ -1,6 +1,7 @@
 import logging
 import os.path
 import sys
+import time
 from multiprocessing import Queue
 import cefpyco
 
@@ -58,6 +59,10 @@ class Run(object):
             self.handle.send_data(name=name, payload=payload,
                                   chunk_num=chunk, end_chunk_num=end_chunk_num, cache_time=cache_time)
 
+        with open("data_txt", "a") as f:
+            text = str(time.time()) + " " + name
+            print(text, file=f)
+
     def handle_interest(self, packet):
         prefix = packet.name.split("/")
         info_hash = prefix[2]
@@ -83,6 +88,9 @@ class Run(object):
             if packet.is_failed:
                 continue
             if packet.is_interest:
+                with open("interest.txt", "a") as f:
+                    text = str(time.time()) + " " + packet.chunk_num
+                    print(text, file=f)
                 self.handle_interest(packet)
 
 
