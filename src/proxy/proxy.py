@@ -7,11 +7,10 @@ import cefpyco
 import downloader
 from torrent import Torrent
 
-PATH = ["/home/marie/Torrent_Proxy/test/1M.dummy.torrent",
-        "/home/marie/Torrent_Proxy/test/10M.dummy.torrent",
-        "/home/marie/Torrent_Proxy/test/100M.dummy.torrent",
-        "/home/marie/Torrent_Proxy/test/1G.dummy.torrent",
-        "/home/marie/Torrent_Proxy/test/10G.dummy.torrent"]
+PATH = ["~/bittorrent/10M.dummy.torrent",
+        "~/bittorrent/100M.dummy.torrent",
+        "~/bittorrent/1G.dummy.torrent",
+        "~/bittorrent/10G.dummy.torrent"]
 
 
 SIZE = 1024 * 4
