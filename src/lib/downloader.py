@@ -39,7 +39,7 @@ class Run(object):
         while not self.pieces_manager.all_pieces_completed():
             if not self.peers_manager.has_unchoked_peers():
                 time.sleep(1)
-                logging.info("No unchocked peers")
+                # logging.info("No unchocked peers")
                 continue
 
             for index in range(self.pieces_manager.number_of_pieces):
