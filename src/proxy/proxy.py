@@ -4,7 +4,7 @@ import sys
 from multiprocessing import Queue
 import cefpyco
 
-import bittorrent_process
+
 from torrent import Torrent
 
 PATH = [
