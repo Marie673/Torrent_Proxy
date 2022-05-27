@@ -7,7 +7,9 @@ import cefpyco
 import bittorrent_process
 from torrent import Torrent
 
-PATH = ["~/dummy/1024M.dummy.torrent"]
+PATH = [
+    "~/torrent/100M.dummy.torrent",
+    "~/torrent/1024M.dummy.torrent"]
 
 SIZE = 1024 * 4
 
