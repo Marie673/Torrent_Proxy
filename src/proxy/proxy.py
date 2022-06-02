@@ -9,9 +9,9 @@ import downloader
 from torrent import Torrent
 
 PATH = [
-        "~/bittorrent/10M.dummy.torrent",
-        "~/bittorrent/100M.dummy.torrent",
-        "~/bittorrent/1024.dummy.torrent"
+        "/home/vagrant/bittorrent/10M.dummy.torrent",
+        "/home/vagrant/bittorrent/100M.dummy.torrent",
+        "/home/vagrant/bittorrent/1024.dummy.torrent"
         ]
 
 
