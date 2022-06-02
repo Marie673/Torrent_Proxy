@@ -15,6 +15,7 @@ PATH = [
         HOME + "/bittorrent/100M.dummy.torrent",
         HOME + "/bittorrent/1024M.dummy.torrent"
         ]
+TEST_DAT = HOME + "/exp/test.dat"
 
 
 SIZE = 1024 * 4
@@ -69,7 +70,7 @@ class Run(object):
         if prefix[0] != 'ccnx:' and prefix[1] != 'BitTorrent':
             return
 
-        with open('~/exp/test.dat', mode='a') as file:
+        with open(TEST_DAT, mode='a') as file:
             text = 'interest:' + info_hash + ":" + \
                    str(piece_index) + ":" + packet.chunk_num + ":" + \
                    time.time()
@@ -78,7 +79,7 @@ class Run(object):
         tmp_path = '/'.join(['tmp', info_hash, str(piece_index)])
         if os.path.exists(tmp_path):
             self.send_file(packet, tmp_path)
-            with open('~/exp/test.dat', mode='a') as file:
+            with open(TEST_DAT, mode='a') as file:
                 text = 'data:' + info_hash + ":" + \
                        str(piece_index) + ":" + packet.chunk_num + ":" + \
                        time.time()

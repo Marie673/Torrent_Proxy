@@ -2,7 +2,10 @@ import piece
 import bitstring
 from pubsub import pub
 import time
+import os
 
+HOME = os.environ['HOME']
+TEST_DAT = HOME + "/exp/test.dat"
 
 class PiecesManager(object):
     def __init__(self, torrent):
@@ -35,7 +38,7 @@ class PiecesManager(object):
 
         if self.pieces[piece_index].are_all_blocks_full():
             if self.pieces[piece_index].set_to_full():
-                with open('~/exp/test.dat', mode='a') as file:
+                with open(TEST_DAT, mode='a') as file:
                     text = 'piece:' + self.torrent.info_hash_str + ":" + \
                            str(piece_index) + ":" + str(-1) + ":" + \
                            time.time()

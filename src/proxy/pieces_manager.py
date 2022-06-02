@@ -2,6 +2,10 @@ import piece
 import bitstring
 from pubsub import pub
 import time
+import os
+
+HOME = os.environ['HOME']
+TEST_DAT = HOME + "/exp/test.dat"
 
 
 class PiecesManager(object):
@@ -25,7 +29,7 @@ class PiecesManager(object):
             if self.pieces[piece_index].set_to_full():
                 tmp_path = '/'.join(["tmp", self.torrent.info_hash_str, str(piece_index)])
                 self.pieces[piece_index].write_piece_on_disk(tmp_path)
-                with open('~/exp/test.dat', mode='a') as file:
+                with open(TEST_DAT, mode='a') as file:
                     text = 'piece:' + self.torrent.info_hash_str + ":" + \
                            str(piece_index) + ":" + str(-1) + ":" + \
                            time.time()
