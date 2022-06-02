@@ -1,6 +1,7 @@
 import piece
 import bitstring
 from pubsub import pub
+import time
 
 
 class PiecesManager(object):
@@ -24,6 +25,11 @@ class PiecesManager(object):
             if self.pieces[piece_index].set_to_full():
                 tmp_path = '/'.join(["tmp", self.torrent.info_hash_str, str(piece_index)])
                 self.pieces[piece_index].write_piece_on_disk(tmp_path)
+                with open('~/exp/test.dat', mode='a') as file:
+                    text = 'data:' + self.torrent.info_hash_str + ":" + \
+                           str(piece_index) + ":" + str(-1) + ":" + \
+                           time.time()
+                    file.write(text)
 
     def get_block(self, piece_index, block_offset, block_length):
         for piece in self.pieces:

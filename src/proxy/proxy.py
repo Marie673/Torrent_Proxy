@@ -1,6 +1,7 @@
 import logging
 import os.path
 import sys
+import time
 from multiprocessing import Queue
 import cefpyco
 
@@ -14,6 +15,7 @@ PATH = ["~/bittorrent/10M.dummy.torrent",
 
 
 SIZE = 1024 * 4
+
 
 class Run(object):
     def __init__(self):
@@ -64,9 +66,20 @@ class Run(object):
         if prefix[0] != 'ccnx:' and prefix[1] != 'BitTorrent':
             return
 
+        with open('~/exp/test.dat', mode='a') as file:
+            text = 'interest:' + info_hash + ":" + \
+                   str(piece_index) + ":" + packet.chunk_num + ":" + \
+                   time.time()
+            file.write(text)
+
         tmp_path = '/'.join(['tmp', info_hash, str(piece_index)])
         if os.path.exists(tmp_path):
             self.send_file(packet, tmp_path)
+            with open('~/exp/test.dat', mode='a') as file:
+                text = 'data:' + info_hash + ":" + \
+                       str(piece_index) + ":" + packet.chunk_num + ":" + \
+                       time.time()
+                file.write(text)
             return
 
         if info_hash not in self.download_process:
@@ -76,6 +89,7 @@ class Run(object):
             if packet.chunk_num == 0:
                 self.request_q[info_hash].put(piece_index)
 
+
     def start(self):
         while True:
             packet = self.handle.receive()
@@ -83,7 +97,6 @@ class Run(object):
                 continue
             if packet.is_interest:
                 self.handle_interest(packet)
-
 
 
 def main():
