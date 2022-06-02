@@ -41,7 +41,7 @@ class PiecesManager(object):
                 with open(TEST_DAT, mode='a') as file:
                     text = 'piece:' + self.torrent.info_hash_str + ":" + \
                            str(piece_index) + ":" + str(-1) + ":" + \
-                           datetime.datetime.now().time().strftime("%H:%M:%S")
+                           datetime.datetime.now().time().strftime("%H:%M:%S") + "\n"
                     file.write(text)
                 self.complete_pieces += 1
 
