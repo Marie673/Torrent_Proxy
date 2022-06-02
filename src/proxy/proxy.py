@@ -72,7 +72,7 @@ class Run(object):
 
         with open(TEST_DAT, mode='a') as file:
             text = 'interest:' + info_hash + ":" + \
-                   str(piece_index) + ":" + packet.chunk_num + ":" + \
+                   str(piece_index) + ":" + str(packet.chunk_num) + ":" + \
                    time.time()
             file.write(text)
 
@@ -81,7 +81,7 @@ class Run(object):
             self.send_file(packet, tmp_path)
             with open(TEST_DAT, mode='a') as file:
                 text = 'data:' + info_hash + ":" + \
-                       str(piece_index) + ":" + packet.chunk_num + ":" + \
+                       str(piece_index) + ":" + str(packet.chunk_num) + ":" + \
                        time.time()
                 file.write(text)
             return
