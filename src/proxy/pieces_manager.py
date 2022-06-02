@@ -1,7 +1,7 @@
 import piece
 import bitstring
 from pubsub import pub
-import time
+import datetime
 import os
 
 HOME = os.environ['HOME']
@@ -32,7 +32,7 @@ class PiecesManager(object):
                 with open(TEST_DAT, mode='a') as file:
                     text = 'piece:' + self.torrent.info_hash_str + ":" + \
                            str(piece_index) + ":" + str(-1) + ":" + \
-                           time.time()
+                           datetime.datetime.now().time().strftime("%H:%M:%S")
                     file.write(text)
 
     def get_block(self, piece_index, block_offset, block_length):
