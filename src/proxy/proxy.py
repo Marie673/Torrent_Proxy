@@ -8,10 +8,11 @@ import cefpyco
 import downloader
 from torrent import Torrent
 
-PATH = ["~/bittorrent/10M.dummy.torrent",
+PATH = [
+        "~/bittorrent/10M.dummy.torrent",
         "~/bittorrent/100M.dummy.torrent",
-        "~/bittorrent/1G.dummy.torrent",
-        "~/bittorrent/10G.dummy.torrent"]
+        "~/bittorrent/1024.dummy.torrent"
+        ]
 
 
 SIZE = 1024 * 4
