@@ -2,7 +2,7 @@ import logging
 import os
 import os.path
 import sys
-import datetime
+import time
 from multiprocessing import Queue
 import cefpyco
 
@@ -73,7 +73,7 @@ class Run(object):
         with open(TEST_DAT, mode='a') as file:
             text = 'interest:' + info_hash + ":" + \
                    str(piece_index) + ":" + str(packet.chunk_num) + ":" + \
-                   datetime.datetime.now().time().strftime("%H:%M:%S")+ "\n"
+                   str(time.time()) + "\n"
             file.write(text)
 
         tmp_path = '/'.join(['tmp', info_hash, str(piece_index)])
@@ -82,7 +82,7 @@ class Run(object):
             with open(TEST_DAT, mode='a') as file:
                 text = 'data:' + info_hash + ":" + \
                        str(piece_index) + ":" + str(packet.chunk_num) + ":" + \
-                       datetime.datetime.now().time().strftime("%H:%M:%S")+ "\n"
+                       str(time.time()) + "\n"
                 file.write(text)
             return
 
