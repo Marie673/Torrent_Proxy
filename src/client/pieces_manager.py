@@ -1,6 +1,7 @@
 import piece
 import bitstring
 from pubsub import pub
+import time
 
 
 class PiecesManager(object):
@@ -34,6 +35,11 @@ class PiecesManager(object):
 
         if self.pieces[piece_index].are_all_blocks_full():
             if self.pieces[piece_index].set_to_full():
+                with open('~/exp/test.dat', mode='a') as file:
+                    text = 'piece:' + self.torrent.info_hash_str + ":" + \
+                           str(piece_index) + ":" + str(-1) + ":" + \
+                           time.time()
+                    file.write(text)
                 self.complete_pieces += 1
 
     def get_block(self, piece_index, block_offset, block_length):

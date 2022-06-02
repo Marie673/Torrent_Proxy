@@ -26,7 +26,7 @@ class PiecesManager(object):
                 tmp_path = '/'.join(["tmp", self.torrent.info_hash_str, str(piece_index)])
                 self.pieces[piece_index].write_piece_on_disk(tmp_path)
                 with open('~/exp/test.dat', mode='a') as file:
-                    text = 'data:' + self.torrent.info_hash_str + ":" + \
+                    text = 'piece:' + self.torrent.info_hash_str + ":" + \
                            str(piece_index) + ":" + str(-1) + ":" + \
                            time.time()
                     file.write(text)
