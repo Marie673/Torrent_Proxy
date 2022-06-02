@@ -1,4 +1,5 @@
 import logging
+import os
 import os.path
 import sys
 import time
@@ -8,10 +9,11 @@ import cefpyco
 import downloader
 from torrent import Torrent
 
+HOME = os.environ['HOME']
 PATH = [
-        "/home/vagrant/bittorrent/10M.dummy.torrent",
-        "/home/vagrant/bittorrent/100M.dummy.torrent",
-        "/home/vagrant/bittorrent/1024.dummy.torrent"
+        HOME + "/bittorrent/10M.dummy.torrent",
+        HOME + "/bittorrent/100M.dummy.torrent",
+        HOME + "/bittorrent/1024.dummy.torrent"
         ]
 
 
