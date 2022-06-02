@@ -13,7 +13,7 @@ HOME = os.environ['HOME']
 PATH = [
         HOME + "/bittorrent/10M.dummy.torrent",
         HOME + "/bittorrent/100M.dummy.torrent",
-        HOME + "/bittorrent/1024.dummy.torrent"
+        HOME + "/bittorrent/1024M.dummy.torrent"
         ]
 
 
