@@ -23,6 +23,7 @@ class PiecesManager(Process):
             print("test piece")
             time.sleep(2)
         logger.info("Pieces Manager is down")
+        logger.debug("PID: {}".format(self.pid))
 
         sys.exit()
 

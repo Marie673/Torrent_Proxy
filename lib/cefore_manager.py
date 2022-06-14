@@ -21,6 +21,7 @@ class CeforeManager(Process):
             print("test cef")
             time.sleep(2)
         logger.info("Cefore Manager is down")
+        logger.debug("PID: {}".format(self.pid))
 
         sys.exit()
 
