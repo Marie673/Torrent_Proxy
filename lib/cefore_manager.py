@@ -1,29 +1,32 @@
-import sys
 import time
-from multiprocessing import Process, Event
+from multiprocessing import Process
 
-from logging import getLogger, StreamHandler, DEBUG
+from logging import getLogger, StreamHandler, Formatter, DEBUG
 logger = getLogger(__name__)
+logger.setLevel(DEBUG)
 handler = StreamHandler()
 handler.setLevel(DEBUG)
-logger.setLevel(DEBUG)
+formatter = Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+handler.setFormatter(formatter)
 logger.addHandler(handler)
-logger.propagate = False
 
 
 class CeforeManager(Process):
     def __init__(self):
         super().__init__()
-        self.exit = Event()
+        self.piece_m = None
+        self.peers_m = None
 
     def run(self) -> None:
-        while not self.exit.is_set():
-            print("test cef")
-            time.sleep(2)
-        logger.info("Cefore Manager is down")
-        logger.debug("PID: {}".format(self.pid))
+        logger.info('Process Cefore Manager is start')
 
-        sys.exit()
+        try:
+            while True:
+                self.loop()
+        except KeyboardInterrupt:
+            logger.info('Exit Process')
+            exit()
 
-    def shutdown(self):
-        self.exit.set()
+    def loop(self):
+        logger.info('{}'.format(self.pid))
+        time.sleep(3)

@@ -1,17 +1,13 @@
-import os
-import sys
-sys.path.append(os.pardir)
-from multiprocessing import Event, Queue, Lock
+from lib import peers_manager, pieces_manager, cefore_manager
 
-from logging import getLogger, StreamHandler, DEBUG
+from logging import getLogger, StreamHandler, Formatter, DEBUG
 logger = getLogger(__name__)
+logger.setLevel(DEBUG)
 handler = StreamHandler()
 handler.setLevel(DEBUG)
-logger.setLevel(DEBUG)
+formatter = Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+handler.setFormatter(formatter)
 logger.addHandler(handler)
-logger.propagate = False
-
-from lib import peers_manager, pieces_manager, cefore_manager
 
 
 def main():
@@ -19,6 +15,15 @@ def main():
     pieces_m = pieces_manager.PiecesManager()
     cefore_m = cefore_manager.CeforeManager()
     logger.info("Processes are created")
+
+    peers_m.pieces_m = pieces_m
+    peers_m.cefore_m = cefore_m
+
+    pieces_m.peers_m = peers_m
+    pieces_m.cefore_m = cefore_m
+
+    cefore_m.peers_m = peers_m
+    cefore_m.piece_m = pieces_m
 
     logger.info("Processes start")
     peers_m.start()
@@ -29,30 +34,19 @@ def main():
     logger.debug("Cefore Manager PID: {}".format(cefore_m.pid))
 
     try:
-        input('Enterキーを押したら終了します。\n')
-        peers_m.shutdown()
-        pieces_m.shutdown()
-        cefore_m.shutdown()
+        while True:
+            pass
 
+    except KeyboardInterrupt:
         peers_m.join()
         pieces_m.join()
         cefore_m.join()
 
         logger.info("All Process is down")
 
-    except KeyboardInterrupt:
-        peers_m.shutdown()
-        pieces_m.shutdown()
-        cefore_m.shutdown()
-
-        peers_m.join()
-        pieces_m.join()
-        cefore_m.join()
-
-        exit(0)
-
     logger.info("exit")
 
 
 if __name__ == '__main__':
     main()
+
