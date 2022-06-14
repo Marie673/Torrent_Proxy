@@ -5,7 +5,7 @@ logger = getLogger(__name__)
 logger.setLevel(DEBUG)
 handler = StreamHandler()
 handler.setLevel(DEBUG)
-formatter = Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+formatter = Formatter('%(asctime)s - %(name)-20s - %(levelname)-7s - %(message)s')
 handler.setFormatter(formatter)
 logger.addHandler(handler)
 
@@ -16,6 +16,14 @@ def main():
     cefore_m = cefore_manager.CeforeManager()
     logger.info("Processes are created")
 
+    logger.info("Processes start")
+    peers_m.start()
+    pieces_m.start()
+    cefore_m.start()
+    logger.debug("Peers Manager PID: {}".format(peers_m.pid))
+    logger.debug("Pieces Manager PID: {}".format(pieces_m.pid))
+    logger.debug("Cefore Manager PID: {}".format(cefore_m.pid))
+
     peers_m.pieces_m = pieces_m
     peers_m.cefore_m = cefore_m
 
@@ -24,14 +32,6 @@ def main():
 
     cefore_m.peers_m = peers_m
     cefore_m.piece_m = pieces_m
-
-    logger.info("Processes start")
-    peers_m.start()
-    pieces_m.start()
-    cefore_m.start()
-    logger.debug("Peers Manager PID: {}".format(peers_m.pid))
-    logger.debug("Pieces Manager PID: {}".format(pieces_m.pid))
-    logger.debug("Cefore Manager PID: {}".format(cefore_m.pid))
 
     try:
         while True:

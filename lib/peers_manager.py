@@ -6,7 +6,7 @@ logger = getLogger(__name__)
 logger.setLevel(DEBUG)
 handler = StreamHandler()
 handler.setLevel(DEBUG)
-formatter = Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+formatter = Formatter('%(asctime)s - %(name)-20s - %(levelname)-7s - %(message)s')
 handler.setFormatter(formatter)
 logger.addHandler(handler)
 
