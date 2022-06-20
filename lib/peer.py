@@ -5,7 +5,7 @@ import socket
 import message
 
 import yaml
-#import logging.config
+import logging.config
 from logging import getLogger
 log_config = 'config.yaml'
 logging.config.dictConfig(yaml.load(open(log_config).read(), Loader=yaml.SafeLoader))
