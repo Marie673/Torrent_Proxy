@@ -139,6 +139,7 @@ class UdpTrackerAnnounceOutput:
         return socks_addr
 
 
+# ここにpeer id格納
 class Handshake(Message):
     payload_length = 68
     total_length = payload_length

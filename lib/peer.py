@@ -1,6 +1,7 @@
 import time
 import bitstring
 import socket
+import struct
 
 import message
 
@@ -132,14 +133,18 @@ class Peer(object):
         """
         logger.debug('handle_request - %s' % self.ip)
         if self.is_interested() and self.is_unchoked():
-            pub.sendMessage('PiecesManager.PeerRequestsPiece', request=request, peer=self)
+            pass
+            # TODO 修正
+            # pub.sendMessage('PiecesManager.PeerRequestsPiece', request=request, peer=self)
 
     def handle_piece(self, message):
         """
         :type message: message.Piece
         """
         # print("{} {}".format(message.piece_index, message.block_offset))
-        pub.sendMessage('PiecesManager.Piece', piece=(message.piece_index, message.block_offset, message.block))
+        pass
+        # TODO 修正
+        # pub.sendMessage('PiecesManager.Piece', piece=(message.piece_index, message.block_offset, message.block))
 
     def handle_cancel(self):
         logger.debug('handle_cancel - %s' % self.ip)
