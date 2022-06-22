@@ -5,6 +5,13 @@ from typing import List
 
 from block import Block, BLOCK_SIZE, State
 
+import yaml
+import logging.config
+from logging import getLogger
+log_config = 'config.yaml'
+logging.config.dictConfig(yaml.load(open(log_config).read(), Loader=yaml.SafeLoader))
+logger = getLogger('develop')
+
 
 class Piece(object):
     def __init__(self, piece_index: int, piece_size: int, piece_hash: str):
@@ -94,7 +101,7 @@ class Piece(object):
             except IOError:
                 f = open(path_file, 'wb')  # New file
             except Exception:
-                logging.exception("Can't write to file")
+                logger.exception("Can't write to file")
                 return
 
             f.seek(file_offset)
@@ -115,6 +122,6 @@ class Piece(object):
         if hashed_piece_raw_data == self.piece_hash:
             return True
 
-        logging.warning("Error Piece Hash")
-        logging.debug("{} : {}".format(hashed_piece_raw_data, self.piece_hash))
+        logger.warning("Error Piece Hash")
+        logger.debug("{} : {}".format(hashed_piece_raw_data, self.piece_hash))
         return False
