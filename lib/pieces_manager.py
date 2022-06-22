@@ -37,6 +37,7 @@ class PiecesManager(object):
 
         if self.pieces[piece_index].are_all_blocks_full():
             if self.pieces[piece_index].set_to_full():
+                self.pieces[piece_index].write_piece_on_disk()
                 self.complete_pieces += 1
 
     def get_block(self, piece_index, block_offset, block_length):
@@ -46,6 +47,15 @@ class PiecesManager(object):
                     return piece.get_block(block_offset, block_length)
                 else:
                     break
+
+        return None
+
+    def get_piece(self, piece_index):
+        piece = self.pieces[piece_index]
+        if piece.exist:
+            with open(self.files[0]["path"], "r+b") as file:
+                data = file.read()
+                return data
 
         return None
 

@@ -9,7 +9,7 @@ import os
 class Torrent(object):
     def __init__(self):
         self.path = ''
-        self.torrent_file = {}
+        self.torrent = {}
         self.total_length: int = 0
         self.piece_length: int = 0
         self.pieces: int = 0
@@ -24,10 +24,10 @@ class Torrent(object):
 
         contents = bdecode(torrent_bytes)
 
-        self.torrent_file = contents
-        self.piece_length = self.torrent_file['info']['piece length']
-        self.pieces = self.torrent_file['info']['pieces']
-        raw_info_hash = bencode(self.torrent_file['info'])
+        self.torrent = contents
+        self.piece_length = self.torrent['info']['piece length']
+        self.pieces = self.torrent['info']['pieces']
+        raw_info_hash = bencode(self.torrent['info'])
         self.info_hash = hashlib.sha1(raw_info_hash).digest()
         self.info_hash_str = str(self.info_hash.hex())
         self.peer_id = self.generate_peer_id()
@@ -52,13 +52,13 @@ class Torrent(object):
         return self
 
     def init_files(self):
-        root = self.torrent_file['info']['name']
+        root = self.torrent['info']['name']
 
-        if 'files' in self.torrent_file['info']:
+        if 'files' in self.torrent['info']:
             if not os.path.exists(root):
                 os.mkdir(root, 0o0766)
 
-            for file in self.torrent_file['info']['files']:
+            for file in self.torrent['info']['files']:
                 path_file = os.path.join(root, *file["path"])
 
                 if not os.path.exists(os.path.dirname(path_file)):
@@ -68,14 +68,14 @@ class Torrent(object):
                 self.total_length += file["length"]
 
         else:
-            self.file_names.append({"path": root, "length": self.torrent_file['info']['length']})
-            self.total_length = self.torrent_file['info']['length']
+            self.file_names.append({"path": root, "length": self.torrent['info']['length']})
+            self.total_length = self.torrent['info']['length']
 
     def get_trackers(self):
-        if 'announce-list' in self.torrent_file:
-            return self.torrent_file['announce-list']
+        if 'announce-list' in self.torrent:
+            return self.torrent['announce-list']
         else:
-            return [[self.torrent_file['announce']]]
+            return [[self.torrent['announce']]]
 
     @staticmethod
     def generate_peer_id():
