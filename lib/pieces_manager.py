@@ -1,14 +1,11 @@
-import time
 from multiprocessing import Process
 
-from logging import getLogger, StreamHandler, Formatter, DEBUG
-logger = getLogger(__name__)
-logger.setLevel(DEBUG)
-handler = StreamHandler()
-handler.setLevel(DEBUG)
-formatter = Formatter('%(asctime)s - %(name)-20s - %(levelname)-7s - %(message)s')
-handler.setFormatter(formatter)
-logger.addHandler(handler)
+import yaml
+import logging.config
+from logging import getLogger
+log_config = 'config.yaml'
+logging.config.dictConfig(yaml.load(open(log_config).read(), Loader=yaml.SafeLoader))
+logger = getLogger('develop')
 
 
 class PiecesManager(Process):
@@ -25,8 +22,7 @@ class PiecesManager(Process):
                 self.loop()
         except KeyboardInterrupt:
             logger.info('Exit Process')
-            exit()
+            return
 
     def loop(self):
-        logger.info('{}'.format(self.pid))
-        time.sleep(3)
+        pass

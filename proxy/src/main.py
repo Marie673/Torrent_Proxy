@@ -1,16 +1,14 @@
 from lib import peers_manager, pieces_manager, cefore_manager
+import yaml
 
-from logging import getLogger, StreamHandler, Formatter, DEBUG
-logger = getLogger(__name__)
-logger.setLevel(DEBUG)
-handler = StreamHandler()
-handler.setLevel(DEBUG)
-formatter = Formatter('%(asctime)s - %(name)-20s - %(levelname)-7s - %(message)s')
-handler.setFormatter(formatter)
-logger.addHandler(handler)
+import logging.config
+from logging import getLogger
+log_config = 'config.yaml'
 
 
 def main():
+    logger = getLogger('develop')
+
     peers_m = peers_manager.PeersManager()
     pieces_m = pieces_manager.PiecesManager()
     cefore_m = cefore_manager.CeforeManager()
@@ -48,5 +46,6 @@ def main():
 
 
 if __name__ == '__main__':
+    logging.config.dictConfig(yaml.load(open(log_config).read(), Loader=yaml.SafeLoader))
     main()
 

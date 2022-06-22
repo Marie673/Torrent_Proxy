@@ -1,23 +1,28 @@
 import time
+import bitstring
 import socket
 import struct
-import bitstring
-from pubsub import pub
-import logging
 
-import message
+from message import Handshake, KeepAlive, UnChoke, Interested, Piece,\
+    WrongMessageException, MessageDispatcher
+
+import yaml
+import logging.config
+from logging import getLogger
+log_config = 'config.yaml'
+logging.config.dictConfig(yaml.load(open(log_config).read(), Loader=yaml.SafeLoader))
+logger = getLogger('develop')
 
 
 class Peer(object):
     def __init__(self, number_of_pieces, ip, port=6881):
         self.last_call = 0.0
-        self.has_handshacked = False
+        self.has_handshaked = False
         self.healthy = False
         self.read_buffer = b''
         self.socket = None
         self.ip = ip
         self.port = port
-        self.number_of_pieces = number_of_pieces
         self.bit_field = bitstring.BitArray(number_of_pieces)
         self.state = {
             'am_choking': True,
@@ -27,13 +32,13 @@ class Peer(object):
         }
 
     def __hash__(self):
-        return "%s:%d" % (self.ip, self.port)
+        return '{}:{}'.format(self.ip, self.port)
 
     def connect(self):
         try:
             self.socket = socket.create_connection((self.ip, self.port), timeout=2)
             self.socket.setblocking(False)
-            logging.debug("Connected to peer ip: {} - port: {}".format(self.ip, self.port))
+            logger.debug("Connected to peer ip: {} - port: {}".format(self.ip, self.port))
             self.healthy = True
 
         except Exception as e:
@@ -48,7 +53,7 @@ class Peer(object):
             self.last_call = time.time()
         except Exception as e:
             self.healthy = False
-            logging.error("Failed to send to peer : %s" % e.__str__())
+            logger.error("Failed to send to peer : %s" % e.__str__())
 
     def is_eligible(self):
         now = time.time()
@@ -76,34 +81,34 @@ class Peer(object):
         return self.state['am_interested']
 
     def handle_choke(self):
-        logging.debug('handle_choke - %s' % self.ip)
+        logger.debug('handle_choke - %s' % self.ip)
         self.state['peer_choking'] = True
 
     def handle_unchoke(self):
-        logging.debug('handle_unchoke - %s' % self.ip)
+        logger.debug('handle_unchoke - %s' % self.ip)
         self.state['peer_choking'] = False
 
     def handle_interested(self):
-        logging.debug('handle_interested - %s' % self.ip)
+        logger.debug('handle_interested - %s' % self.ip)
         self.state['peer_interested'] = True
 
         if self.am_choking():
-            unchoke = message.UnChoke().to_bytes()
+            unchoke = UnChoke().to_bytes()
             self.send_to_peer(unchoke)
 
     def handle_not_interested(self):
-        logging.debug('handle_not_interested - %s' % self.ip)
+        logger.debug('handle_not_interested - %s' % self.ip)
         self.state['peer_interested'] = False
 
     def handle_have(self, have):
         """
         :type have: message.Have
         """
-        logging.debug('handle_have - ip: %s - piece: %s' % (self.ip, have.piece_index))
+        logger.debug('handle_have - ip: %s - piece: %s' % (self.ip, have.piece_index))
         self.bit_field[have.piece_index] = True
 
         if self.is_choking() and not self.state['am_interested']:
-            interested = message.Interested().to_bytes()
+            interested = Interested().to_bytes()
             self.send_to_peer(interested)
             self.state['am_interested'] = True
 
@@ -113,59 +118,63 @@ class Peer(object):
         """
         :type bitfield: message.BitField
         """
-        logging.debug('handle_bitfield - %s - %s' % (self.ip, bitfield.bitfield))
+        logger.debug('handle_bitfield - %s - %s' % (self.ip, bitfield.bitfield))
         self.bit_field = bitfield.bitfield
 
         if self.is_choking() and not self.state['am_interested']:
-            interested = message.Interested().to_bytes()
+            interested = Interested().to_bytes()
             self.send_to_peer(interested)
             self.state['am_interested'] = True
 
         # pub.sendMessage('RarestPiece.updatePeersBitfield', bitfield=self.bit_field)
 
+    # TODO いる？考える
     def handle_request(self, request):
         """
         :type request: message.Request
         """
-        logging.debug('handle_request - %s' % self.ip)
+        logger.debug('handle_request - %s' % self.ip)
         if self.is_interested() and self.is_unchoked():
-            pub.sendMessage('PiecesManager.PeerRequestsPiece', request=request, peer=self)
+            pass
+            # TODO 修正
+            return request
+            # pub.sendMessage('PiecesManager.PeerRequestsPiece', request=request, peer=self)
 
-    def handle_piece(self, message):
-        """
-        :type message: message.Piece
-        """
-        # print("{} {}".format(message.piece_index, message.block_offset))
-        pub.sendMessage('PiecesManager.Piece', piece=(message.piece_index, message.block_offset, message.block))
+    @staticmethod
+    def handle_piece(message: Piece):
+        piece = (message.piece_index, message.block_offset, message.block)
+        return piece
 
+    # TODO
     def handle_cancel(self):
-        logging.debug('handle_cancel - %s' % self.ip)
+        logger.debug('handle_cancel - %s' % self.ip)
 
+    # TODO
     def handle_port_request(self):
-        logging.debug('handle_port_request - %s' % self.ip)
+        logger.debug('handle_port_request - %s' % self.ip)
 
     def _handle_handshake(self):
         try:
-            handshake_message = message.Handshake.from_bytes(self.read_buffer)
+            handshake_message = Handshake.from_bytes(self.read_buffer)
             self.has_handshacked = True
             self.read_buffer = self.read_buffer[handshake_message.total_length:]
-            logging.debug('handle_handshake - %s' % self.ip)
+            logger.debug('handle_handshake - %s' % self.ip)
             return True
 
         except Exception:
-            logging.exception("First message should always be a handshake message")
+            logger.exception("First message should always be a handshake message")
             self.healthy = False
 
         return False
 
     def _handle_keep_alive(self):
         try:
-            keep_alive = message.KeepAlive.from_bytes(self.read_buffer)
-            logging.debug('handle_keep_alive - %s' % self.ip)
-        except message.WrongMessageException:
+            keep_alive = KeepAlive.from_bytes(self.read_buffer)
+            logger.debug('handle_keep_alive - %s' % self.ip)
+        except WrongMessageException:
             return False
         except Exception:
-            logging.exception("Error KeepALive, (need at least 4 bytes : {})".format(len(self.read_buffer)))
+            logger.exception("Error KeepALive, (need at least 4 bytes : {})".format(len(self.read_buffer)))
             return False
 
         self.read_buffer = self.read_buffer[keep_alive.total_length:]
@@ -186,8 +195,10 @@ class Peer(object):
                 self.read_buffer = self.read_buffer[total_length:]
 
             try:
-                received_message = message.MessageDispatcher(payload).dispatch()
+                received_message = MessageDispatcher(payload).dispatch()
                 if received_message:
                     yield received_message
-            except message.WrongMessageException as e:
-                logging.exception(e.__str__())
+            except WrongMessageException as e:
+                logger.exception(e.__str__())
+
+

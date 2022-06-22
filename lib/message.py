@@ -1,11 +1,17 @@
-import logging
+from struct import unpack, pack
 import random
 import socket
-from struct import pack, unpack
-import bitstring
 
-HANDSHAKE_PSTR = b'BitTorrent protocol'
-HANDSHAKE_PSTR_LEN = len(HANDSHAKE_PSTR)
+import bitstring as bitstring
+import yaml
+import logging.config
+from logging import getLogger
+log_config = 'config.yaml'
+logging.config.dictConfig(yaml.load(open(log_config).read(), Loader=yaml.SafeLoader))
+logger = getLogger('develop')
+
+HANDSHAKE_PROTOCOL = b'BitTorrent protocol'
+HANDSHAKE_PROTOCOL_LEN = len(HANDSHAKE_PROTOCOL)
 LENGTH_PREFIX = 4
 
 
@@ -19,10 +25,11 @@ class MessageDispatcher:
 
     def dispatch(self):
         try:
-            payload_length, message_id = unpack(">IB", self.payload[:5])
+            payload_length, message_id = unpack('>IB', self.payload[:5])
         except Exception as e:
-            logging.warning("Failed to unpacking message: %s" % e.__str__())
+            logger.warning('Failed to unpacking message: {}'.format(e.__str__()))
             return None
+
         map_id_to_message = {
             0: Choke,
             1: UnChoke,
@@ -37,7 +44,7 @@ class MessageDispatcher:
         }
 
         if message_id not in list(map_id_to_message.keys()):
-            raise WrongMessageException("Wrong message id")
+            raise WrongMessageException('Wrong message id')
 
         return map_id_to_message[message_id].from_bytes(self.payload)
 
@@ -68,6 +75,10 @@ class UdpTrackerConnection(Message):
 
 
 class UdpTrackerAnnounce(Message):
+    @classmethod
+    def from_bytes(cls, payload):
+        pass
+
     def __init__(self, info_hash, conn_id, peer_id):
         super(UdpTrackerAnnounce, self).__init__()
         self.peer_id = peer_id
@@ -128,6 +139,7 @@ class UdpTrackerAnnounceOutput:
         return socks_addr
 
 
+# ここにpeer id格納
 class Handshake(Message):
     payload_length = 68
     total_length = payload_length
@@ -141,9 +153,9 @@ class Handshake(Message):
 
     def to_bytes(self):
         reserved = b'\x00' * 8
-        handshake = pack(">B{}s8s20s20s".format(HANDSHAKE_PSTR_LEN),
-                         HANDSHAKE_PSTR_LEN,
-                         HANDSHAKE_PSTR,
+        handshake = pack(">B{}s8s20s20s".format(HANDSHAKE_PROTOCOL_LEN),
+                         HANDSHAKE_PROTOCOL_LEN,
+                         HANDSHAKE_PROTOCOL,
                          reserved,
                          self.info_hash,
                          self.peer_id)
@@ -156,7 +168,7 @@ class Handshake(Message):
         pstr, reserved, info_hash, peer_id = unpack(">{}s8s20s20s".format(pstrlen),
                                                     payload[1:cls.total_length])
 
-        if pstr != HANDSHAKE_PSTR:
+        if pstr != HANDSHAKE_PROTOCOL:
             raise ValueError("Invalid protocol")
 
         return Handshake(info_hash, peer_id)
