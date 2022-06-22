@@ -1,5 +1,7 @@
 from multiprocessing import Process
 
+from piece
+
 import yaml
 import logging.config
 from logging import getLogger
@@ -26,3 +28,5 @@ class PiecesManager(Process):
 
     def loop(self):
         pass
+
+
