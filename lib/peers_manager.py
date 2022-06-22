@@ -3,20 +3,24 @@ import random
 import select
 from multiprocessing import Process
 import socket
-
-import yaml
-import logging.config
-from logging import getLogger
-
 from typing import List, Dict
 
 from message import Message, KeepAlive, Handshake, Choke, UnChoke, Interested, \
     NotInterested, Have, BitField, Request, Piece, Cancel, Port
 from peer import Peer
+from tracker import Tracker
+from torrent import Torrent
+
+import yaml
+import logging.config
+from logging import getLogger
 
 log_config = 'config.yaml'
 logging.config.dictConfig(yaml.load(open(log_config).read(), Loader=yaml.SafeLoader))
 logger = getLogger('develop')
+
+MAX_PEERS_TRY_CONNECT = 200
+MAX_PEERS_CONNECTED = 100
 
 
 class PeersManager(Process):
@@ -41,6 +45,8 @@ class PeersManager(Process):
             return
 
     def loop(self):
+        # TODO peerの数を確認してadd peerを行う
+
         read = [peer.socket for peers_list in self.peers_dict.values()
                 for peer in peers_list]
         read_list, _, _ = select.select(read, [], [], 1)
@@ -52,7 +58,7 @@ class PeersManager(Process):
                 continue
 
             try:
-                payload = self._read_from_socket(sock)
+                payload = self.read_from_socket(sock)
             except Exception as e:
                 logger.error('Recv failed {}'.format(e.__str__()))
                 self.remove_peer(peer)
@@ -62,6 +68,30 @@ class PeersManager(Process):
 
             for message in peer.get_messages():
                 self._process_new_message(message, peer)
+
+    def try_peer_connect(self, torrent: Torrent):
+        # tracker
+        tracker = Tracker(torrent)
+        dict_sock_addr = tracker.get_peers_from_trackers()
+
+        logger.info("Trying to connect to %d peer(s)" % len(dict_sock_addr))
+
+        connected_peers: List[Peer] = []
+        for _, sock_addr in dict_sock_addr.items():
+            if len(connected_peers) >= MAX_PEERS_CONNECTED:
+                break
+
+            new_peer = Peer(int(torrent.number_of_pieces), sock_addr.ip, sock_addr.port)
+            if not new_peer.connect():
+                continue
+
+            print('Connected to %d/%d peers' % (len(connected_peers), MAX_PEERS_CONNECTED))
+
+            connected_peers.append(new_peer)
+
+        # kademlia
+        # ipfs
+        self.add_peers(connected_peers, torrent.info_hash_str)
 
     def get_random_peer_having_piece(self, info_hash, index):
         ready_peers = []
@@ -138,7 +168,7 @@ class PeersManager(Process):
         pass
 
     @staticmethod
-    def _read_from_socket(sock: socket.socket) -> bytes:
+    def read_from_socket(sock: socket.socket) -> bytes:
         data = b''
 
         while True:
