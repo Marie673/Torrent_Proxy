@@ -68,10 +68,6 @@ class Piece(object):
 
         self.is_full = True
         self.raw_data = data
-        # ここでファイルに書き込み
-        # この部分をDataのプッシュに割り当て
-        self._write_piece_on_disk()
-        pub.sendMessage('PiecesManager.PieceCompleted', piece_index=self.piece_index)
 
         return True
 
@@ -96,13 +92,11 @@ class Piece(object):
             piece_offset = file["pieceOffset"]
             length = file["length"]
 
+            # TODO mutex処理追加
             try:
                 f = open(path_file, 'r+b')  # Already existing file
             except IOError:
                 f = open(path_file, 'wb')  # New file
-            except Exception:
-                logger.exception("Can't write to file")
-                return
 
             f.seek(file_offset)
             f.write(self.raw_data[piece_offset:piece_offset + length])

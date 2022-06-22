@@ -66,9 +66,9 @@ class PiecesManager(object):
 
             if i == last_piece:
                 piece_length = self.torrent.total_length - (self.number_of_pieces - 1) * self.torrent.piece_length
-                pieces.append(piece.Piece(i, piece_length, self.torrent.pieces[start:end]))
+                pieces.append(Piece(i, piece_length, self.torrent.pieces[start:end]))
             else:
-                pieces.append(piece.Piece(i, self.torrent.piece_length, self.torrent.pieces[start:end]))
+                pieces.append(Piece(i, self.torrent.piece_length, self.torrent.pieces[start:end]))
 
         return pieces
 
