@@ -8,6 +8,7 @@ import os
 
 class Torrent(object):
     def __init__(self):
+        self.path = ''
         self.torrent_file = {}
         self.total_length: int = 0
         self.piece_length: int = 0
@@ -15,7 +16,7 @@ class Torrent(object):
         self.info_hash: str = ''
         self.info_hash_str: str = ''
         self.peer_id: str = ''
-        # self.announce_list = ''
+        self.announce_list = ''
         self.file_names = []
         self.number_of_pieces: int = 0
 
@@ -29,7 +30,6 @@ class Torrent(object):
         raw_info_hash = bencode(self.torrent_file['info'])
         self.info_hash = hashlib.sha1(raw_info_hash).digest()
         self.info_hash_str = str(self.info_hash.hex())
-        print("info_hash"+ self.info_hash_str)
         self.peer_id = self.generate_peer_id()
         self.announce_list = self.get_trackers()
         self.init_files()
@@ -46,25 +46,9 @@ class Torrent(object):
         logging.debug('start load_from_path')
         self.path = path
         with open(path, 'rb') as file:
-            contents = bdecode(file)
-
-        self.torrent_file = contents
-        self.piece_length = self.torrent_file['info']['piece length']
-        self.pieces = self.torrent_file['info']['pieces']
-        raw_info_hash = bencode(self.torrent_file['info'])
-        self.info_hash = hashlib.sha1(raw_info_hash).digest()
-        self.info_hash_str = str(self.info_hash.hex())
-        self.peer_id = self.generate_peer_id()
-        # self.announce_list = self.get_trackers()
-        self.init_files()
-        self.number_of_pieces = math.ceil(self.total_length / self.piece_length)
-        logging.debug(self.file_names)
-
-        assert(self.total_length > 0)
-        assert(len(self.file_names) > 0)
+            self.load_from_bytes(file)
 
         logging.debug('Success load torrent file')
-
         return self
 
     def init_files(self):
@@ -93,6 +77,7 @@ class Torrent(object):
         else:
             return [[self.torrent_file['announce']]]
 
-    def generate_peer_id(self):
+    @staticmethod
+    def generate_peer_id():
         seed = str(time.time())
         return hashlib.sha1(seed.encode('utf-8')).digest()
