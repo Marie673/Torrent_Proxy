@@ -1,10 +1,16 @@
 import hashlib
 import math
 import time
-import logging
+from typing import List
 
-from pubsub import pub
 from block import Block, BLOCK_SIZE, State
+
+import yaml
+import logging.config
+from logging import getLogger
+log_config = 'config.yaml'
+logging.config.dictConfig(yaml.load(open(log_config).read(), Loader=yaml.SafeLoader))
+logger = getLogger('develop')
 
 
 class Piece(object):
@@ -12,12 +18,11 @@ class Piece(object):
         self.piece_index: int = piece_index
         self.piece_size: int = piece_size
         self.piece_hash: str = piece_hash
-
         self.is_full: bool = False
         self.files = []
         self.raw_data: bytes = b''
         self.number_of_blocks: int = int(math.ceil(float(piece_size) / BLOCK_SIZE))
-        self.blocks: list[Block] = []
+        self.blocks: List[Block] = []
 
         self._init_blocks()
 
@@ -28,11 +33,10 @@ class Piece(object):
 
     def set_block(self, offset, data):
         index = int(offset / BLOCK_SIZE)
-        # logging.debug("{} {} {}".format(self.piece_index,index, len(self.blocks)))
+
         if not self.is_full and not self.blocks[index].state == State.FULL:
             self.blocks[index].data = data
             self.blocks[index].state = State.FULL
-
 
     def get_block(self, block_offset, block_length):
         return self.raw_data[block_offset:block_length]
@@ -64,8 +68,6 @@ class Piece(object):
 
         self.is_full = True
         self.raw_data = data
-        self._write_piece_on_disk()
-        pub.sendMessage('PiecesManager.PieceCompleted', piece_index=self.piece_index)
 
         return True
 
@@ -90,13 +92,11 @@ class Piece(object):
             piece_offset = file["pieceOffset"]
             length = file["length"]
 
+            # TODO mutex処理追加
             try:
                 f = open(path_file, 'r+b')  # Already existing file
             except IOError:
                 f = open(path_file, 'wb')  # New file
-            except Exception:
-                logging.exception("Can't write to file")
-                return
 
             f.seek(file_offset)
             f.write(self.raw_data[piece_offset:piece_offset + length])
@@ -116,6 +116,6 @@ class Piece(object):
         if hashed_piece_raw_data == self.piece_hash:
             return True
 
-        logging.warning("Error Piece Hash")
-        logging.debug("{} : {}".format(hashed_piece_raw_data, self.piece_hash))
+        logger.warning("Error Piece Hash")
+        logger.debug("{} : {}".format(hashed_piece_raw_data, self.piece_hash))
         return False
