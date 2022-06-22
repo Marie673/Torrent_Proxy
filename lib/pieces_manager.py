@@ -111,5 +111,3 @@ class PiecesManager(object):
 
                 files.append(file)
         return files
-
-
