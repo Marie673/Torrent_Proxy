@@ -81,8 +81,20 @@ class PeersManager(Process):
 
         raise Exception('Peer not present in peer_list')
 
+    def exist_peer(self, peer):  # keyを返す
+        for info_hash, peers in self.peers_dict.items():
+            if peer in peers:
+                return info_hash
+
+        return 0
+
     def add_peers(self, peers, info_hash) -> None:
         for peer in peers:
+            key = self.exist_peer(peer)
+            if key:
+                logger.info('{} is already connected.'.format(peer.ip))
+                continue
+
             if self._do_handshake(peer, info_hash):
                 self.peers_dict.setdefault(info_hash, []).append(peer)
             else:
@@ -151,8 +163,8 @@ class PeersManager(Process):
         peer.send_to_peer(handshake.to_bytes())
         logger.info('new peer added: {}({})'.format(peer.ip, peer.port))
 
-    @staticmethod
-    def _process_new_message(new_message: Message, peer: Peer) -> None:
+    def _process_new_message(self, new_message: Message, peer: Peer) -> None:
+        # TODO Handshake KeepAliveも受け付けるようにする
         if isinstance(new_message, Handshake) or isinstance(new_message, KeepAlive):
             logger.error('Handshake or KeepAlive should have already been handled')
 
@@ -176,9 +188,11 @@ class PeersManager(Process):
 
         elif isinstance(new_message, Request):
             peer.handle_request(new_message)
+            self.peer_request_piece(new_message, peer)
 
         elif isinstance(new_message, Piece):
-            peer.handle_piece(new_message)
+            piece_index, block_offset, block = peer.handle_piece(new_message)
+            # TODO Piece Managerへの登録
 
         elif isinstance(new_message, Cancel):
             peer.handle_cancel()
