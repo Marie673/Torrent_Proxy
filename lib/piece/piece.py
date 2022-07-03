@@ -29,7 +29,7 @@ class Piece(object):
 
         self._init_blocks()
 
-    def _update_block_status(self):  # if block is pending for too long : set it free
+    def update_block_status(self):  # if block is pending for too long : set it free
         for i, block in enumerate(self.blocks):
             if block.state == State.PENDING and (time.time() - block.last_seen) > 5:
                 self.blocks[i] = Block()

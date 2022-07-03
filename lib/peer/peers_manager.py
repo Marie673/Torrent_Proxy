@@ -9,7 +9,7 @@ from message import Message, KeepAlive, Handshake, Choke, UnChoke, Interested, \
     NotInterested, Have, BitField, Request, Piece, Cancel, Port
 from peer import Peer
 from tracker import Tracker
-from torrent import Torrent
+from lib.torrent import Torrent
 
 import yaml
 import logging.config

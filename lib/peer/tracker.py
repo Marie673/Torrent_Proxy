@@ -4,8 +4,8 @@ from bcoding import bdecode
 import socket
 from urllib.parse import urlparse
 
-from message import UdpTrackerConnection, UdpTrackerAnnounce, UdpTrackerAnnounceOutput
-from peers_manager import PeersManager
+from lib.peer.message import UdpTrackerConnection, UdpTrackerAnnounce, UdpTrackerAnnounceOutput
+from lib.peer.peers_manager import PeersManager
 
 import yaml
 import logging.config

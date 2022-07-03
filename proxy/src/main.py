@@ -1,8 +1,11 @@
-from lib import peers_manager, pieces_manager, cefore_manager
+from lib import cefore_manager
+from lib.peer import peers_manager
+from lib.piece import pieces_manager
 import yaml
 
 import logging.config
 from logging import getLogger
+
 log_config = 'config.yaml'
 
 

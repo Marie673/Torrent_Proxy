@@ -1,6 +1,6 @@
 import bitstring
 
-from piece import Piece
+from lib.piece.piece import Piece
 
 import yaml
 from logging import getLogger
