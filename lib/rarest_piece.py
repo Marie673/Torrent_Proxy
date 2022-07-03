@@ -1,4 +1,10 @@
-import logging
+import yaml
+import logging.config
+from logging import getLogger
+
+log_config = 'config.yaml'
+logging.config.dictConfig(yaml.load(open(log_config).read(), Loader=yaml.SafeLoader))
+logger = getLogger('develop')
 
 
 class RarestPieces(object):
@@ -22,7 +28,7 @@ class RarestPieces(object):
             if piece_index is not None:
                 self.rarest_pieces.__delitem__(piece_index)
         except Exception:
-            logging.exception("Failed to remove rarest piece")
+            logger.exception("Failed to remove rarest piece")
 
         # Peer's bitfield updated
         else:

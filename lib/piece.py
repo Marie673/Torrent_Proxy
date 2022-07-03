@@ -29,7 +29,7 @@ class Piece(object):
 
         self._init_blocks()
 
-    def update_block_status(self):  # if block is pending for too long : set it free
+    def _update_block_status(self):  # if block is pending for too long : set it free
         for i, block in enumerate(self.blocks):
             if block.state == State.PENDING and (time.time() - block.last_seen) > 5:
                 self.blocks[i] = Block()
@@ -41,7 +41,6 @@ class Piece(object):
             self.blocks[index].data = data
             self.blocks[index].state = State.FULL
 
-    # files未対応
     def get_block(self, block_offset, block_length):
         if self.exist:
             for path_file in self.files:
@@ -94,28 +93,6 @@ class Piece(object):
 
         else:
             self.blocks.append(Block(block_size=int(self.piece_size)))
-
-    # files未対応
-    def write_piece_on_disk(self):
-        for file in self.files:
-            path_file = file["path"]
-            file_offset = file["fileOffset"]
-            piece_offset = file["pieceOffset"]
-            length = file["length"]
-
-            # TODO mutex処理追加
-            try:
-                f = open(path_file, 'r+b')  # Already existing file
-            except IOError:
-                f = open(path_file, 'wb')  # New file
-
-            f.seek(file_offset)
-            f.write(self.raw_data[piece_offset:piece_offset + length])
-            f.close()
-
-        self.exist = True
-        self.raw_data = b''
-        self.blocks = []
 
     def _merge_blocks(self):
         buf = b''

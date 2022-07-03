@@ -1,11 +1,11 @@
-from multiprocessing import Process
 import bitstring
 
 from piece import Piece
 
 import yaml
-import logging.config
 from logging import getLogger
+import logging.config
+
 log_config = 'config.yaml'
 logging.config.dictConfig(yaml.load(open(log_config).read(), Loader=yaml.SafeLoader))
 logger = getLogger('develop')
@@ -20,35 +20,62 @@ class PiecesManager(object):
         self.files = self._load_files()
         self.complete_pieces = 0
 
+        # トレントのファイル
         for file in self.files:
             id_piece = file['idPiece']
             self.pieces[id_piece].files.append(file)
 
-    def update_bitfield(self, piece_index):
-        self.bitfield[piece_index] = 1
+    def _update_bitfield(self, piece_index):
+        piece = self.pieces[piece_index]
+        if piece.is_full:
+            self.bitfield[piece_index] = 1
+        else:
+            self.bitfield[piece_index] = 0
 
-    def receive_block_piece(self, piece):
-        piece_index, piece_offset, piece_data = piece
+    def receive_block_piece(self, receive_piece_data):
+        piece_index, piece_offset, piece_data = receive_piece_data
 
         if self.pieces[piece_index].is_full:
             return
 
-        self.pieces[piece_index].set_block(piece_offset, piece_data)
+        piece = self.pieces[piece_index]
+        piece.set_block(piece_offset, piece_data)
 
-        if self.pieces[piece_index].are_all_blocks_full():
-            if self.pieces[piece_index].set_to_full():
-                self.pieces[piece_index].write_piece_on_disk()
+        if piece.are_all_blocks_full():
+            if piece.set_to_full():
+                self._write_piece_on_disk(piece)
                 self.complete_pieces += 1
 
-    def get_block(self, piece_index, block_offset, block_length):
-        for piece in self.pieces:
-            if piece_index == piece.piece_index:
-                if piece.is_full:
-                    return piece.get_block(block_offset, block_length)
-                else:
-                    break
+    def _write_piece_on_disk(self, piece):
+        # TODO
+        for file in self.files:
+            path_file = file["path"]
+            file_offset = file["fileOffset"]
+            piece_offset = file["pieceOffset"]
+            length = file["length"]
 
-        return None
+            # TODO mutex処理追加
+            try:
+                f = open(path_file, 'r+b')  # Already existing file
+            except IOError:
+                f = open(path_file, 'wb')  # New file
+
+            f.seek(file_offset)
+            f.write(piece.raw_data[piece_offset:piece_offset + length])
+            f.close()
+
+        # TODO piece reset関数をPieceに追加
+        piece.exist = True
+        piece.raw_data = b''
+        piece.blocks = []
+
+    def get_block(self, piece_index, block_offset, block_length) -> Piece:
+        piece = self.pieces[piece_index]
+        if piece_index == piece.piece_index:
+            if piece.is_full:
+                return piece.get_block(block_offset, block_length)
+        # TODO 例外クラス作る
+        raise Exception('Piece is not full')
 
     def get_piece(self, piece_index):
         piece = self.pieces[piece_index]
@@ -59,7 +86,7 @@ class PiecesManager(object):
 
         return None
 
-    def all_pieces_completed(self):
+    def all_pieces_completed(self) -> bool:
         for piece in self.pieces:
             if not piece.is_full:
                 return False
