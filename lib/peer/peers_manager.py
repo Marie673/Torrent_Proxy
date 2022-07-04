@@ -1,121 +1,97 @@
 import errno
 import random
-import select
-from multiprocessing import Process
 import socket
+
+from message import Message, KeepAlive, Handshake, Choke, UnChoke, Interested, \
+    NotInterested, Have, BitField, Request, Piece, Cancel, Port
+from peer import Peer
+from tracker import Tracker
+from lib.torrent import Torrent
 
 import yaml
 import logging.config
 from logging import getLogger
 
-from typing import List, Dict
-
-from message import Message, KeepAlive, Handshake, Choke, UnChoke, Interested, \
-    NotInterested, Have, BitField, Request, Piece, Cancel, Port
-from peer import Peer
-
 log_config = 'config.yaml'
 logging.config.dictConfig(yaml.load(open(log_config).read(), Loader=yaml.SafeLoader))
 logger = getLogger('develop')
 
+MAX_PEERS_TRY_CONNECT = 200
+MAX_PEERS_CONNECTED = 100
 
-class PeersManager(Process):
-    peers_list = List[Peer]
 
-    def __init__(self):
-        super().__init__()
-        self.logger = getLogger('develop')
-        self.pieces_m = None
-        self.cefore_m = None
+class PeersManager(object):
+    def __init__(self, torrent: Torrent):
+        self.torrent = torrent
+        self.peers = {}
 
-        self.peers_dict: Dict[str, PeersManager.peers_list] = {}
+    def try_peer_connect(self):
+        # tracker
+        tracker = Tracker(self.torrent)
+        addrs = tracker.get_peers_from_trackers()
 
-    def run(self) -> None:
-        logger.info('Process Peers Manager is start')
+        logger.info("Trying to connect to %d peer(s)" % len(addrs))
 
-        try:
-            while True:
-                self.loop()
-        except KeyboardInterrupt:
-            logger.info('Exit Process')
-            return
+        for _, sock_addr in addrs.items():
+            if len(self.peers) >= MAX_PEERS_CONNECTED:
+                break
 
-    def loop(self):
-        read = [peer.socket for peers_list in self.peers_dict.values()
-                for peer in peers_list]
-        read_list, _, _ = select.select(read, [], [], 1)
-
-        for sock in read_list:
-            peer = self._get_peer_by_socket(sock)
-            if not peer.healthy:
-                self.remove_peer(peer)
+            new_peer = Peer(int(self.torrent.number_of_pieces), sock_addr.ip, sock_addr.port)
+            if not new_peer.connect():
                 continue
 
-            try:
-                payload = self._read_from_socket(sock)
-            except Exception as e:
-                logger.error('Recv failed {}'.format(e.__str__()))
-                self.remove_peer(peer)
-                continue
+            print('Connected to %d/%d peers' % (len(self.peers), MAX_PEERS_CONNECTED))
 
-            peer.read_buffer += payload
+            self.add_peers(sock_addr)
 
-            for message in peer.get_messages():
-                self._process_new_message(message, peer)
+        # kademlia
+        # ipfs
 
-    def get_random_peer_having_piece(self, info_hash, index):
+    def get_random_peer_having_piece(self, index):
         ready_peers = []
 
-        peers_list = self.peers_dict[info_hash]
-        for peer in peers_list:
+        for _, peer in self.peers.items():
             if peer.is_eligible() and peer.is_unchoked() and peer.am_interested() and peer.has_piece(index):
                 ready_peers.append(peer)
 
         return random.choice(ready_peers) if ready_peers else None
 
     def _get_peer_by_socket(self, sock):
-        for peers_list in self.peers_dict.values():
-            for peer in peers_list:
-                if sock == peer.socket:
-                    return peer
+        for peer in self.peers:
+            if sock == peer.socket:
+                return peer
 
         raise Exception('Peer not present in peer_list')
 
     def exist_peer(self, peer):  # keyを返す
-        for info_hash, peers in self.peers_dict.items():
-            if peer in peers:
-                return info_hash
+        if peer in self.peers:
+            return True
 
-        return 0
+        return False
 
-    def add_peers(self, peers, info_hash) -> None:
-        for peer in peers:
-            key = self.exist_peer(peer)
-            if key:
-                logger.info('{} is already connected.'.format(peer.ip))
-                continue
+    def add_peers(self, peer) -> None:
+        if self.exist_peer(peer):
+            logger.info('{} is already connected.'.format(peer.ip))
+            return
 
-            if self._do_handshake(peer, info_hash):
-                self.peers_dict.setdefault(info_hash, []).append(peer)
-            else:
-                logger.error('Error _do_handshake')
+        if self._do_handshake(peer):
+            self.peers[peer.__hash__()] = peer
+        else:
+            logger.error('Error _do_handshake')
 
     def remove_peer(self, peer) -> None:
-        for key, peers_list in self.peers_dict.items():
-            if peer in peers_list:
-                self.peers_dict[key].remove(peer)
+        if self.exist_peer(peer):
+            del self.peers[peer.__hash__]
 
     def has_unchoked_peers(self, info_hash) -> bool:
-        peers_list = self.peers_dict[info_hash]
-        for peer in peers_list:
+        for peer in self.peers.values():
             if peer.is_unchoked():
                 return True
         return False
 
-    def unchoked_peers_count(self, info_hash):
+    def unchoked_peers_count(self):
         cpt = 0
-        peers_list = self.peers_dict[info_hash]
-        for peer in peers_list:
+        for peer in self.peers.values():
             if peer.is_unchoked():
                 cpt += 1
 
@@ -123,6 +99,7 @@ class PeersManager(Process):
 
     # Peerから呼び出したい?
     def peer_request_piece(self, request=None, peer=None):
+        """
         if not request or not peer:
             logger.error('empty request/peer message')
 
@@ -132,13 +109,13 @@ class PeersManager(Process):
             piece = Piece(piece_index, block_offset, block_length, block).to_bytes()
             peer.send_to_peer(piece)
             logger.info('send piece index #{} to peer: {}'.format(piece_index, peer.ip))
-
+        """
     # peers_listが持っているピースを更新
     def peers_bitfield(self, info_hash, bitfield=None):
         pass
 
     @staticmethod
-    def _read_from_socket(sock: socket.socket) -> bytes:
+    def read_from_socket(sock: socket.socket) -> bytes:
         data = b''
 
         while True:
@@ -157,8 +134,8 @@ class PeersManager(Process):
 
         return data
 
-    @staticmethod
-    def _do_handshake(peer, info_hash):
+    def _do_handshake(self, peer):
+        info_hash = self.torrent.info_hash_str
         handshake = Handshake(info_hash)
         peer.send_to_peer(handshake.to_bytes())
         logger.info('new peer added: {}({})'.format(peer.ip, peer.port))

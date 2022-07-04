@@ -1,16 +1,21 @@
 import ipaddress
-import struct
-import peer
-from message import UdpTrackerConnection, UdpTrackerAnnounce, UdpTrackerAnnounceOutput
-from peers_manager import PeersManager
 import requests
-import logging
 from bcoding import bdecode
 import socket
 from urllib.parse import urlparse
 
-MAX_PEERS_TRY_CONNECT = 30
-MAX_PEERS_CONNECTED = 8
+from lib.peer.message import UdpTrackerConnection, UdpTrackerAnnounce, UdpTrackerAnnounceOutput
+from lib.peer.peers_manager import PeersManager
+
+import yaml
+import logging.config
+from logging import getLogger
+
+log_config = 'config.yaml'
+logging.config.dictConfig(yaml.load(open(log_config).read(), Loader=yaml.SafeLoader))
+logger = getLogger('develop')
+
+MAX_PEERS_TRY_CONNECT = 200
 
 
 class SockAddr:
@@ -31,12 +36,8 @@ class Tracker(object):
         self.dict_sock_addr = {}
 
     def get_peers_from_trackers(self):
-        s = SockAddr("10.0.2.3", 53117)
-        self.dict_sock_addr[s.__hash__()] = s
-        s = SockAddr("10.0.2.4", 53117)
-        self.dict_sock_addr[s.__hash__()] = s
-        """ 実験用につきコメント化 ↑実験用
         for i, tracker in enumerate(self.torrent.announce_list):
+
             if len(self.dict_sock_addr) >= MAX_PEERS_TRY_CONNECT:
                 break
 
@@ -44,7 +45,7 @@ class Tracker(object):
 
             if str.startswith(tracker_url, "http"):
                 try:
-                    self.http_scraper(self.torrent, tracker_url)
+                    self.http_scraper(tracker_url)
                 except Exception as e:
                     logging.error("HTTP scraping failed: %s " % e.__str__())
 
@@ -56,42 +57,24 @@ class Tracker(object):
 
             else:
                 logging.error("unknown scheme for: %s " % tracker_url)
-        """
 
-        self.try_peer_connect()
+        return self.dict_sock_addr
 
-        return self.connected_peers
-
-    def try_peer_connect(self):
-        logging.info("Trying to connect to %d peer(s)" % len(self.dict_sock_addr))
-
-        for _, sock_addr in self.dict_sock_addr.items():
-            if len(self.connected_peers) >= MAX_PEERS_CONNECTED:
-                break
-
-            new_peer = peer.Peer(int(self.torrent.number_of_pieces), sock_addr.ip, sock_addr.port)
-            if not new_peer.connect():
-                continue
-
-            print('Connected to %d/%d peers' % (len(self.connected_peers), MAX_PEERS_CONNECTED))
-
-            self.connected_peers[new_peer.__hash__()] = new_peer
-
-    def http_scraper(self, torrent, tracker):
+    def http_scraper(self, tracker):
         params = {
-            'info_hash': torrent.info_hash,
-            'peer_id': torrent.peer_id,
+            'info_hash': self.torrent.info_hash,
+            'peer_id': self.torrent.peer_id,
             'uploaded': 0,
             'downloaded': 0,
             'port': 6881,
-            'left': torrent.total_length,
+            'left': self.torrent.total_length,
             'event': 'started'
         }
 
         try:
             answer_tracker = requests.get(tracker, params=params, timeout=5)
             list_peers: dict = bdecode(answer_tracker.content)
-            offset = 0
+            # offset = 0
             if type(list_peers['peers']) is not dict:
                 '''
                     - Handles bytes form of list of peers
@@ -124,7 +107,7 @@ class Tracker(object):
                     self.dict_sock_addr[s.__hash__()] = s
 
         except Exception as e:
-            logging.exception("HTTP scraping failed: %s" % e.__str__())
+            logger.exception("HTTP scraping failed: %s" % e.__str__())
 
     def udp_scrapper(self, announce):
         torrent = self.torrent
@@ -133,7 +116,7 @@ class Tracker(object):
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         sock.settimeout(4)
-        ip, port = socket.gethostbyname(parsed.hostname), parsed.port
+        ip, port = socket.gethostbyname(str(parsed.hostname)), parsed.port
 
         if ipaddress.ip_address(ip).is_private:
             return
@@ -165,7 +148,8 @@ class Tracker(object):
 
         print("Got %d peers" % len(self.dict_sock_addr))
 
-    def send_message(self, conn, sock, tracker_message):
+    @staticmethod
+    def send_message(conn, sock, tracker_message):
         message = tracker_message.to_bytes()
         trans_id = tracker_message.trans_id
         action = tracker_message.action
@@ -174,18 +158,18 @@ class Tracker(object):
         sock.sendto(message, conn)
 
         try:
-            response = PeersManager._read_from_socket(sock)
+            response = PeersManager.read_from_socket(sock)
         except socket.timeout as e:
-            logging.debug("Timeout : %s" % e)
+            logger.debug("Timeout : %s" % e)
             return
         except Exception as e:
-            logging.exception("Unexpected error when sending message : %s" % e.__str__())
+            logger.exception("Unexpected error when sending message : %s" % e.__str__())
             return
 
         if len(response) < size:
-            logging.debug("Did not get full message.")
+            logger.debug("Did not get full message.")
 
         if action != response[0:4] or trans_id != response[4:8]:
-            logging.debug("Transaction or Action ID did not match")
+            logger.debug("Transaction or Action ID did not match")
 
         return response

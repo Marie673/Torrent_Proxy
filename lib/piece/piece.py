@@ -15,13 +15,16 @@ logger = getLogger('develop')
 
 class Piece(object):
     def __init__(self, piece_index: int, piece_size: int, piece_hash: str):
+        self.exist = False
+
         self.piece_index: int = piece_index
         self.piece_size: int = piece_size
         self.piece_hash: str = piece_hash
         self.is_full: bool = False
         self.files = []
-        self.raw_data: bytes = b''
         self.number_of_blocks: int = int(math.ceil(float(piece_size) / BLOCK_SIZE))
+
+        self.raw_data: bytes = b''
         self.blocks: List[Block] = []
 
         self._init_blocks()
@@ -39,6 +42,12 @@ class Piece(object):
             self.blocks[index].state = State.FULL
 
     def get_block(self, block_offset, block_length):
+        if self.exist:
+            for path_file in self.files:
+                with open(path_file, 'r+b') as file:
+                    data = file.read()
+                    return data[block_offset:block_length]
+
         return self.raw_data[block_offset:block_length]
 
     def get_empty_block(self):
@@ -84,23 +93,6 @@ class Piece(object):
 
         else:
             self.blocks.append(Block(block_size=int(self.piece_size)))
-
-    def _write_piece_on_disk(self):
-        for file in self.files:
-            path_file = file["path"]
-            file_offset = file["fileOffset"]
-            piece_offset = file["pieceOffset"]
-            length = file["length"]
-
-            # TODO mutex処理追加
-            try:
-                f = open(path_file, 'r+b')  # Already existing file
-            except IOError:
-                f = open(path_file, 'wb')  # New file
-
-            f.seek(file_offset)
-            f.write(self.raw_data[piece_offset:piece_offset + length])
-            f.close()
 
     def _merge_blocks(self):
         buf = b''
