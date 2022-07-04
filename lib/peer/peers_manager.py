@@ -1,6 +1,7 @@
 import errno
 import random
 import socket
+import select
 
 from message import Message, KeepAlive, Handshake, Choke, UnChoke, Interested, \
     NotInterested, Have, BitField, Request, Piece, Cancel, Port
@@ -24,6 +25,29 @@ class PeersManager(object):
     def __init__(self, torrent: Torrent):
         self.torrent = torrent
         self.peers = {}
+
+    def read_message(self):
+        read = [peer.socket for peers_list in self.peers.values()
+                for peer in peers_list]
+        read_list, _, _ = select.select(read, [], [], 1)
+
+        for sock in read_list:
+            peer = self._get_peer_by_socket(sock)
+            if not peer.healthy:
+                self.remove_peer(peer)
+                continue
+
+            try:
+                payload = self.read_from_socket(sock)
+            except Exception as e:
+                logger.error('Recv failed {}'.format(e.__str__()))
+                self.remove_peer(peer)
+                continue
+
+            peer.read_buffer += payload
+
+            for message in peer.get_messages():
+                self._process_new_message(message, peer)
 
     def try_peer_connect(self):
         # tracker
@@ -82,6 +106,10 @@ class PeersManager(object):
     def remove_peer(self, peer) -> None:
         if self.exist_peer(peer):
             del self.peers[peer.__hash__]
+
+    def get_peers_socket(self):
+        peers_sock = [peer.socket for peer in self.peers.values()]
+        return peers_sock
 
     def has_unchoked_peers(self, info_hash) -> bool:
         for peer in self.peers.values():
