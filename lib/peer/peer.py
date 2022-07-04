@@ -128,7 +128,7 @@ class Peer(object):
 
         # pub.sendMessage('RarestPiece.updatePeersBitfield', bitfield=self.bit_field)
 
-    # TODO いる？考える
+    # TODO 必要か考える
     def handle_request(self, request):
         """
         :type request: message.Request
@@ -200,5 +200,3 @@ class Peer(object):
                     yield received_message
             except WrongMessageException as e:
                 logger.exception(e.__str__())
-
-

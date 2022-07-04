@@ -25,6 +25,10 @@ class PiecesManager(object):
             id_piece = file['idPiece']
             self.pieces[id_piece].files.append(file)
 
+    def update_piece_status(self):
+        for piece in self.pieces:
+            piece.update_block_status()
+
     def _update_bitfield(self, piece_index):
         piece = self.pieces[piece_index]
         if piece.is_full:
@@ -47,7 +51,6 @@ class PiecesManager(object):
                 self.complete_pieces += 1
 
     def _write_piece_on_disk(self, piece):
-        # TODO
         for file in self.files:
             path_file = file["path"]
             file_offset = file["fileOffset"]
@@ -61,6 +64,7 @@ class PiecesManager(object):
                 f = open(path_file, 'wb')  # New file
 
             f.seek(file_offset)
+            # 結合度高い
             f.write(piece.raw_data[piece_offset:piece_offset + length])
             f.close()
 
