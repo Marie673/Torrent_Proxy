@@ -68,7 +68,9 @@ class Run(object):
                         text = "------------------------------------------------------------\n" + \
                                str(now_time - start_time) + "[sec]\n" + \
                                str(self.pieces_manager.bitfield) + '\n' + \
-                               "------------------------------------------------------------\n\033[7A"
+                               "completed | {}/{} pieces".format(self.pieces_manager.complete_pieces,
+                                                                 self.pieces_manager.number_of_pieces) + '\n' + \
+                               "------------------------------------------------------------\n\033[8A"
                         print(text)
                         prog_time = now_time
 
