@@ -14,12 +14,21 @@ class PiecesManager(object):
         self.number_of_pieces = int(torrent.number_of_pieces)
         self.pieces = self._generate_pieces()
         self.files = self._load_files()
+        self.bitfield = bitstring.BitArray(self.number_of_pieces)
 
         for file in self.files:
             id_piece = file['idPiece']
             self.pieces[id_piece].files.append(file)
 
         pub.subscribe(self.receive_block_piece, 'PiecesManager.Piece')
+        pub.subscribe(self.update_bitfield, 'PiecesManager.PieceCompleted')
+
+    def str_bitfield(self):
+        length = self.bitfield.len
+        if not length:
+            return ''
+
+        return self.bitfield._readhex(length, 0)
 
     def receive_block_piece(self, piece):
         piece_index, piece_offset, piece_data = piece

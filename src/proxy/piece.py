@@ -61,6 +61,7 @@ class Piece(object):
 
         self.is_full = True
         self.raw_data = data
+        pub.sendMessage('PiecesManager.PieceCompleted', piece_index=self.piece_index)
         return True
 
     def _init_blocks(self):

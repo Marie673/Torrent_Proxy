@@ -38,6 +38,7 @@ class Run(Process):
         peers_dict = self.tracker.get_peers_from_trackers()
         self.peers_manager.add_peers(peers_dict.values())
 
+        prog_time = time.time()
         while True:
             if not self.peers_manager.has_unchoked_peers():
                 # self.peers_manager.add_peers(peers_dict.values())
@@ -71,3 +72,10 @@ class Run(Process):
                     piece_data = message.Request(piece_index, block_offset, block_length).to_bytes()
                     peer.send_to_peer(piece_data)
                     time.sleep(0.001)
+                    now_time = time.time()
+                    if (now_time - prog_time) > 1:
+                        text = "\033[2J--------------------------------------------------------------------------\n" + \
+                               self.pieces_manager.str_bitfield() + '\n' + \
+                               "------------------------------------------------------------------------------"
+                        print(text)
+                        prog_time = now_time
