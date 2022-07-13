@@ -66,7 +66,7 @@ class Run(object):
                     now_time = time.time()
                     if (now_time - prog_time) > 1:
                         text = "\033[2J--------------------------------------------------------------------------\n" + \
-                               str(self.pieces_manager.bitfield) + '\n' + \
+                               self.pieces_manager.str_bitfield() + '\n' + \
                                str(now_time - start_time) + "[sec]\n" + \
                                "completed | {}/{} pieces".format(self.pieces_manager.complete_pieces,
                                                                  self.pieces_manager.number_of_pieces) + '\n' + \
