@@ -64,13 +64,13 @@ class Run(object):
                     time.sleep(0.0001)
 
                     now_time = time.time()
-                    if (now_time - prog_time) > 2:
-                        text = "\033[8A------------------------------------------------------------\n" + \
+                    if (now_time - prog_time) > 1:
+                        text = "\033[7A------------------------------------------------------------\n" + \
                                str(now_time - start_time) + "[sec]\n" + \
                                str(self.pieces_manager.bitfield) + '\n' + \
                                "completed | {}/{} pieces".format(self.pieces_manager.complete_pieces,
                                                                  self.pieces_manager.number_of_pieces) + '\n' + \
-                               "------------------------------------------------------------\n\033[8B"
+                               "------------------------------------------------------------\n\033[7B"
                         print(text)
                         prog_time = now_time
 
