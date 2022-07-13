@@ -17,7 +17,7 @@ def main():
     cefore_m = cefore_manager.CeforeManager()
     logger.info("Processes are created")
 
-    logger.info("Processes start")
+    logger.info("Pro cesses start")
     peers_m.start()
     pieces_m.start()
     cefore_m.start()

@@ -1,4 +1,10 @@
 from multiprocessing import Process
+import select
+from typing import Dict
+
+from lib.peer.peers_manager import PeersManager
+from lib.piece.pieces_manager import PiecesManager
+from lib.torrent import Torrent
 
 import yaml
 from logging import getLogger
@@ -13,6 +19,8 @@ class BitTorrent(Process):
     def __init__(self):
         super().__init__()
         self.test = 0
+        self.peers_manager: Dict[str, PeersManager] = {}
+        self.pieces_manager: Dict[str, PiecesManager] = {}
 
     def run(self) -> None:
         logger.info('Process Peers Manager is start')
@@ -25,26 +33,13 @@ class BitTorrent(Process):
             return
 
     def loop(self):
-        # TODO peerの数を確認してadd peerを行う
+        for peers in self.peers_manager.values():
+            peers.read_message()
 
-        read = [peer.socket for peers_list in self.peers_dict.values()
-                for peer in peers_list]
-        read_list, _, _ = select.select(read, [], [], 1)
+    def add_torrent(self, torrent: Torrent):
+        peers_m = PeersManager(torrent)
+        pieces_m = PiecesManager(torrent)
+        info_hash = torrent.info_hash_str
 
-        for sock in read_list:
-            peer = self._get_peer_by_socket(sock)
-            if not peer.healthy:
-                self.remove_peer(peer)
-                continue
-
-            try:
-                payload = self.read_from_socket(sock)
-            except Exception as e:
-                logger.error('Recv failed {}'.format(e.__str__()))
-                self.remove_peer(peer)
-                continue
-
-            peer.read_buffer += payload
-
-            for message in peer.get_messages():
-                self._process_new_message(message, peer)
+        self.peers_manager[info_hash] = peers_m
+        self.pieces_manager[info_hash] = pieces_m
