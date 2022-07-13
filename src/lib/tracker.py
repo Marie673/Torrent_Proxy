@@ -31,7 +31,7 @@ class Tracker(object):
         self.dict_sock_addr = {}
 
     def get_peers_from_trackers(self):
-        s = SockAddr("10.0.2.3", 53117)
+        s = SockAddr("192.168.60.101", 8999)
         self.dict_sock_addr[s.__hash__()] = s
         s = SockAddr("10.0.2.4", 53117)
         self.dict_sock_addr[s.__hash__()] = s
