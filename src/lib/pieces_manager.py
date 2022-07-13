@@ -25,7 +25,7 @@ class PiecesManager(object):
         if not length:
             return ''
 
-        return ''.join((self.bitfield._readhex(length, 0), '...'))
+        return self.bitfield._readhex(length, 0)
 
     def update_bitfield(self, piece_index):
         self.bitfield[piece_index] = 1
