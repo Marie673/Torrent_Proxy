@@ -67,8 +67,8 @@ class Run(object):
                     if (now_time - prog_time) > 1:
                         text = "------------------------------------------------------------\n" + \
                                str(now_time - start_time) + "[sec]\n" + \
-                               str(self.pieces_manager.bitfield[:20000]) + '\n' + \
-                               "------------------------------------------------------------\n"
+                               str(self.pieces_manager.bitfield) + '\n' + \
+                               "------------------------------------------------------------\n\033[7A"
                         print(text)
                         prog_time = now_time
 
