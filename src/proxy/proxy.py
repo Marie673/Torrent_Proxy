@@ -11,11 +11,11 @@ from torrent import Torrent
 
 HOME = os.environ['HOME']
 PATH = [
-    HOME + "/torrent/128M.dummy.torrent",
-    HOME + "/torrent/256M.dummy.torrent",
-    HOME + "/torrent/512M.dummy.torrent",
-    HOME + "/torrent/1024M.dummy.torrent",
-    HOME + "/torrent/2048M.dummy.torrent"
+    HOME + "/torrent/torrent/128M.dummy.torrent",
+    HOME + "/torrent/torrent/256M.dummy.torrent",
+    HOME + "/torrent/torrent/512M.dummy.torrent",
+    HOME + "/torrent/torrent/1024M.dummy.torrent",
+    HOME + "/torrent/torrent/2048M.dummy.torrent"
 ]
 TEST_DAT = HOME + "/exp/test.dat"
 
