@@ -11,10 +11,12 @@ from torrent import Torrent
 
 HOME = os.environ['HOME']
 PATH = [
-        HOME + "/bittorrent/10M.dummy.torrent",
-        HOME + "/bittorrent/100M.dummy.torrent",
-        HOME + "/bittorrent/1024M.dummy.torrent"
-        ]
+    HOME + "/torrent/128M.dummy.torrent",
+    HOME + "/torrent/256M.dummy.torrent",
+    HOME + "/torrent/512M.dummy.torrent",
+    HOME + "/torrent/1024M.dummy.torrent",
+    HOME + "/torrent/2048M.dummy.torrent"
+]
 TEST_DAT = HOME + "/exp/test.dat"
 
 
@@ -71,8 +73,8 @@ class Run(object):
             return
 
         with open(TEST_DAT, mode='a') as file:
-            text = 'interest:' + info_hash + ":" + \
-                   str(piece_index) + ":" + str(packet.chunk_num) + ":" + \
+            text = 'interest,' + info_hash + "," + \
+                   str(piece_index) + "," + str(packet.chunk_num) + "," + \
                    str(time.time()) + "\n"
             file.write(text)
 
@@ -80,8 +82,8 @@ class Run(object):
         if os.path.exists(tmp_path):
             self.send_file(packet, tmp_path)
             with open(TEST_DAT, mode='a') as file:
-                text = 'data:' + info_hash + ":" + \
-                       str(piece_index) + ":" + str(packet.chunk_num) + ":" + \
+                text = 'data,' + info_hash + "," + \
+                       str(piece_index) + "," + str(packet.chunk_num) + "," + \
                        str(time.time()) + "\n"
                 file.write(text)
             return

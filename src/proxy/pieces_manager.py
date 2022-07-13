@@ -30,8 +30,8 @@ class PiecesManager(object):
                 tmp_path = '/'.join(["tmp", self.torrent.info_hash_str, str(piece_index)])
                 self.pieces[piece_index].write_piece_on_disk(tmp_path)
                 with open(TEST_DAT, mode='a') as file:
-                    text = 'piece:' + self.torrent.info_hash_str + ":" + \
-                           str(piece_index) + ":" + str(-1) + ":" + \
+                    text = 'piece,' + self.torrent.info_hash_str + "," + \
+                           str(piece_index) + "," + str(-1) + "," + \
                            str(time.time()) + "\n"
                     file.write(text)
 

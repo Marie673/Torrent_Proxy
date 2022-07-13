@@ -21,7 +21,7 @@ class Piece(object):
 
     def update_block_status(self):  # if block is pending for too long : set it free
         for i, block in enumerate(self.blocks):
-            if block.state == State.PENDING and (time.time() - block.last_seen) > 5:
+            if block.state == State.PENDING and (time.time() - block.last_seen) > 1:
                 self.blocks[i] = Block()
 
     def set_block(self, offset, data):

@@ -41,8 +41,8 @@ class PiecesManager(object):
         if self.pieces[piece_index].are_all_blocks_full():
             if self.pieces[piece_index].set_to_full():
                 with open(TEST_DAT, mode='a') as file:
-                    text = 'piece:' + self.torrent.info_hash_str + ":" + \
-                           str(piece_index) + ":" + str(-1) + ":" + \
+                    text = 'piece,' + self.torrent.info_hash_str + "," + \
+                           str(piece_index) + "," + str(-1) + "," + \
                            str(time.time()) + "\n"
                     file.write(text)
                 self.complete_pieces += 1
