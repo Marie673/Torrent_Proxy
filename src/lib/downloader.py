@@ -64,7 +64,7 @@ class Run(object):
                     time.sleep(0.0001)
 
                     now_time = time.time()
-                    if (now_time - prog_time) > 1:
+                    if (now_time - prog_time) > 2:
                         text = "------------------------------------------------------------\n" + \
                                str(now_time - start_time) + "[sec]\n" + \
                                str(self.pieces_manager.bitfield) + '\n' + \
