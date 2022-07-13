@@ -38,7 +38,18 @@ class CefAppConsumer:
 
     def run(self):
         self.on_start()
+        start_time = prog_time = time.time()
         while self.pieces_manager.complete_pieces != self.number_of_pieces:
+            now_time = time.time()
+            if (now_time - prog_time) > 1:
+                text = "\033[2J--------------------------------------------------------------------------\n" + \
+                       self.pieces_manager.str_bitfield() + '\n' + \
+                       str(now_time - start_time) + "[sec]\n" + \
+                       "completed | {}/{} pieces".format(self.pieces_manager.complete_pieces,
+                                                         self.pieces_manager.number_of_pieces) + '\n' + \
+                       "------------------------------------------------------------------------------"
+                print(text)
+                prog_time = now_time
             packet = self.cef_handle.receive(timeout_ms=1000)
             if packet.is_failed:
                 self.on_rcv_failed()

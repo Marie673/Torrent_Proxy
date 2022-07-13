@@ -27,6 +27,13 @@ class PiecesManager(object):
         pub.subscribe(self.receive_block_piece, 'PiecesManager.Piece')
         pub.subscribe(self.update_bitfield, 'PiecesManager.PieceCompleted')
 
+    def str_bitfield(self):
+        length = self.bitfield.len
+        if not length:
+            return ''
+
+        return self.bitfield._readhex(length, 0)
+
     def update_bitfield(self, piece_index):
         self.bitfield[piece_index] = 1
 
