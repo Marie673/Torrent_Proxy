@@ -40,7 +40,7 @@ class Run(Process):
 
         while True:
             if not self.peers_manager.has_unchoked_peers():
-                self.peers_manager.add_peers(peers_dict.values())
+                # self.peers_manager.add_peers(peers_dict.values())
                 time.sleep(1)
                 continue
 
