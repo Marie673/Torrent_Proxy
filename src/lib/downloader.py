@@ -11,7 +11,6 @@ import torrent
 import tracker
 import message
 
-
 sys.setcheckinterval(10)
 
 
@@ -64,10 +63,14 @@ class Run(object):
                     peer.send_to_peer(piece_data)
                     time.sleep(0.0001)
 
-            now_time = time.time()
-            if (now_time - prog_time) > 1:
-                print(self.pieces_manager.bitfield)
-                prog_time = now_time
+                    now_time = time.time()
+                    if (now_time - prog_time) > 1:
+                        text = "------------------------------------------------------------\n" + \
+                               str(now_time - start_time) + "[sec]\n" + \
+                               str(self.pieces_manager.bitfield) + '\n' + \
+                               "------------------------------------------------------------\n\033[nA"
+                        print(text)
+                        prog_time = now_time
 
         logging.info("File(s) downloaded successfully.")
         self.display_progression()
