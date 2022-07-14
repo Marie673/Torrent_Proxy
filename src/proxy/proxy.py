@@ -97,6 +97,7 @@ class Run(object):
                 bit_string = bitfield._readhex(bitfield.len, 0)
                 self.handle.send_data(name=name, payload=bit_string,
                                       cache_time=0)
+                logging.info("send data")
 
             if message == 'request':
                 piece_index = int(prefix[4])
