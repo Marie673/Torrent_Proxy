@@ -82,7 +82,6 @@ class Run(object):
             '''
             message = prefix[3]
             if message == 'bitfield':
-                logging.info("get bitfield message")
                 torrent = self.torrent[info_hash]
                 num_of_pieces = torrent.number_of_pieces
                 bitfield = bitstring.BitArray(num_of_pieces)
@@ -96,7 +95,7 @@ class Run(object):
 
                 bit_string = bitfield._readhex(bitfield.len, 0)
                 self.handle.send_data(name=name, payload=bit_string)
-                logging.info("send data")
+                logging.info(bit_string)
 
             if message == 'request':
                 piece_index = int(prefix[4])
