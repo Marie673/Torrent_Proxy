@@ -134,6 +134,7 @@ class Run(object):
 
     def start(self):
         pre_time = time.time()
+        self.update_bitfield()
         while True:
             now_time = time.time()
             if now_time - pre_time > 5:
