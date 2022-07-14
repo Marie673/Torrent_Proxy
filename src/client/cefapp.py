@@ -43,7 +43,7 @@ class BitfieldThread(Thread):
     def do_update(self):
         if self.end_chunk_num == -1:
             cef_handle.send_interest(name=self.name, chunk_num=0)
-            packet = self.queue.get(timeout=5)
+            packet = self.queue.get()
             self.queue.task_done()
 
             self.end_chunk_num = packet.end_chunk_num
