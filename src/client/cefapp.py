@@ -85,7 +85,6 @@ class CefAppConsumer:
 
     def run(self):
         self.proxy_bitfield.start()
-        piece_thread = ThreadPoolExecutor(max_workers=MAX_PIECE)
         while True:
             packet = cef_handle.receive(timeout_ms=1000)
             if packet.is_failed:
