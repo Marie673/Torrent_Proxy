@@ -37,14 +37,7 @@ class PiecesManager(object):
     def update_bitfield(self, piece_index):
         self.bitfield[piece_index] = 1
 
-    def receive_block_piece(self, piece):
-        piece_index, piece_offset, piece_data = piece
-
-        if self.pieces[piece_index].is_full:
-            return
-
-        self.pieces[piece_index].set_block(piece_offset, piece_data)
-
+    def receive_block_piece(self, piece_index):
         if self.pieces[piece_index].are_all_blocks_full():
             if self.pieces[piece_index].set_to_full():
                 with open(TEST_DAT, mode='a') as file:

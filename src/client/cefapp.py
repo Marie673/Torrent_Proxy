@@ -1,5 +1,6 @@
 import logging
 import queue
+import threading
 import time
 from queue import Queue
 from threading import Thread, Event
@@ -12,10 +13,10 @@ from torrent import Torrent
 
 PROTOCOL = 'ccnx:/BitTorrent'
 CHUNK_SIZE = 1024 * 4
-MAX_PIECE = 500
+MAX_PIECE = 50
+TIME_OUT = 5
 
 cef_handle = cefpyco.CefpycoHandle()
-cef_handle.begin()
 
 
 class BitfieldThread(Thread):
@@ -68,10 +69,51 @@ class BitfieldThread(Thread):
                 self.bitfield[i] = packet.payload[i]
 
 
+class Interest(Thread):
+    def __init__(self, piece: Piece, name):
+        super().__init__()
+        self.piece = piece
+        self.name = name
+
+        self.last_receive_chunk = None
+        self.last_receive_time = None
+
+        self.end_chunk_num = None
+
+    def __hash__(self):
+        return self.name
+
+    def run(self) -> None:
+        cef_handle.send_interest(self.name, 0)
+        while not self.piece.is_full:
+            if time.time() - self.last_receive_time > 5:
+                self.get_next_chunk()
+
+    def get_next_chunk(self):
+        chunk = self.last_receive_chunk + 1
+        cef_handle.send_interest(self.name, chunk + 1)
+
+    def receive_piece(self, packet):
+        chunk = packet.chunk_num
+        self.last_receive_chunk = chunk
+        self.last_receive_time = time.time()
+        self.end_chunk_num = packet.end_chun_num
+
+        piece_offset = chunk * CHUNK_SIZE
+        piece_data = packet.payload
+        if self.piece.is_full:
+            return
+        self.piece.set_block(piece_offset, piece_data)
+        if chunk == self.end_chunk_num:
+            return
+        self.get_next_chunk()
+
+
 class CefAppConsumer:
     last_log_line = ""
 
     def __init__(self, pieces_manager):
+        cef_handle.begin()
         self.pieces_manager: PiecesManager = pieces_manager
         self.pieces: [Piece] = pieces_manager.pieces
 
@@ -85,24 +127,21 @@ class CefAppConsumer:
 
         self.bitfield = [0 for _ in range(self.number_of_pieces)]
         self.proxy_bitfield = BitfieldThread(self.pieces_manager.torrent)
+        self.thread = {}
         # test
         self.data_size = 0
 
     def run(self):
         self.proxy_bitfield.start()
-        while True:
+        self.on_start()
+
+        start_time = prog_time = time.time()
+        while self.pieces_manager.complete_pieces != self.number_of_pieces:
             packet = cef_handle.receive(timeout_ms=1000)
             if packet.is_failed:
                 self.on_rcv_failed()
             else:
                 self.on_rcv_succeeded(packet)
-
-
-
-
-        self.on_start()
-        start_time = prog_time = time.time()
-        while self.pieces_manager.complete_pieces != self.number_of_pieces:
             now_time = time.time()
             if (now_time - prog_time) > 1:
                 text = "\033[2J--------------------------------------------------------------------------\n" + \
@@ -114,64 +153,31 @@ class CefAppConsumer:
                 print(text)
                 prog_time = now_time
 
-            packet = self.cef_handle.receive(timeout_ms=1000)
-            if packet.is_failed:
-                self.on_rcv_failed()
-            elif packet.name.split('/')[2] == self.info_hash:
-                self.on_rcv_succeeded(packet)
         if self.pieces_manager.complete_pieces == self.number_of_pieces:
             return True
         else:
             return False
-
 
     def create_request_interest(self, index):
         name = '/'.join([self.name, 'request', str(index)])
         return name
 
     def on_start(self):
-        bitfield = self.proxy_bitfield.bitfield
-        for i in range(self.number_of_pieces):
-            if bitfield[i] == 0:
-                continue
-            piece = self.pieces[i]
-
         for piece in self.pieces:
-            index = piece.piece_index
-            name = self.create_request_interest(index)
-            self.cef_handle.send_interest(name, 0)
-            if index >= MAX_PIECE:
+            if threading.active_count() > MAX_PIECE:
                 break
-        self.get_piece(0)
 
-    def get_bitfield(self):
-        name = '/'.join([PROTOCOL, 'bitfield'])
-        self.cef_handle.send_interest(name, 0)
-
-        packet = self.cef_handle.receive()
-
-    def handle_bitfield(self, packet):
-        chunk = packet.chunk_num
-
-        if chunk == 0:
-            end_chunk_num = packet.end_chunk_num
-            for num in range(1, end_chunk_num):
-                self.cef_handle.send_interest(name=packet.name, chunk_num=num)
-
-    def get_piece(self, index):
-        name = self.create_request_interest(index)
-        for chunk in range(self.chunk_num):
-            # logging.debug("{} {}".format(name, chunk))
-            self.cef_handle.send_interest(name, chunk)
+            name = '/'.join([PROTOCOL, self.info_hash, 'request', str(piece.piece_index)])
+            if piece.piece_index in self.thread:
+                continue
+            else:
+                t = Interest(piece, name)
+                t.start()
+                self.thread[piece.piece_index] = t
 
     def on_rcv_failed(self):
         logging.debug("on rcv failed")
-
-        for piece in self.pieces:
-            if piece.is_full:
-                continue
-            self.get_piece(piece.piece_index)
-            return
+        self.on_start()
 
     def on_rcv_succeeded(self, packet):
         name = packet.name
@@ -185,31 +191,19 @@ class CefAppConsumer:
 
         message = prefix[2]
         if message == 'request':
-            pass
+            self.handle_request(packet)
         elif message == 'bitfield':
             self.proxy_bitfield.queue.put(packet)
         else:
             pass
 
     def handle_request(self, packet):
-        piece_index = int(packet.name.split('/')[-1])
-        chunk = packet.chunk_num
-
-        if chunk == 0:
-            self.bitfield[piece_index] = 1
-            if piece_index + MAX_PIECE < self.number_of_pieces:
-                name = self.create_request_interest(piece_index + MAX_PIECE)
-                self.cef_handle.send_interest(name, 0)
-        # logging.debug("{} {}".format(piece_index, chunk*CHUNK_SIZE))
-        piece_data = (piece_index, chunk * CHUNK_SIZE, packet.payload)
-        self.pieces_manager.receive_block_piece(piece_data)
-
-        # self.display_progression()
-
-        if chunk == packet.end_chunk_num:
-            next_piece_index = piece_index + 1
-            if next_piece_index < self.number_of_pieces:
-                self.get_piece(next_piece_index)
+        name = packet.name
+        prefix = name.split('/')
+        piece_index = prefix[3]
+        t = self.thread[piece_index]
+        t.receive_piece(packet)
+        self.pieces_manager.receive_block_piece(piece_index)
 
     def display_progression(self):
 
