@@ -95,8 +95,7 @@ class Run(object):
                         bitfield[i] = 0
 
                 bit_string = bitfield._readhex(bitfield.len, 0)
-                self.handle.send_data(name=name, payload=bit_string,
-                                      cache_time=0)
+                self.handle.send_data(name=name, payload=bit_string)
                 logging.info("send data")
 
             if message == 'request':
