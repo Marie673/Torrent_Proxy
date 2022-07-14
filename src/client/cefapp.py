@@ -1,4 +1,5 @@
 import logging
+import queue
 import time
 from queue import Queue
 from threading import Thread, Event
@@ -43,8 +44,11 @@ class BitfieldThread(Thread):
     def do_update(self):
         if self.end_chunk_num == -1:
             cef_handle.send_interest(name=self.name, chunk_num=0)
-            packet = self.queue.get()
-            self.queue.task_done()
+            try:
+                packet = self.queue.get(timeout=5)
+                self.queue.task_done()
+            except queue.Empty:
+                return
 
             self.end_chunk_num = packet.end_chunk_num
             for i in range(CHUNK_SIZE):
@@ -52,24 +56,25 @@ class BitfieldThread(Thread):
 
         for chunk in range(self.end_chunk_num):
             cef_handle.send_interest(name=self.name, chunk_num=chunk)
-            packet = self.queue.get()
-            self.queue.task_done()
 
+        while True:
+            try:
+                packet = self.queue.get(timeout=5)
+                self.queue.task_done()
+            except queue.Empty:
+                return
             chunk = packet.chunk_num
-            for i in range(chunk*CHUNK_SIZE, (chunk+1)*CHUNK_SIZE):
+            for i in range(chunk * CHUNK_SIZE, (chunk + 1) * CHUNK_SIZE):
                 self.bitfield[i] = packet.payload[i]
 
 
 class CefAppConsumer:
     last_log_line = ""
 
-    def __init__(self, pieces_manager,
-                 pipeline=1000, timeout_limit=10):
-        self.cef_handle = cefpyco.CefpycoHandle()
-        self.cef_handle.begin()
-
+    def __init__(self, pieces_manager):
         self.pieces_manager: PiecesManager = pieces_manager
         self.pieces: [Piece] = pieces_manager.pieces
+
         self.info_hash = self.pieces_manager.torrent.info_hash_str
         self.number_of_pieces = self.pieces_manager.number_of_pieces
         self.piece_length = self.pieces_manager.torrent.piece_length
@@ -88,7 +93,7 @@ class CefAppConsumer:
         while True:
             packet = cef_handle.receive(timeout_ms=1000)
             if packet.is_failed:
-                continue
+                self.on_rcv_failed()
             else:
                 self.on_rcv_succeeded(packet)
 
@@ -125,6 +130,12 @@ class CefAppConsumer:
         return name
 
     def on_start(self):
+        bitfield = self.proxy_bitfield.bitfield
+        for i in range(self.number_of_pieces):
+            if bitfield[i] == 0:
+                continue
+            piece = self.pieces[i]
+
         for piece in self.pieces:
             index = piece.piece_index
             name = self.create_request_interest(index)

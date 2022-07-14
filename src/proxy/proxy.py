@@ -96,14 +96,13 @@ class Run(object):
             message = prefix[3]
             if message == 'bitfield':
                 bitfield = self.bitfield[info_hash]
-                bit_string = bitfield._readhex(bitfield.len, 0)
+                bitfield_bytes = bitfield.bytes
                 chunk = packet.chunk_num
 
-                data = bit_string.encode('utf-8')
-                size = len(data)
+                size = len(bitfield_bytes)
                 end_chunk_num = size // SIZE - 1
 
-                payload = data[chunk*SIZE:(chunk+1)*SIZE]
+                payload = bitfield_bytes[chunk * SIZE:(chunk + 1) * SIZE]
                 self.handle.send_data(name=name, payload=payload,
                                       chunk_num=chunk, end_chunk_num=end_chunk_num, cache_time=0)
 
