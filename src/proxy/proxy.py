@@ -70,7 +70,7 @@ class Run(object):
                                   chunk_num=chunk, end_chunk_num=end_chunk_num, cache_time=cache_time)
 
     def update_bitfield(self):
-        for info_hash, bitfield in self.bitfield:
+        for info_hash, bitfield in self.bitfield.items():
             num_of_pieces = self.torrent[info_hash].number_of_pieces
 
             for i in range(num_of_pieces):
