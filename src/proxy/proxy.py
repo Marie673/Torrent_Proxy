@@ -82,6 +82,7 @@ class Run(object):
             '''
             message = prefix[3]
             if message == 'bitfield':
+                logging.info("get bitfield message")
                 torrent = self.torrent[info_hash]
                 num_of_pieces = torrent.number_of_pieces
                 bitfield = bitstring.BitArray(num_of_pieces)
