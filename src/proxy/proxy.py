@@ -4,6 +4,8 @@ import os.path
 import sys
 import time
 from multiprocessing import Queue
+
+import bitstring
 import cefpyco
 
 import downloader
@@ -66,35 +68,59 @@ class Run(object):
                                   chunk_num=chunk, end_chunk_num=end_chunk_num, cache_time=cache_time)
 
     def handle_interest(self, packet):
-        prefix = packet.name.split("/")
-        info_hash = prefix[2]
-        piece_index = int(prefix[3])
+        name = packet.name
+        prefix = name.split("/")
         if prefix[0] != 'ccnx:' and prefix[1] != 'BitTorrent':
             return
 
-        with open(TEST_DAT, mode='a') as file:
-            text = 'interest,' + info_hash + "," + \
-                   str(piece_index) + "," + str(packet.chunk_num) + "," + \
-                   str(time.time()) + "\n"
-            file.write(text)
+        if prefix[1] == 'BitTorrent':
+            info_hash = prefix[2]
+            '''
+            message protocol
+                bitfield
+                request
+            '''
+            message = prefix[3]
+            if message == 'bitfield':
+                torrent = self.torrent[info_hash]
+                num_of_pieces = torrent.number_of_pieces
+                bitfield = bitstring.BitArray(num_of_pieces)
 
-        tmp_path = '/'.join(['tmp', info_hash, str(piece_index)])
-        if os.path.exists(tmp_path):
-            self.send_file(packet, tmp_path)
-            with open(TEST_DAT, mode='a') as file:
-                text = 'data,' + info_hash + "," + \
-                       str(piece_index) + "," + str(packet.chunk_num) + "," + \
-                       str(time.time()) + "\n"
-                file.write(text)
-            return
+                for i in range(num_of_pieces):
+                    path = '/'.join(['tmp', info_hash, str(i)])
+                    if os.path.exists(path):
+                        bitfield[i] = 1
+                    else:
+                        bitfield[i] = 0
 
-        if info_hash not in self.download_process:
-            self.create_new_process(info_hash)
-            self.request_q[info_hash].put(piece_index)
-        else:
-            if packet.chunk_num == 0:
-                self.request_q[info_hash].put(piece_index)
+                bit_string = bitfield._readhex(bitfield.len, 0)
+                self.handle.send_data(name=name, payload=bit_string,
+                                      cache_time=0)
 
+            if message == 'request':
+                piece_index = int(prefix[4])
+                with open(TEST_DAT, mode='a') as file:
+                    text = 'interest,' + info_hash + "," + \
+                           str(piece_index) + "," + str(packet.chunk_num) + "," + \
+                           str(time.time()) + "\n"
+                    file.write(text)
+
+                tmp_path = '/'.join(['tmp', info_hash, str(piece_index)])
+                if os.path.exists(tmp_path):
+                    self.send_file(packet, tmp_path)
+                    with open(TEST_DAT, mode='a') as file:
+                        text = 'data,' + info_hash + "," + \
+                               str(piece_index) + "," + str(packet.chunk_num) + "," + \
+                               str(time.time()) + "\n"
+                        file.write(text)
+                    return
+
+                if info_hash not in self.download_process:
+                    self.create_new_process(info_hash)
+                    self.request_q[info_hash].put(piece_index)
+                else:
+                    if packet.chunk_num == 0:
+                        self.request_q[info_hash].put(piece_index)
 
     def start(self):
         while True:
