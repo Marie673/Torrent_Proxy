@@ -32,10 +32,12 @@ class Run(object):
         self.handle.register('ccnx:/BitTorrent')
 
         self.torrent = {}
+        self.bitfield = {}
         for path in PATH:
             t = Torrent()
             t.load_from_path(path)
             self.torrent[t.info_hash_str] = t
+            self.bitfield[t.info_hash_str] = bitstring.BitArray(t.number_of_pieces)
 
         self.download_process = {}
         self.request_q = {}
@@ -67,6 +69,17 @@ class Run(object):
             self.handle.send_data(name=name, payload=payload,
                                   chunk_num=chunk, end_chunk_num=end_chunk_num, cache_time=cache_time)
 
+    def update_bitfield(self):
+        for info_hash, bitfield in self.bitfield:
+            num_of_pieces = self.torrent[info_hash].number_of_pieces
+
+            for i in range(num_of_pieces):
+                path = '/'.join(['tmp', info_hash, str(i)])
+                if os.path.exists(path):
+                    bitfield[i] = 1
+                else:
+                    bitfield[i] = 0
+
     def handle_interest(self, packet):
         name = packet.name
         prefix = name.split("/")
@@ -82,20 +95,17 @@ class Run(object):
             '''
             message = prefix[3]
             if message == 'bitfield':
-                torrent = self.torrent[info_hash]
-                num_of_pieces = torrent.number_of_pieces
-                bitfield = bitstring.BitArray(num_of_pieces)
-
-                for i in range(num_of_pieces):
-                    path = '/'.join(['tmp', info_hash, str(i)])
-                    if os.path.exists(path):
-                        bitfield[i] = 1
-                    else:
-                        bitfield[i] = 0
-
+                bitfield = self.bitfield[info_hash]
                 bit_string = bitfield._readhex(bitfield.len, 0)
-                self.handle.send_data(name=name, payload=bit_string)
-                logging.info(bit_string)
+                chunk = packet.chunk_num
+
+                data = bit_string.encode('utf-8')
+                size = len(data)
+                end_chunk_num = size // SIZE - 1
+
+                payload = data[chunk*SIZE:(chunk+1)*SIZE]
+                self.handle.send_data(name=name, payload=payload,
+                                      chunk_num=chunk, end_chunk_num=end_chunk_num, cache_time=0)
 
             if message == 'request':
                 piece_index = int(prefix[4])
@@ -123,7 +133,12 @@ class Run(object):
                         self.request_q[info_hash].put(piece_index)
 
     def start(self):
+        pre_time = time.time()
         while True:
+            now_time = time.time()
+            if now_time - pre_time > 5:
+                self.update_bitfield()
+
             packet = self.handle.receive()
             if packet.is_failed:
                 continue
