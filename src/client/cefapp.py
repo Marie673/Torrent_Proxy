@@ -26,12 +26,8 @@ class BitfieldThread(Thread):
         self.info_hash = self.torrent.info_hash_str
         self.bitfield = [0 for _ in range(self.torrent.number_of_pieces)]
         self.health: bool = True
-        self.queue = Queue()
 
         self.name = '/'.join([PROTOCOL, self.info_hash, 'bitfield'])
-        self.end_chunk_num = -1
-
-        self.packet = None
 
     def run(self) -> None:
         pre_time = time.time()
@@ -42,32 +38,20 @@ class BitfieldThread(Thread):
                 print(self.bitfield)
                 pre_time - time.time()
 
+    def get_bitfield(self, packet):
+        chunk = packet.chunk_num
+        end_chunk_num = packet.end_chunk_num
+        payload = packet.payload
+
+        for i in range(CHUNK_SIZE):
+            self.bitfield[chunk*CHUNK_SIZE + 1] = payload[i]
+
+        if chunk != end_chunk_num:
+            cef_handle.send_interest(name=self.name, chunk_num=chunk+1)
+
     def do_update(self):
-        if self.end_chunk_num == -1:
-            cef_handle.send_interest(name=self.name, chunk_num=0)
-            try:
-                packet = self.queue.get(timeout=5)
-                self.queue.task_done()
-            except queue.Empty:
-                return
-
-            self.end_chunk_num = packet.end_chunk_num
-            for i in range(CHUNK_SIZE):
-                self.bitfield[i] = packet.payload[i]
-
-        for chunk in range(self.end_chunk_num):
-            cef_handle.send_interest(name=self.name, chunk_num=chunk)
-
-        while True:
-            try:
-                packet = self.queue.get(timeout=5)
-                self.queue.task_done()
-            except queue.Empty:
-                return
-            chunk = packet.chunk_num
-            for i in range(chunk * CHUNK_SIZE, (chunk + 1) * CHUNK_SIZE):
-                self.bitfield[i] = packet.payload[i]
-
+        cef_handle.send_interest(name=self.name, chunk_num=0)
+        return
 
 class Interest(Thread):
     def __init__(self, piece: Piece, name):
@@ -133,7 +117,7 @@ class CefAppConsumer:
 
     def run(self):
         self.proxy_bitfield.start()
-        self.on_start()
+        # self.on_start()
 
         start_time = prog_time = time.time()
         while self.pieces_manager.complete_pieces != self.number_of_pieces:
@@ -193,7 +177,7 @@ class CefAppConsumer:
         if message == 'request':
             self.handle_request(packet)
         elif message == 'bitfield':
-            self.proxy_bitfield.queue.put(packet)
+            self.proxy_bitfield.get_bitfield(packet)
         else:
             pass
 
