@@ -35,13 +35,14 @@ class BitfieldThread(Thread):
             now_time = time.time()
             if now_time - pre_time > 5:
                 self.do_update()
-                print(self.bitfield)
+                # print(self.bitfield)
                 pre_time - time.time()
 
     def get_bitfield(self, packet):
         chunk = packet.chunk_num
         end_chunk_num = packet.end_chunk_num
         payload = packet.payload
+        print(payload)
 
         for i in range(CHUNK_SIZE):
             self.bitfield[chunk*CHUNK_SIZE + 1] = payload[i]
@@ -128,6 +129,7 @@ class CefAppConsumer:
                 self.on_rcv_succeeded(packet)
             now_time = time.time()
             if (now_time - prog_time) > 1:
+                """
                 text = "\033[2J--------------------------------------------------------------------------\n" + \
                        self.pieces_manager.str_bitfield() + '\n' + \
                        str(now_time - start_time) + "[sec]\n" + \
@@ -135,6 +137,7 @@ class CefAppConsumer:
                                                          self.pieces_manager.number_of_pieces) + '\n' + \
                        "------------------------------------------------------------------------------"
                 print(text)
+                """
                 prog_time = now_time
 
         if self.pieces_manager.complete_pieces == self.number_of_pieces:
