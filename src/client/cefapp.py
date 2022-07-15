@@ -166,7 +166,7 @@ class CefAppConsumer:
 
     def on_rcv_failed(self):
         logging.debug("on rcv failed")
-        self.on_start()
+        # self.on_start()
 
     def on_rcv_succeeded(self, packet):
         name = packet.name
