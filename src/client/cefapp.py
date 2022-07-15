@@ -54,6 +54,7 @@ class BitfieldThread(Thread):
         cef_handle.send_interest(name=self.name, chunk_num=0)
         return
 
+
 class Interest(Thread):
     def __init__(self, piece: Piece, name):
         super().__init__()
@@ -126,6 +127,7 @@ class CefAppConsumer:
             if packet.is_failed:
                 self.on_rcv_failed()
             else:
+                print('get packet')
                 self.on_rcv_succeeded(packet)
             now_time = time.time()
             if (now_time - prog_time) > 1:
