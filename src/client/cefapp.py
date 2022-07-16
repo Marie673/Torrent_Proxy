@@ -80,7 +80,7 @@ class Interest(Thread):
         CefAppConsumer.cef_handle.send_interest(self.name, chunk)
         self.last_call_time = time.time()
 
-    def receive_piece(self, packet):
+    def receive_piece(self, packet) -> bool:
         chunk = packet.chunk_num
         self.last_receive_chunk = chunk
         self.end_chunk_num = packet.end_chunk_num
@@ -88,12 +88,13 @@ class Interest(Thread):
         piece_offset = chunk * CHUNK_SIZE
         piece_data = packet.payload
         if self.piece.is_full:
-            return
+            return True
         CefAppConsumer.data_size += len(piece_data)
         self.piece.set_block(piece_offset, piece_data)
         if chunk == self.end_chunk_num:
-            return
+            return True
         self.get_next_chunk()
+        return False
 
 
 class CefAppConsumer:
@@ -198,7 +199,9 @@ class CefAppConsumer:
         piece_index = int(prefix[4])
 
         t = self.thread[name]
-        t.receive_piece(packet)
+        if t.receive_piece(packet):
+            del self.thread[name]
+            self.on_start()
         self.pieces_manager.receive_block_piece(piece_index)
 
     def display_progression(self):
