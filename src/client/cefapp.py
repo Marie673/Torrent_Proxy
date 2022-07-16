@@ -146,10 +146,9 @@ class CefAppConsumer:
             else:
                 return False
         except KeyboardInterrupt:
-            self.proxy_bitfield.healthy = False
-            self.proxy_bitfield.join()
-            for t in self.thread:
+            for t in threading.enumerate():
                 t.healthy = False
+            for t in threading.enumerate():
                 t.join()
 
     def create_request_interest(self, index):
