@@ -169,7 +169,7 @@ class CefAppConsumer:
 
     def on_rcv_failed(self):
         logging.debug("on rcv failed")
-        # self.on_start()
+        self.on_start()
 
     def on_rcv_succeeded(self, packet):
         name = packet.name
@@ -210,9 +210,3 @@ class CefAppConsumer:
             logging.info(current_log_line)
 
         self.last_log_line = current_log_line
-
-
-def test():
-    path = '/home/vagrant/torrent/torrent/1024MB.dummy.torrent'
-    import client
-    run = client.Run(path)
