@@ -63,9 +63,6 @@ class Interest(Thread):
 
         self.end_chunk_num = None
 
-    def __hash__(self):
-        return self.name
-
     def run(self) -> None:
         print('testA')
         CefAppConsumer.cef_handle.send_interest(self.name, 0)
@@ -156,6 +153,7 @@ class CefAppConsumer:
             if piece.piece_index in self.thread:
                 continue
             else:
+                print()
                 t = Interest(piece, name)
                 t.start()
                 self.thread[piece.piece_index] = t
