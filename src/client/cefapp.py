@@ -165,8 +165,9 @@ class CefAppConsumer:
         for piece in self.pieces:
             if threading.active_count() > MAX_PIECE + 1:
                 break
+
             if piece.is_full:
-                break
+                continue
 
             name = '/'.join([PROTOCOL, self.info_hash, 'request', str(piece.piece_index)])
             if name in self.thread.keys():
