@@ -137,9 +137,10 @@ class CefAppConsumer:
                 if (now_time - prog_time) > 1:
                     text = "\033[2J--------------------------------------------------------------------------\n" + \
                            str(now_time - start_time) + "[sec]\n" + \
-                           str(CefAppConsumer.data_size) + \
-                           "completed | {}/{} pieces".format(self.pieces_manager.complete_pieces,
-                                                             self.pieces_manager.number_of_pieces) + '\n' + \
+                           str(CefAppConsumer.data_size) + "\n" \
+                                                           "completed | {}/{} pieces".format(
+                        self.pieces_manager.complete_pieces,
+                        self.pieces_manager.number_of_pieces) + '\n' + \
                            "------------------------------------------------------------------------------"
                     print(text)
                     prog_time = now_time
