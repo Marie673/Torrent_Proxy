@@ -76,7 +76,7 @@ class Interest(Thread):
 
     def get_next_chunk(self):
         chunk = self.last_receive_chunk + 1
-        print(self.name, chunk)
+
         CefAppConsumer.cef_handle.send_interest(self.name, chunk)
         self.last_call_time = time.time()
 
@@ -138,7 +138,7 @@ class CefAppConsumer:
                            "completed | {}/{} pieces".format(self.pieces_manager.complete_pieces,
                                                              self.pieces_manager.number_of_pieces) + '\n' + \
                            "------------------------------------------------------------------------------"
-                    # print(text)
+                    print(text)
                     prog_time = now_time
 
             if self.pieces_manager.complete_pieces == self.number_of_pieces:
