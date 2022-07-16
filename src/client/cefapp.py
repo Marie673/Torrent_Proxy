@@ -137,7 +137,7 @@ class CefAppConsumer:
                            "completed | {}/{} pieces".format(self.pieces_manager.complete_pieces,
                                                              self.pieces_manager.number_of_pieces) + '\n' + \
                            "------------------------------------------------------------------------------"
-                    print(text)
+                    # print(text)
                     prog_time = now_time
 
             if self.pieces_manager.complete_pieces == self.number_of_pieces:
@@ -186,9 +186,9 @@ class CefAppConsumer:
 
         message = prefix[3]
         if message == 'request':
+            print('get request')
             self.handle_request(packet)
         elif message == 'bitfield':
-            print('get bitfield data')
             self.proxy_bitfield.get_bitfield(packet)
         else:
             pass
