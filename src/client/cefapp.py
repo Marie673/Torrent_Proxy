@@ -130,7 +130,7 @@ class CefAppConsumer:
         start_time = prog_time = time.time()
         try:
             while self.pieces_manager.complete_pieces != self.number_of_pieces:
-                packet = CefAppConsumer.cef_handle.receive(timeout_ms=1000)
+                packet = CefAppConsumer.cef_handle.receive(timeout_ms=2000)
                 if packet.is_failed:
                     self.on_rcv_failed()
                 else:
@@ -200,6 +200,7 @@ class CefAppConsumer:
             pass
 
     def handle_request(self, packet):
+        print('test1')
         name = packet.name
         prefix = name.split('/')
         piece_index = int(prefix[4])
