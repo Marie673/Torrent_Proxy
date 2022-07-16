@@ -14,7 +14,7 @@ from torrent import Torrent
 
 PROTOCOL = 'ccnx:/BitTorrent'
 CHUNK_SIZE = 1024 * 4
-MAX_PIECE = 50
+MAX_PIECE = 30
 TIME_OUT = 5
 
 
@@ -89,6 +89,7 @@ class Interest(Thread):
         piece_data = packet.payload
         if self.piece.is_full:
             return
+        CefAppConsumer.data_size += len(packet)
         self.piece.set_block(piece_offset, piece_data)
         if chunk == self.end_chunk_num:
             return
@@ -98,6 +99,7 @@ class Interest(Thread):
 class CefAppConsumer:
     cef_handle = cefpyco.CefpycoHandle()
     last_log_line = ""
+    data_size = 0
 
     def __init__(self, pieces_manager):
 
@@ -135,6 +137,7 @@ class CefAppConsumer:
                 if (now_time - prog_time) > 1:
                     text = "\033[2J--------------------------------------------------------------------------\n" + \
                            str(now_time - start_time) + "[sec]\n" + \
+                           str(CefAppConsumer.data_size) + \
                            "completed | {}/{} pieces".format(self.pieces_manager.complete_pieces,
                                                              self.pieces_manager.number_of_pieces) + '\n' + \
                            "------------------------------------------------------------------------------"
