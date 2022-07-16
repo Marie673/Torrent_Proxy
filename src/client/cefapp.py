@@ -206,6 +206,7 @@ class CefAppConsumer:
 
         t = self.thread[name]
         if t.receive_piece(packet):
+            print('complete')
             del self.thread[name]
             self.on_start()
         self.pieces_manager.receive_block_piece(piece_index)
