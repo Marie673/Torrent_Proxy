@@ -54,7 +54,7 @@ class BitfieldThread(Thread):
 
 class Interest(Thread):
     def __init__(self, piece: Piece, name):
-        super().__init__()
+        super(Interest, self).__init__()
         self.piece = piece
         self.name = name
 
@@ -149,11 +149,9 @@ class CefAppConsumer:
         return name
 
     def on_start(self):
-        print('test')
         for piece in self.pieces:
             if threading.active_count() > MAX_PIECE:
                 break
-            print('test1')
             name = '/'.join([PROTOCOL, self.info_hash, 'request', str(piece.piece_index)])
             if piece.piece_index in self.thread:
                 continue
