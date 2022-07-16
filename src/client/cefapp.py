@@ -28,6 +28,8 @@ class BitfieldThread(Thread):
 
         self.name = '/'.join([PROTOCOL, self.info_hash, 'bitfield'])
 
+        self.healthy = True
+
     def run(self) -> None:
         pre_time = time.time()
         while self.health:
@@ -63,9 +65,11 @@ class Interest(Thread):
 
         self.end_chunk_num = None
 
+        self.healthy = True
+
     def run(self) -> None:
         CefAppConsumer.cef_handle.send_interest(self.name, 0)
-        while not self.piece.is_full:
+        while (not self.piece.is_full) and self.healthy:
             now_time = time.time()
             if now_time - self.last_receive_time > 5:
                 self.get_next_chunk()
@@ -119,26 +123,33 @@ class CefAppConsumer:
         self.on_start()
 
         start_time = prog_time = time.time()
-        while self.pieces_manager.complete_pieces != self.number_of_pieces:
-            packet = CefAppConsumer.cef_handle.receive(timeout_ms=1000)
-            if packet.is_failed:
-                self.on_rcv_failed()
-            else:
-                self.on_rcv_succeeded(packet)
-            now_time = time.time()
-            if (now_time - prog_time) > 1:
-                text = "\033[2J--------------------------------------------------------------------------\n" + \
-                       str(now_time - start_time) + "[sec]\n" + \
-                       "completed | {}/{} pieces".format(self.pieces_manager.complete_pieces,
-                                                         self.pieces_manager.number_of_pieces) + '\n' + \
-                       "------------------------------------------------------------------------------"
-                print(text)
-                prog_time = now_time
+        try:
+            while self.pieces_manager.complete_pieces != self.number_of_pieces:
+                packet = CefAppConsumer.cef_handle.receive(timeout_ms=1000)
+                if packet.is_failed:
+                    self.on_rcv_failed()
+                else:
+                    self.on_rcv_succeeded(packet)
+                now_time = time.time()
+                if (now_time - prog_time) > 1:
+                    text = "\033[2J--------------------------------------------------------------------------\n" + \
+                           str(now_time - start_time) + "[sec]\n" + \
+                           "completed | {}/{} pieces".format(self.pieces_manager.complete_pieces,
+                                                             self.pieces_manager.number_of_pieces) + '\n' + \
+                           "------------------------------------------------------------------------------"
+                    print(text)
+                    prog_time = now_time
 
-        if self.pieces_manager.complete_pieces == self.number_of_pieces:
-            return True
-        else:
-            return False
+            if self.pieces_manager.complete_pieces == self.number_of_pieces:
+                return True
+            else:
+                return False
+        except KeyboardInterrupt:
+            self.proxy_bitfield.healthy = False
+            self.proxy_bitfield.join()
+            for t in self.thread:
+                t.healthy = False
+                t.join()
 
     def create_request_interest(self, index):
         name = '/'.join([self.name, 'request', str(index)])
