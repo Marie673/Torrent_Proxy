@@ -174,11 +174,14 @@ class CefAppConsumer:
         '''
         prefix[0] = ccnx:
         prefix[1] = BitTorrent:
-        prefix[2] = message　-> request, bitfield
-        prefix[3] = peace_index
+        prefix[2] = info_hash
+        prefix[3] = message　-> request, bitfield
+        prefix[4] = peace_index
         '''
-        print(packet.name)
-        message = prefix[2]
+        if prefix[2] != self.info_hash:
+            logging.info('missing info_hash')
+
+        message = prefix[3]
         if message == 'request':
             self.handle_request(packet)
         elif message == 'bitfield':
