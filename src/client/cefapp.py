@@ -42,10 +42,8 @@ class BitfieldThread(Thread):
         end_chunk_num = packet.end_chunk_num
         payload: bytes = packet.payload
         bs = bitstring.BitArray(payload)
-        print(bs)
-        print(len(bs))
 
-        # self.bitfield.overwrite(bs=,pos=)
+        self.bitfield.overwrite(bs=bs, pos=CHUNK_SIZE * chunk)
 
         if chunk != end_chunk_num:
             CefAppConsumer.cef_handle.send_interest(name=self.name, chunk_num=chunk + 1)
