@@ -83,7 +83,7 @@ class Interest(Thread):
     def receive_piece(self, packet):
         chunk = packet.chunk_num
         self.last_receive_chunk = chunk
-        self.end_chunk_num = packet.end_chun_num
+        self.end_chunk_num = packet.end_chunk_num
 
         piece_offset = chunk * CHUNK_SIZE
         piece_data = packet.payload
