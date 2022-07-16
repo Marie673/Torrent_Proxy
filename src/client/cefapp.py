@@ -59,7 +59,7 @@ class Interest(Thread):
         self.name = name
 
         self.last_receive_chunk = None
-        self.last_receive_time = None
+        self.last_receive_time = time.time()
 
         self.end_chunk_num = None
 
