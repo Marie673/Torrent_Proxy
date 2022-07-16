@@ -33,7 +33,7 @@ class BitfieldThread(Thread):
             now_time = time.time()
             if now_time - pre_time > 5:
                 self.do_update()
-                # print(self.bitfield)
+                print(self.bitfield)
                 pre_time - time.time()
 
     def get_bitfield(self, packet):
