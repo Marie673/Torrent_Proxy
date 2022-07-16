@@ -126,35 +126,29 @@ class CefAppConsumer:
         self.on_start()
 
         start_time = prog_time = time.time()
-        try:
-            while self.pieces_manager.complete_pieces != self.number_of_pieces:
-                packet = CefAppConsumer.cef_handle.receive(timeout_ms=2000)
-                if packet.is_failed:
-                    self.on_rcv_failed()
-                else:
-                    self.on_rcv_succeeded(packet)
-                now_time = time.time()
-                if (now_time - prog_time) > 1:
-                    text = "\033[2J--------------------------------------------------------------------------\n" + \
-                           str(now_time - start_time) + "[sec]\n" + \
-                           str(CefAppConsumer.data_size) + "\n" + \
-                           "completed | {}/{} pieces".format(
-                               self.pieces_manager.complete_pieces,
-                               self.pieces_manager.number_of_pieces) + '\n' + \
-                           "------------------------------------------------------------------------------"
-                    print(text)
-                    prog_time = now_time
 
-            if self.pieces_manager.complete_pieces == self.number_of_pieces:
-                return True
+        while self.pieces_manager.complete_pieces != self.number_of_pieces:
+            packet = CefAppConsumer.cef_handle.receive(timeout_ms=2000)
+            if packet.is_failed:
+                self.on_rcv_failed()
             else:
-                return False
+                self.on_rcv_succeeded(packet)
+            now_time = time.time()
+            if (now_time - prog_time) > 1:
+                text = "\033[2J--------------------------------------------------------------------------\n" + \
+                       str(now_time - start_time) + "[sec]\n" + \
+                       str(CefAppConsumer.data_size) + "\n" + \
+                       "completed | {}/{} pieces".format(
+                           self.pieces_manager.complete_pieces,
+                           self.pieces_manager.number_of_pieces) + '\n' + \
+                       "------------------------------------------------------------------------------"
+                print(text)
+                prog_time = now_time
 
-        except KeyboardInterrupt:
-            for t in self.thread.values():
-                t.healthy = False
-            for t in threading.enumerate():
-                t.join()
+        if self.pieces_manager.complete_pieces == self.number_of_pieces:
+            return True
+        else:
+            return False
 
     def create_request_interest(self, index):
         name = '/'.join([self.name, 'request', str(index)])
