@@ -41,7 +41,8 @@ class BitfieldThread(Thread):
         chunk = packet.chunk_num
         end_chunk_num = packet.end_chunk_num
         payload: bytes = packet.payload
-        bs = bitstring.BitArray(bin=payload)
+        bs = bitstring.BitArray(payload)
+        print(bs)
         print(len(bs))
 
         # self.bitfield.overwrite(bs=,pos=)
