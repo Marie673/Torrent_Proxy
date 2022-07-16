@@ -16,8 +16,6 @@ CHUNK_SIZE = 1024 * 4
 MAX_PIECE = 50
 TIME_OUT = 5
 
-cef_handle = cefpyco.CefpycoHandle()
-
 
 class BitfieldThread(Thread):
     def __init__(self, torrent: Torrent):
@@ -48,10 +46,11 @@ class BitfieldThread(Thread):
             self.bitfield[chunk*CHUNK_SIZE + 1] = payload[i]
 
         if chunk != end_chunk_num:
-            cef_handle.send_interest(name=self.name, chunk_num=chunk+1)
+            CefAppConsumer.cef_handle.send_interest(name=self.name, chunk_num=chunk + 1)
 
     def do_update(self):
-        cef_handle.send_interest(name=self.name, chunk_num=0)
+        CefAppConsumer.cef_handle.send_interest(name=self.name, chunk_num=0)
+        print('send Interest')
         return
 
 
@@ -70,14 +69,14 @@ class Interest(Thread):
         return self.name
 
     def run(self) -> None:
-        cef_handle.send_interest(self.name, 0)
+        CefAppConsumer.cef_handle.send_interest(self.name, 0)
         while not self.piece.is_full:
             if time.time() - self.last_receive_time > 5:
                 self.get_next_chunk()
 
     def get_next_chunk(self):
         chunk = self.last_receive_chunk + 1
-        cef_handle.send_interest(self.name, chunk + 1)
+        CefAppConsumer.cef_handle.send_interest(self.name, chunk + 1)
 
     def receive_piece(self, packet):
         chunk = packet.chunk_num
@@ -96,10 +95,12 @@ class Interest(Thread):
 
 
 class CefAppConsumer:
+    cef_handle = cefpyco.CefpycoHandle()
     last_log_line = ""
 
     def __init__(self, pieces_manager):
-        cef_handle.begin()
+
+        CefAppConsumer.cef_handle.begin()
         self.pieces_manager: PiecesManager = pieces_manager
         self.pieces: [Piece] = pieces_manager.pieces
 
@@ -123,7 +124,7 @@ class CefAppConsumer:
 
         start_time = prog_time = time.time()
         while self.pieces_manager.complete_pieces != self.number_of_pieces:
-            packet = cef_handle.receive(timeout_ms=1000)
+            packet = CefAppConsumer.cef_handle.receive(timeout_ms=1000)
             if packet.is_failed:
                 self.on_rcv_failed()
             else:
@@ -203,3 +204,9 @@ class CefAppConsumer:
             logging.info(current_log_line)
 
         self.last_log_line = current_log_line
+
+
+def test():
+    path = '/home/vagrant/torrent/torrent/1024MB.dummy.torrent'
+    import client
+    run = client.Run(path)

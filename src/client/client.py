@@ -26,7 +26,6 @@ class Run(object):
         logging.info('Cefore Manager Started')
         logging.info("PiecesManager Started")
 
-
     def start(self):
         start_time = time.time()
         # logging.debug('start request pieces')
