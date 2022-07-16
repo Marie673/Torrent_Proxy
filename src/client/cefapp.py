@@ -14,7 +14,7 @@ from torrent import Torrent
 
 PROTOCOL = 'ccnx:/BitTorrent'
 CHUNK_SIZE = 1024 * 4
-MAX_PIECE = 10
+MAX_PIECE = 50
 TIME_OUT = 5
 
 
