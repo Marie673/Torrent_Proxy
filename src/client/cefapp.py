@@ -68,6 +68,7 @@ class Interest(Thread):
         self.healthy = True
 
     def run(self) -> None:
+        print(self.name)
         CefAppConsumer.cef_handle.send_interest(self.name, 0)
         while (not self.piece.is_full) and self.healthy:
             now_time = time.time()
