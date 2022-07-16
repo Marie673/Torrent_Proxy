@@ -78,6 +78,7 @@ class Interest(Thread):
         chunk = self.last_receive_chunk + 1
 
         CefAppConsumer.cef_handle.send_interest(self.name, chunk)
+        print(self.name, chunk)
         self.last_call_time = time.time()
 
     def receive_piece(self, packet):
