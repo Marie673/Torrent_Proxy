@@ -34,7 +34,6 @@ class BitfieldThread(Thread):
             now_time = time.time()
             if now_time - pre_time > 5:
                 self.do_update()
-                print(self.bitfield.hex)
                 pre_time = time.time()
 
     def get_bitfield(self, packet):
@@ -119,7 +118,7 @@ class CefAppConsumer:
 
     def run(self):
         self.proxy_bitfield.start()
-        # self.on_start()
+        self.on_start()
 
         start_time = prog_time = time.time()
         while self.pieces_manager.complete_pieces != self.number_of_pieces:
