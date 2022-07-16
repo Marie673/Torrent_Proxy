@@ -142,7 +142,7 @@ class CefAppConsumer:
                         self.pieces_manager.complete_pieces,
                         self.pieces_manager.number_of_pieces) + '\n' + \
                            "------------------------------------------------------------------------------"
-                    print(text)
+                    # print(text)
                     prog_time = now_time
 
             if self.pieces_manager.complete_pieces == self.number_of_pieces:
