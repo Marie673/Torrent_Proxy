@@ -76,7 +76,8 @@ class Interest(Thread):
 
     def get_next_chunk(self):
         chunk = self.last_receive_chunk + 1
-        CefAppConsumer.cef_handle.send_interest(self.name, chunk + 1)
+        print(self.name, chunk)
+        CefAppConsumer.cef_handle.send_interest(self.name, chunk)
 
     def receive_piece(self, packet):
         chunk = packet.chunk_num
