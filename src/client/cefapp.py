@@ -37,6 +37,7 @@ class BitfieldThread(Thread):
                 pre_time - time.time()
 
     def get_bitfield(self, packet):
+        print('get bitfield')
         chunk = packet.chunk_num
         end_chunk_num = packet.end_chunk_num
         payload = packet.payload
