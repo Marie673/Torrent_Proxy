@@ -128,7 +128,7 @@ class CefAppConsumer:
         self.data_size = 0
 
     def run(self):
-        self.proxy_bitfield.start()
+        # self.proxy_bitfield.start()
         self.on_start()
 
         start_time = prog_time = time.time()
