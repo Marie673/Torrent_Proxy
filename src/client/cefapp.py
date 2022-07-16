@@ -153,7 +153,6 @@ class CefAppConsumer:
             if piece.piece_index in self.thread:
                 continue
             else:
-                print()
                 t = Interest(piece, name)
                 t.start()
                 self.thread[piece.piece_index] = t
