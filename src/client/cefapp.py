@@ -61,7 +61,7 @@ class Interest(Thread):
         self.name = name
 
         self.last_receive_chunk = -1
-        self.last_receive_time = time.time()
+        self.last_call_time = time.time()
 
         self.end_chunk_num = None
 
@@ -71,18 +71,18 @@ class Interest(Thread):
         CefAppConsumer.cef_handle.send_interest(self.name, 0)
         while (not self.piece.is_full) and self.healthy:
             now_time = time.time()
-            if now_time - self.last_receive_time > 5:
+            if now_time - self.last_call_time > 5:
                 self.get_next_chunk()
 
     def get_next_chunk(self):
         chunk = self.last_receive_chunk + 1
         print(self.name, chunk)
         CefAppConsumer.cef_handle.send_interest(self.name, chunk)
+        self.last_call_time = time.time()
 
     def receive_piece(self, packet):
         chunk = packet.chunk_num
         self.last_receive_chunk = chunk
-        self.last_receive_time = time.time()
         self.end_chunk_num = packet.end_chun_num
 
         piece_offset = chunk * CHUNK_SIZE
