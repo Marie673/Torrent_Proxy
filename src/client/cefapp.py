@@ -167,7 +167,7 @@ class CefAppConsumer:
             else:
                 t = Interest(piece, name)
                 t.start()
-                self.thread[piece.piece_index] = t
+                self.thread[name] = t
 
     def on_rcv_failed(self):
         logging.debug("on rcv failed")
@@ -199,7 +199,7 @@ class CefAppConsumer:
         name = packet.name
         prefix = name.split('/')
         piece_index = prefix[4]
-        t = self.thread[piece_index]
+        t = self.thread[name]
         t.receive_piece(packet)
         self.pieces_manager.receive_block_piece(piece_index)
 
