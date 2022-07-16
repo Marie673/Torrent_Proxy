@@ -150,7 +150,7 @@ class CefAppConsumer:
                 return False
 
         except KeyboardInterrupt:
-            for t in self.thread:
+            for t in self.thread.values():
                 t.healthy = False
             for t in threading.enumerate():
                 t.join()
