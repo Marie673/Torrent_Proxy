@@ -51,7 +51,6 @@ class BitfieldThread(Thread):
 
     def do_update(self):
         CefAppConsumer.cef_handle.send_interest(name=self.name, chunk_num=0)
-        print('send Interest')
         return
 
 
@@ -178,7 +177,7 @@ class CefAppConsumer:
         prefix[2] = message　-> request, bitfield
         prefix[3] = peace_index
         '''
-
+        print(packet.name)
         message = prefix[2]
         if message == 'request':
             self.handle_request(packet)
