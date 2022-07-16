@@ -133,7 +133,6 @@ class CefAppConsumer:
                     self.on_rcv_succeeded(packet)
                 now_time = time.time()
                 if (now_time - prog_time) > 1:
-                    thr = [t.piece.piece_index for t in threading.enumerate()]
                     text = "\033[2J--------------------------------------------------------------------------\n" + \
                            str(now_time - start_time) + "[sec]\n" + \
                            str(thr) + \
@@ -147,8 +146,9 @@ class CefAppConsumer:
                 return True
             else:
                 return False
+
         except KeyboardInterrupt:
-            for t in threading.enumerate():
+            for t in self.thread:
                 t.healthy = False
             for t in threading.enumerate():
                 t.join()
