@@ -68,7 +68,6 @@ class Interest(Thread):
         self.healthy = True
 
     def run(self) -> None:
-        print('test')
         CefAppConsumer.cef_handle.send_interest(self.name, 0)
         while (not self.piece.is_full) and self.healthy:
             now_time = time.time()
@@ -79,7 +78,6 @@ class Interest(Thread):
         chunk = self.last_receive_chunk + 1
 
         CefAppConsumer.cef_handle.send_interest(self.name, chunk)
-        print(self.name, chunk)
         self.last_call_time = time.time()
 
     def receive_piece(self, packet):
@@ -200,11 +198,10 @@ class CefAppConsumer:
             pass
 
     def handle_request(self, packet):
-        print('test1')
         name = packet.name
         prefix = name.split('/')
         piece_index = int(prefix[4])
-        print(packet.name)
+
         t = self.thread[name]
         t.receive_piece(packet)
         self.pieces_manager.receive_block_piece(piece_index)
