@@ -196,7 +196,7 @@ class CefAppConsumer:
     def handle_request(self, packet):
         name = packet.name
         prefix = name.split('/')
-        piece_index = prefix[3]
+        piece_index = prefix[4]
         t = self.thread[piece_index]
         t.receive_piece(packet)
         self.pieces_manager.receive_block_piece(piece_index)
