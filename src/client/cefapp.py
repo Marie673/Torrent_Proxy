@@ -129,7 +129,6 @@ class CefAppConsumer:
             if packet.is_failed:
                 self.on_rcv_failed()
             else:
-                print('get packet')
                 self.on_rcv_succeeded(packet)
             now_time = time.time()
             if (now_time - prog_time) > 1:
