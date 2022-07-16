@@ -67,6 +67,7 @@ class Interest(Thread):
         return self.name
 
     def run(self) -> None:
+        print('testA')
         CefAppConsumer.cef_handle.send_interest(self.name, 0)
         while not self.piece.is_full:
             if time.time() - self.last_receive_time > 5:
@@ -148,10 +149,11 @@ class CefAppConsumer:
         return name
 
     def on_start(self):
+        print('test')
         for piece in self.pieces:
             if threading.active_count() > MAX_PIECE:
                 break
-
+            print('test1')
             name = '/'.join([PROTOCOL, self.info_hash, 'request', str(piece.piece_index)])
             if piece.piece_index in self.thread:
                 continue
