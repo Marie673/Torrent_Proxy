@@ -161,7 +161,7 @@ class CefAppConsumer:
             if threading.active_count() > MAX_PIECE + 1:
                 break
             name = '/'.join([PROTOCOL, self.info_hash, 'request', str(piece.piece_index)])
-            if piece.piece_index in self.thread:
+            if name in self.thread.keys():
                 continue
             else:
                 t = Interest(piece, name)
