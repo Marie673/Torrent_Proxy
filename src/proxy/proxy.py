@@ -107,7 +107,6 @@ class Run(object):
                                       chunk_num=chunk, end_chunk_num=end_chunk_num, cache_time=0)
 
             if message == 'request':
-                print('get request interest')
                 piece_index = int(prefix[4])
                 with open(TEST_DAT, mode='a') as file:
                     text = 'interest,' + info_hash + "," + \
