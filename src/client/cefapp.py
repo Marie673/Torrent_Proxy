@@ -40,7 +40,7 @@ class BitfieldThread(Thread):
         chunk = packet.chunk_num
         end_chunk_num = packet.end_chunk_num
         payload = packet.payload
-        print(payload[0])
+        print(payload[0:25])
         for i in range(CHUNK_SIZE):
             self.bitfield[chunk * CHUNK_SIZE + i] = payload[i]
 
