@@ -42,7 +42,7 @@ class BitfieldThread(Thread):
         payload = packet.payload
 
         for i in range(CHUNK_SIZE):
-            self.bitfield[chunk*CHUNK_SIZE + 1] = payload[i]
+            self.bitfield[chunk * CHUNK_SIZE + i] = payload[i]
 
         if chunk != end_chunk_num:
             CefAppConsumer.cef_handle.send_interest(name=self.name, chunk_num=chunk + 1)
