@@ -135,7 +135,8 @@ class CefAppConsumer:
                 self.on_rcv_succeeded(packet)
             now_time = time.time()
             if (now_time - prog_time) > 1:
-                text = "\033[2J--------------------------------------------------------------------------\n" + \
+                # \033[2J
+                text = "\n--------------------------------------------------------------------------\n" + \
                        str(now_time - start_time) + "[sec]\n" + \
                        str(CefAppConsumer.data_size) + "\n" + \
                        "completed | {}/{} pieces".format(
