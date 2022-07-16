@@ -64,7 +64,6 @@ class Interest(Thread):
         self.end_chunk_num = None
 
     def run(self) -> None:
-        print('testA')
         CefAppConsumer.cef_handle.send_interest(self.name, 0)
         while not self.piece.is_full:
             if time.time() - self.last_receive_time > 5:
