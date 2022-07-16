@@ -91,7 +91,7 @@ class Interest(Thread):
         piece_data = packet.payload
         if self.piece.is_full:
             return
-        CefAppConsumer.data_size += len(packet)
+        CefAppConsumer.data_size += len(piece_data)
         self.piece.set_block(piece_offset, piece_data)
         if chunk == self.end_chunk_num:
             return
