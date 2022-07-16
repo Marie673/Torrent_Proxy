@@ -6,6 +6,7 @@ from queue import Queue
 from threading import Thread, Event
 from concurrent.futures import ThreadPoolExecutor
 import cefpyco
+import bitstring
 
 from piece import Piece
 from pieces_manager import PiecesManager
@@ -22,7 +23,7 @@ class BitfieldThread(Thread):
         super().__init__()
         self.torrent = torrent
         self.info_hash = self.torrent.info_hash_str
-        self.bitfield = [0 for _ in range(self.torrent.number_of_pieces)]
+        self.bitfield = bitstring.BitArray(self.torrent.number_of_pieces)
         self.health: bool = True
 
         self.name = '/'.join([PROTOCOL, self.info_hash, 'bitfield'])
