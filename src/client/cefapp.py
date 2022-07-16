@@ -183,6 +183,7 @@ class CefAppConsumer:
         if message == 'request':
             self.handle_request(packet)
         elif message == 'bitfield':
+            print('get bitfield data')
             self.proxy_bitfield.get_bitfield(packet)
         else:
             pass

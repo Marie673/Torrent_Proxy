@@ -95,7 +95,6 @@ class Run(object):
             '''
             message = prefix[3]
             if message == 'bitfield':
-                print('Get bitfield')
                 bitfield = self.bitfield[info_hash]
                 bitfield_bytes = bitfield.bytes
                 chunk = packet.chunk_num
