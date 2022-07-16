@@ -169,7 +169,7 @@ class CefAppConsumer:
                 self.thread[name] = t
 
     def on_rcv_failed(self):
-        logging.debug("on rcv failed")
+        logging.debug("***** on rcv failed *****")
         self.on_start()
 
     def on_rcv_succeeded(self, packet):
