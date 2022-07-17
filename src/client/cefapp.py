@@ -163,7 +163,8 @@ class CefAppConsumer:
                 continue
 
             name = '/'.join([PROTOCOL, self.info_hash, 'request', str(piece.piece_index)])
-            if name in self.interest.keys():
+            if name in self.interest.items():
+                self.interest[name].get_next_chunk()
                 continue
             else:
                 t = Interest(piece, name)
@@ -173,8 +174,7 @@ class CefAppConsumer:
 
     def on_rcv_failed(self):
         logging.debug("***** on rcv failed *****")
-        for interest in self.interest.values():
-            interest.get_next_chunk()
+        self.on_start()
 
     def on_rcv_succeeded(self, packet):
         name = packet.name
