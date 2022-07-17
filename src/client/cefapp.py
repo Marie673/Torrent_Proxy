@@ -207,6 +207,8 @@ class CefAppConsumer:
         piece_index = int(prefix[4])
 
         print('data', name)
+        if name not in self.interest.keys():
+            return
 
         t = self.interest[name]
         if t.receive_piece(packet):
