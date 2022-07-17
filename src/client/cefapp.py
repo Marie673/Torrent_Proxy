@@ -27,6 +27,7 @@ class BitfieldThread(Thread):
         self.health: bool = True
 
         self.name = '/'.join([PROTOCOL, self.info_hash, 'bitfield'])
+        self.last_call_time = time.time()
 
         self.healthy = True
 
@@ -61,6 +62,7 @@ class Interest:
         self.name = name
 
         self.last_receive_chunk = -1
+        self.last_call_time = time.time()
 
         self.end_chunk_num = None
 
@@ -71,6 +73,7 @@ class Interest:
         chunk = self.last_receive_chunk + 1
 
         CefAppConsumer.cef_handle.send_interest(self.name, chunk)
+        self.last_call_time = time.time()
 
     def receive_piece(self, packet) -> bool:
         chunk = packet.chunk_num
@@ -154,6 +157,10 @@ class CefAppConsumer:
         return name
 
     def on_start(self):
+        for interest in self.interest.values():
+            if time.time() - interest.last_call_time > 5:
+                interest.get_next_chunk()
+
         if len(self.interest) >= MAX_PIECE:
             return
 
