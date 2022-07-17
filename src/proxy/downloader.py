@@ -53,21 +53,19 @@ class Run(Process):
                 self.request.append(request_index)
             """
 
-            for index in:
+            for piece in self.pieces_manager.pieces:
                 # print(self.request)
-                piece = self.pieces_manager.pieces[index]
                 if piece.is_full:
-                    self.request.remove(index)
                     continue
 
                 for i in range(piece.number_of_blocks):
-                    peer = self.peers_manager.get_random_peer_having_piece(index)
+                    peer = self.peers_manager.get_random_peer_having_piece(piece.piece_index)
                     if not peer:
                         continue
 
-                    self.pieces_manager.pieces[index].update_block_status()
+                    piece.update_block_status()
 
-                    data = self.pieces_manager.pieces[index].get_empty_block()
+                    data = piece.get_empty_block()
                     if not data:
                         continue
                     piece_index, block_offset, block_length = data
@@ -76,7 +74,7 @@ class Run(Process):
                     time.sleep(0.001)
                     now_time = time.time()
                     if (now_time - prog_time) > 1:
-                        text = "\033[2J--------------------------------------------------------------------------\n" + \
+                        text = "--------------------------------------------------------------------------\n" + \
                                self.pieces_manager.str_bitfield() + '\n' + \
                                "------------------------------------------------------------------------------"
                         print(text)
