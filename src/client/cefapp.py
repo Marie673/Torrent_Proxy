@@ -14,7 +14,7 @@ from torrent import Torrent
 
 PROTOCOL = 'ccnx:/BitTorrent'
 CHUNK_SIZE = 1024 * 4
-MAX_PIECE = 2
+MAX_PIECE = 5
 TIME_OUT = 5
 
 
@@ -134,8 +134,7 @@ class CefAppConsumer:
             now_time = time.time()
             if (now_time - prog_time) > 1:
                 # \033[2J
-                text = str(
-                    self.interest.keys()) + "\n--------------------------------------------------------------------------\n" + \
+                text = "\n--------------------------------------------------------------------------\n" + \
                        str(now_time - start_time) + "[sec]\n" + \
                        str(CefAppConsumer.data_size) + 'Byte ' + \
                        str((CefAppConsumer.data_size * 8 / 1024) / (now_time - start_time)) + \
