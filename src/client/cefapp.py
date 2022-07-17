@@ -54,32 +54,25 @@ class BitfieldThread(Thread):
         return
 
 
-class Interest(Thread):
+class Interest:
     def __init__(self, piece: Piece, name):
         super(Interest, self).__init__()
         self.piece = piece
         self.name = name
 
         self.last_receive_chunk = -1
-        self.last_call_time = time.time()
 
         self.end_chunk_num = None
 
         self.healthy = True
 
-    def run(self) -> None:
-        print(self.name)
-        CefAppConsumer.cef_handle.send_interest(self.name, 0)
-        while (not self.piece.is_full) and self.healthy:
-            now_time = time.time()
-            if now_time - self.last_call_time > 5:
-                self.get_next_chunk()
+    def on_rcv_failed(self):
+        self.get_next_chunk()
 
     def get_next_chunk(self):
         chunk = self.last_receive_chunk + 1
 
         CefAppConsumer.cef_handle.send_interest(self.name, chunk)
-        self.last_call_time = time.time()
 
     def receive_piece(self, packet) -> bool:
         chunk = packet.chunk_num
@@ -123,7 +116,7 @@ class CefAppConsumer:
 
         self.bitfield = [0 for _ in range(self.number_of_pieces)]
         self.proxy_bitfield = BitfieldThread(self.pieces_manager.torrent)
-        self.thread = {}
+        self.interest = {}
         # test
         self.data_size = 0
 
@@ -163,23 +156,24 @@ class CefAppConsumer:
 
     def on_start(self):
         for piece in self.pieces:
-            if threading.active_count() > MAX_PIECE + 1:
+            if len(self.interest) > MAX_PIECE:
                 break
 
             if piece.is_full:
                 continue
 
             name = '/'.join([PROTOCOL, self.info_hash, 'request', str(piece.piece_index)])
-            if name in self.thread.keys():
+            if name in self.interest.keys():
                 continue
             else:
                 t = Interest(piece, name)
-                t.start()
-                self.thread[name] = t
+                t.get_next_chunk()
+                self.interest[name] = t
 
     def on_rcv_failed(self):
         logging.debug("***** on rcv failed *****")
-        self.on_start()
+        for interest in self.interest.values():
+            interest.get_next_chunk()
 
     def on_rcv_succeeded(self, packet):
         name = packet.name
@@ -207,10 +201,10 @@ class CefAppConsumer:
         prefix = name.split('/')
         piece_index = int(prefix[4])
 
-        t = self.thread[name]
+        t = self.interest[name]
         if t.receive_piece(packet):
             print('complete')
-            del self.thread[name]
+            del self.interest[name]
             self.on_start()
         self.pieces_manager.receive_block_piece(piece_index)
 
