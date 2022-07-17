@@ -131,7 +131,8 @@ class CefAppConsumer:
             now_time = time.time()
             if (now_time - prog_time) > 1:
                 # \033[2J
-                text = "\n--------------------------------------------------------------------------\n" + \
+                text = str(
+                    self.interest.keys()) + "\n--------------------------------------------------------------------------\n" + \
                        str(now_time - start_time) + "[sec]\n" + \
                        str(CefAppConsumer.data_size) + 'Byte ' + \
                        str((CefAppConsumer.data_size * 8 / 1024) / (now_time - start_time)) + \
