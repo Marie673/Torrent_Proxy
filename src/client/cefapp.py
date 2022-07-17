@@ -155,6 +155,7 @@ class CefAppConsumer:
         for piece in self.pieces:
 
             if len(self.interest) >= MAX_PIECE:
+
                 break
 
             if piece.is_full:
@@ -166,16 +167,16 @@ class CefAppConsumer:
 
             name = '/'.join([PROTOCOL, self.info_hash, 'request', str(piece.piece_index)])
             if name in self.interest.items():
-                self.interest[name].get_next_chunk()
                 continue
             else:
                 t = Interest(piece, name)
                 t.get_next_chunk()
                 self.interest[name] = t
-                print(name)
 
     def on_rcv_failed(self):
         logging.debug("***** on rcv failed *****")
+        for interest in self.interest.values():
+            interest.get_next_chunk()
         self.on_start()
 
     def on_rcv_succeeded(self, packet):
