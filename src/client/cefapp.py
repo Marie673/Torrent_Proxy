@@ -180,7 +180,6 @@ class CefAppConsumer:
             if name in self.interest.keys():
                 continue
 
-            print(name)
             interest = Interest(piece, name)
             interest.get_next_chunk()
             self.interest[name] = interest
