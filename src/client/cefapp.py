@@ -181,6 +181,7 @@ class CefAppConsumer:
     def on_rcv_succeeded(self, packet):
         name = packet.name
         prefix = name.split('/')
+        print(name, packet.chunk_num)
         '''
         prefix[0] = ccnx:
         prefix[1] = BitTorrent:
@@ -195,7 +196,8 @@ class CefAppConsumer:
         if message == 'request':
             self.handle_request(packet)
         elif message == 'bitfield':
-            self.proxy_bitfield.get_bitfield(packet)
+            pass
+            # self.proxy_bitfield.get_bitfield(packet)
         else:
             pass
 
