@@ -45,13 +45,15 @@ class Run(Process):
                 time.sleep(1)
                 continue
 
+            """"
             while not self.request_q.empty():
                 request_index = self.request_q.get()
                 if request_index in self.request:
                     continue
                 self.request.append(request_index)
+            """
 
-            for index in self.request[:MAX_PIECE]:
+            for index in:
                 # print(self.request)
                 piece = self.pieces_manager.pieces[index]
                 if piece.is_full:

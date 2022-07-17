@@ -66,6 +66,7 @@ class Run(object):
             file.seek(seek)
             payload = file.read(SIZE)
             # logging.debug("name:{} chunk:{}".format(name, chunk))
+            print('send data', name)
             self.handle.send_data(name=name, payload=payload,
                                   chunk_num=chunk, end_chunk_num=end_chunk_num, cache_time=cache_time)
 
