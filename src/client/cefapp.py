@@ -166,12 +166,12 @@ class CefAppConsumer:
             # continue
 
             name = '/'.join([PROTOCOL, self.info_hash, 'request', str(piece.piece_index)])
-            if name in self.interest.items():
+            if name in self.interest.keys():
                 continue
-            else:
-                interest = Interest(piece, name)
-                interest.get_next_chunk()
-                self.interest[name] = interest
+
+            interest = Interest(piece, name)
+            interest.get_next_chunk()
+            self.interest[name] = interest
 
     def on_rcv_failed(self):
         logging.debug("***** on rcv failed *****")
