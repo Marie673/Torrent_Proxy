@@ -40,14 +40,11 @@ class Run(object):
             self.bitfield[t.info_hash_str] = bitstring.BitArray(t.number_of_pieces)
 
         self.download_process = {}
-        self.request_q = {}
         self.piece_q = {}
 
     def create_new_process(self, info_hash):
-        request_q = Queue()
-        self.request_q[info_hash] = request_q
 
-        process = downloader.Run(self.torrent[info_hash], request_q)
+        process = downloader.Run(self.torrent[info_hash])
         process.start()
 
         self.download_process[info_hash] = process
@@ -128,10 +125,9 @@ class Run(object):
 
                 if info_hash not in self.download_process:
                     self.create_new_process(info_hash)
-                    self.request_q[info_hash].put(piece_index)
                 else:
                     if packet.chunk_num == 0:
-                        self.request_q[info_hash].put(piece_index)
+                        pass
 
     def start(self):
         pre_time = time.time()

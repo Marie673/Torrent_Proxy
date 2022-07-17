@@ -9,7 +9,6 @@ import tracker
 import message
 
 
-
 CHUNK_SIZE = 1024 * 4
 MAX_PIECE = 50
 
@@ -17,16 +16,13 @@ MAX_PIECE = 50
 class Run(Process):
     percentage_completed = -1
 
-    def __init__(self, torrent, request_q):
+    def __init__(self, torrent):
         Process.__init__(self)
         self.torrent = torrent
         self.tracker = tracker.Tracker(self.torrent)
 
         self.pieces_manager = pieces_manager.PiecesManager(self.torrent)
         self.peers_manager = peers_manager.PeersManager(self.torrent, self.pieces_manager)
-
-        self.request_q: Queue = request_q
-        self.request = []
 
         logging.info("PiecesManager Started")
 
