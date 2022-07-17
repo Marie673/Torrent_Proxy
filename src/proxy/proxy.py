@@ -135,11 +135,12 @@ class Run(object):
 
     def start(self):
         pre_time = time.time()
-        self.update_bitfield()
+        # self.update_bitfield()
         while True:
             now_time = time.time()
             if now_time - pre_time > 10:
-                self.update_bitfield()
+                pass
+                # self.update_bitfield()
 
             packet = self.handle.receive()
             if packet.is_failed:
