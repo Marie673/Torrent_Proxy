@@ -152,16 +152,17 @@ class CefAppConsumer:
 
     def on_start(self):
         for piece in self.pieces:
+            print('testA')
             if len(self.interest) > MAX_PIECE:
                 break
-
+            print('testB')
             if piece.is_full:
                 continue
-
+            print('testC')
             index = piece.piece_index
             if self.proxy_bitfield.bitfield[index] == 0:
                 continue
-
+            print('testD')
             name = '/'.join([PROTOCOL, self.info_hash, 'request', str(piece.piece_index)])
             if name in self.interest.items():
                 self.interest[name].get_next_chunk()
