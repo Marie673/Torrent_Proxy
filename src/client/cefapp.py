@@ -133,7 +133,9 @@ class CefAppConsumer:
                 # \033[2J
                 text = "\n--------------------------------------------------------------------------\n" + \
                        str(now_time - start_time) + "[sec]\n" + \
-                       str(CefAppConsumer.data_size) + "\n" + \
+                       str(CefAppConsumer.data_size) + 'Byte ' + \
+                       str((CefAppConsumer.data_size * 8 / 1024) / now_time - start_time) + \
+                       "Kbps" + "\n" + \
                        "completed | {}/{} pieces".format(
                            self.pieces_manager.complete_pieces,
                            self.pieces_manager.number_of_pieces) + '\n' + \
