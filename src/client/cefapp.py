@@ -151,13 +151,15 @@ class CefAppConsumer:
         return name
 
     def on_start(self):
+        if len(self.interest) >= MAX_PIECE:
+            return
+
         for piece in self.pieces:
+            if piece.is_full:
+                continue
 
             if len(self.interest) >= MAX_PIECE:
                 break
-
-            if piece.is_full:
-                continue
 
             index = piece.piece_index
             # if self.proxy_bitfield.bitfield[index] == 0:
@@ -167,9 +169,9 @@ class CefAppConsumer:
             if name in self.interest.items():
                 continue
             else:
-                t = Interest(piece, name)
-                t.get_next_chunk()
-                self.interest[name] = t
+                interest = Interest(piece, name)
+                interest.get_next_chunk()
+                self.interest[name] = interest
 
     def on_rcv_failed(self):
         logging.debug("***** on rcv failed *****")
@@ -207,8 +209,8 @@ class CefAppConsumer:
         if name not in self.interest.keys():
             return
 
-        t = self.interest[name]
-        if t.receive_piece(packet):
+        interest = self.interest[name]
+        if interest.receive_piece(packet):
             del self.interest[name]
             self.on_start()
         self.pieces_manager.receive_block_piece(piece_index)
