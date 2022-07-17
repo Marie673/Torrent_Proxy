@@ -71,7 +71,6 @@ class Interest:
         chunk = self.last_receive_chunk + 1
 
         CefAppConsumer.cef_handle.send_interest(self.name, chunk)
-        print(self.name, chunk)
 
     def receive_piece(self, packet) -> bool:
         chunk = packet.chunk_num
@@ -181,7 +180,6 @@ class CefAppConsumer:
     def on_rcv_succeeded(self, packet):
         name = packet.name
         prefix = name.split('/')
-        print('---------', name, packet.chunk_num)
         '''
         prefix[0] = ccnx:
         prefix[1] = BitTorrent:
@@ -206,13 +204,11 @@ class CefAppConsumer:
         prefix = name.split('/')
         piece_index = int(prefix[4])
 
-        print('data', name)
         if name not in self.interest.keys():
             return
 
         t = self.interest[name]
         if t.receive_piece(packet):
-            print('complete')
             del self.interest[name]
             self.on_start()
         self.pieces_manager.receive_block_piece(piece_index)
