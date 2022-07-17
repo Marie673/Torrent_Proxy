@@ -19,8 +19,9 @@ PATH = [
     HOME + "/torrent/torrent/1024MB.dummy.torrent",
     HOME + "/torrent/torrent/2048MB.dummy.torrent"
 ]
-TEST_DAT = HOME + "/exp/test.dat"
+CACHE_TIME = 0
 
+TEST_DAT = HOME + "/exp/test.dat"
 
 SIZE = 1024 * 4
 
@@ -56,7 +57,6 @@ class Run(object):
 
         file_size = os.path.getsize(file_name)
         end_chunk_num = file_size // SIZE - 1
-        cache_time = 10000
         seek = chunk * SIZE
 
         with open(file_name, "rb") as file:
@@ -66,7 +66,7 @@ class Run(object):
             if chunk == 0:
                 print('send data', name)
             self.handle.send_data(name=name, payload=payload,
-                                  chunk_num=chunk, end_chunk_num=end_chunk_num, cache_time=cache_time)
+                                  chunk_num=chunk, end_chunk_num=end_chunk_num, cache_time=CACHE_TIME)
 
     def update_bitfield(self):
         for info_hash, bitfield in self.bitfield.items():
@@ -82,7 +82,7 @@ class Run(object):
     def handle_interest(self, packet):
         name = packet.name
         prefix = name.split("/")
-        if prefix[0] != 'ccnx:' and prefix[1] != 'BitTorrent':
+        if prefix[0] != 'ccnx:':
             return
 
         if prefix[1] == 'BitTorrent':
@@ -134,7 +134,7 @@ class Run(object):
         self.update_bitfield()
         while True:
             now_time = time.time()
-            if now_time - pre_time > 5:
+            if now_time - pre_time > 10:
                 self.update_bitfield()
 
             packet = self.handle.receive()
