@@ -155,7 +155,6 @@ class CefAppConsumer:
         for piece in self.pieces:
 
             if len(self.interest) >= MAX_PIECE:
-
                 break
 
             if piece.is_full:
