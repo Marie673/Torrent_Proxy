@@ -181,7 +181,7 @@ class CefAppConsumer:
     def on_rcv_succeeded(self, packet):
         name = packet.name
         prefix = name.split('/')
-        print(name, packet.chunk_num)
+        print('---------', name, packet.chunk_num)
         '''
         prefix[0] = ccnx:
         prefix[1] = BitTorrent:
