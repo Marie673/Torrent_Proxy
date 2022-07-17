@@ -204,6 +204,8 @@ class CefAppConsumer:
         prefix = name.split('/')
         piece_index = int(prefix[4])
 
+        print('data', name)
+
         t = self.interest[name]
         if t.receive_piece(packet):
             print('complete')
