@@ -41,7 +41,6 @@ class Run(object):
             self.bitfield[t.info_hash_str] = bitstring.BitArray(t.number_of_pieces)
 
         self.download_process = {}
-        self.piece_q = {}
 
     def create_new_process(self, info_hash):
 
@@ -107,27 +106,32 @@ class Run(object):
 
             if message == 'request':
                 piece_index = int(prefix[4])
-                with open(TEST_DAT, mode='a') as file:
+                """
+                #with open(TEST_DAT, mode='a') as file:
                     text = 'interest,' + info_hash + "," + \
                            str(piece_index) + "," + str(packet.chunk_num) + "," + \
                            str(time.time()) + "\n"
                     file.write(text)
+                """
 
                 tmp_path = '/'.join(['tmp', info_hash, str(piece_index)])
                 if os.path.exists(tmp_path):
                     self.send_file(packet, tmp_path)
-                    with open(TEST_DAT, mode='a') as file:
+                    """
+                    # with open(TEST_DAT, mode='a') as file:
                         text = 'data,' + info_hash + "," + \
                                str(piece_index) + "," + str(packet.chunk_num) + "," + \
                                str(time.time()) + "\n"
                         file.write(text)
+                    """
                     return
-
+                """    
                 if info_hash not in self.download_process:
                     self.create_new_process(info_hash)
                 else:
                     if packet.chunk_num == 0:
                         pass
+                """
 
     def start(self):
         pre_time = time.time()
