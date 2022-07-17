@@ -117,7 +117,7 @@ class CefAppConsumer:
         self.data_size = 0
 
     def run(self):
-        self.proxy_bitfield.start()
+        # self.proxy_bitfield.start()
         self.on_start()
 
         start_time = prog_time = time.time()
@@ -160,9 +160,9 @@ class CefAppConsumer:
                 continue
 
             index = piece.piece_index
-            if self.proxy_bitfield.bitfield[index] == 0:
-                continue
-            print('testD')
+            # if self.proxy_bitfield.bitfield[index] == 0:
+            # continue
+
             name = '/'.join([PROTOCOL, self.info_hash, 'request', str(piece.piece_index)])
             if name in self.interest.items():
                 self.interest[name].get_next_chunk()
