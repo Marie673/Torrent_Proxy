@@ -71,6 +71,7 @@ class Interest:
         chunk = self.last_receive_chunk + 1
 
         CefAppConsumer.cef_handle.send_interest(self.name, chunk)
+        print(self.name, chunk)
 
     def receive_piece(self, packet) -> bool:
         chunk = packet.chunk_num
