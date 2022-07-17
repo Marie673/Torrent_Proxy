@@ -152,13 +152,13 @@ class CefAppConsumer:
 
     def on_start(self):
         for piece in self.pieces:
-            print('testA')
+
             if len(self.interest) > MAX_PIECE:
                 break
-            print('testB')
+
             if piece.is_full:
                 continue
-            print('testC')
+
             index = piece.piece_index
             if self.proxy_bitfield.bitfield[index] == 0:
                 continue
