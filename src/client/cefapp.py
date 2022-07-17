@@ -123,7 +123,7 @@ class CefAppConsumer:
         start_time = prog_time = time.time()
 
         while self.pieces_manager.complete_pieces != self.number_of_pieces:
-            packet = CefAppConsumer.cef_handle.receive(timeout_ms=2000)
+            packet = CefAppConsumer.cef_handle.receive()
             if packet.is_failed:
                 self.on_rcv_failed()
             else:
