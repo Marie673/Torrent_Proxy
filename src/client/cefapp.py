@@ -169,6 +169,7 @@ class CefAppConsumer:
                 t = Interest(piece, name)
                 t.get_next_chunk()
                 self.interest[name] = t
+                print(name)
 
     def on_rcv_failed(self):
         logging.debug("***** on rcv failed *****")
