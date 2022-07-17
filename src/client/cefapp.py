@@ -64,8 +64,6 @@ class Interest:
 
         self.end_chunk_num = None
 
-        self.healthy = True
-
     def on_rcv_failed(self):
         self.get_next_chunk()
 
@@ -82,14 +80,12 @@ class Interest:
         piece_offset = chunk * CHUNK_SIZE
         piece_data = packet.payload
         if self.piece.is_full:
-            self.healthy = False
             return True
 
         CefAppConsumer.data_size += len(piece_data)
         self.piece.set_block(piece_offset, piece_data)
 
         if chunk == self.end_chunk_num:
-            self.healthy = False
             return True
         self.get_next_chunk()
         return False
