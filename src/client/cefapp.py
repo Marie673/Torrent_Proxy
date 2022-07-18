@@ -139,11 +139,19 @@ class CefAppConsumer:
                 # \033[2J
                 for interest in self.interest.values():
                     print(interest.name)
+
+                if CefAppConsumer.data_size > 1024 * 1024:
+                    throughput = str(
+                        ((CefAppConsumer.data_size * 8) / (1024 * 1024)) / (now_time - start_time)) + "Mbps"
+                elif CefAppConsumer.data_size > 1024:
+                    throughput = str(((CefAppConsumer.data_size * 8) / 1024) / (now_time - start_time)) + "Kbps"
+                else:
+                    throughput = str((CefAppConsumer.data_size * 8) / (now_time - start_time)) + "bps"
+
                 text = "\n--------------------------------------------------------------------------\n" + \
                        str(now_time - start_time) + "[sec]\n" + \
                        str(CefAppConsumer.data_size) + 'Byte ' + \
-                       str((CefAppConsumer.data_size * 8 / 1024) / (now_time - start_time)) + \
-                       "Kbps" + "\n" + \
+                       throughput + "\n" + \
                        "completed | {}/{} pieces".format(
                            self.pieces_manager.complete_pieces,
                            self.pieces_manager.number_of_pieces) + '\n' + \
