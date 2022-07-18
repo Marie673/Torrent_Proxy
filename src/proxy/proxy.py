@@ -142,7 +142,7 @@ class Run(object):
                 pass
                 # self.update_bitfield()
 
-            packet = self.handle.receive(timeout_ms=4000)
+            packet = self.handle.receive(timeout_ms=10000)
             if packet.is_failed:
                 print('failed')
                 continue
