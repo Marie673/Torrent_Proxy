@@ -144,6 +144,7 @@ class Run(object):
 
             packet = self.handle.receive()
             if packet.is_failed:
+                print('failed')
                 continue
             if packet.is_interest:
                 self.handle_interest(packet)
