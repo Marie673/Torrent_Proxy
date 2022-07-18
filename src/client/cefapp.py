@@ -83,12 +83,12 @@ class Interest:
         piece_offset = chunk * CHUNK_SIZE
         piece_data = packet.payload
         if self.piece.is_full:
-            return True
+            return False
 
         CefAppConsumer.data_size += len(piece_data)
         self.piece.set_block(piece_offset, piece_data)
 
-        if chunk == self.end_chunk_num:
+        if chunk == self.end_chunk_num and self.piece.is_full:
             return True
         self.get_next_chunk()
         return False
@@ -222,6 +222,7 @@ class CefAppConsumer:
 
         interest = self.interest[name]
         if interest.receive_piece(packet):
+            self.pieces_manager.complete_pieces += 1
             del self.interest[name]
             self.on_start()
         self.pieces_manager.receive_block_piece(piece_index)

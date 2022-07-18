@@ -46,7 +46,6 @@ class PiecesManager(object):
                            str(piece_index) + "," + str(-1) + "," + \
                            str(time.time()) + "\n"
                     file.write(text)
-                self.complete_pieces += 1
 
     def get_block(self, piece_index, block_offset, block_length):
         for piece in self.pieces:
