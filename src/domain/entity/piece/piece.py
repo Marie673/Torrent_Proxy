@@ -2,6 +2,7 @@ import math
 from typing import List
 import hashlib
 import time
+import signal
 
 from block import Block, BLOCK_SIZE, State
 
@@ -32,6 +33,8 @@ class Piece(object):
         self.blocks: List[Block] = []
 
         self._init_blocks()
+        signal.signal(signal.SIGALRM, self.update_block_status())
+        signal.setitimer(signal.ITIMER_REAL, 1, 5)
 
     def update_block_status(self):  # if block is pending for too long : set it free
         for i, block in enumerate(self.blocks):
@@ -117,3 +120,7 @@ class Piece(object):
         logger.warning("Error Piece Hash")
         logger.debug("{} : {}".format(hashed_piece_raw_data, self.piece_hash))
         return False
+
+    def write_on_disk(self):
+        with open(self.file_path, "wb") as file:
+            file.write(self.raw_data)

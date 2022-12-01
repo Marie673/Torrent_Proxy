@@ -16,8 +16,6 @@ log_config = 'config.yaml'
 logging.config.dictConfig(yaml.load(open(log_config).read(), Loader=yaml.SafeLoader))
 logger = getLogger('develop')
 
-MAX_PEERS_TRY_CONNECT = 200
-
 
 class SockAddr:
     def __init__(self, ip, port, allowed=True):
@@ -38,9 +36,6 @@ class Tracker(object):
 
     def get_peers_from_trackers(self):
         for i, tracker in enumerate(self.torrent.announce_list):
-
-            if len(self.dict_sock_addr) >= MAX_PEERS_TRY_CONNECT:
-                break
 
             tracker_url = tracker[0]
 

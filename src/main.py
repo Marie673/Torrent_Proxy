@@ -1,16 +1,21 @@
-# This is a sample Python script.
-
-# Press ⌃R to execute it or replace it with your code.
-# Press Double ⇧ to search everywhere for classes, files, tool windows, actions, and settings.
+from application.bittorrent.bittorrent import BitTorrent, CommunicationManager
+from application.interest_listener import InterestListener
 
 
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press ⌘F8 to toggle the breakpoint.
+def main():
+    com_mgr = CommunicationManager()
+    interest_listener = InterestListener()
+
+    com_mgr.start()
+    interest_listener.start()
+
+    queue = []
+    while True:
+        for request in queue:
+            info_hash, piece_index = request
+            # ピースファイルが存在すればDataを送信
+            # 無ければBitTorrentで要求
 
 
-# Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    print_hi('PyCharm')
-
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+    main()

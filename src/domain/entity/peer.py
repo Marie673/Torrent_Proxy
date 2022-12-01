@@ -15,7 +15,8 @@ logger = getLogger('develop')
 
 
 class Peer(object):
-    def __init__(self, number_of_pieces, ip, port=6881):
+    def __init__(self, info_hash, number_of_pieces, ip, port):
+        self.info_hash = info_hash
         self.last_call = 0.0
         self.has_handshaked = False
         self.healthy = False
@@ -30,11 +31,12 @@ class Peer(object):
             'peer_choking': True,
             'peer_interested': False,
         }
+        self._connect()
 
     def __hash__(self):
         return '{}:{}'.format(self.ip, self.port)
 
-    def connect(self):
+    def _connect(self):
         try:
             self.socket = socket.create_connection((self.ip, self.port), timeout=2)
             self.socket.setblocking(False)
@@ -46,6 +48,19 @@ class Peer(object):
             return False
 
         return True
+
+    def disconnect(self):
+        self.socket.close()
+
+    def do_handshake(self):
+        try:
+            handshake = Handshake(self.info_hash)
+            self.send_to_peer(handshake.to_bytes())
+            return True
+        except Exception:
+            pass
+
+        return False
 
     def send_to_peer(self, msg):
         try:
