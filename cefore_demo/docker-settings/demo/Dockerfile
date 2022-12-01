@@ -1,14 +1,14 @@
 FROM cefore/base
-LABEL maintainer="hayamizu <hayamizu@nict.go.jp>"
 WORKDIR /cefore/cefore
-RUN ./configure
+RUN ./configure --enable-cache --enable-csmgr
 RUN make
 RUN make install
 RUN make clean
 RUN ldconfig
 WORKDIR /cefore/cefpyco
+RUN git pull
 RUN cmake .
 RUN make install
 ENV USER root
-COPY ./entrypoint.bash /cefore
-ENTRYPOINT /cefore/entrypoint.bash
+ENV LC_ALL C.UTF-8
+ENV LANG=C.UTF-8
