@@ -1,6 +1,7 @@
 import enum
+import hashlib
 from typing import List
-from bcoding import bdecode
+from bcoding import bdecode, bencode
 import logging
 
 """
@@ -46,6 +47,8 @@ class Torrent(object):
     nodes: list
 
     info: Info
+    info_hash: bytes
+    info_hash_hex: str
     file_mode: FileMode
 
     def __init__(self, path: str):
@@ -61,6 +64,8 @@ class Torrent(object):
 
         if 'info' in torrent.keys():
             new_info: Info = Info()
+            self.info_hash = hashlib.sha1(bencode(torrent['info'])).digest()
+            self.info_hash_hex = str(self.info_hash.hex())
             if 'files' in torrent['info'].keys():
                 self.file_mode = FileMode.multiple_file
                 new_info.files = []
@@ -115,6 +120,11 @@ class Torrent(object):
             print(f'  piece_length: {self.info.piece_length}')
             print(f'  pieces: {self.info.pieces[:10]} ... '
                   f'size is {len(self.info.pieces)}')
+        except AttributeError:
+            pass
+
+        try:
+            print(f'info_hash: {self.info_hash_hex}')
         except AttributeError:
             pass
 
