@@ -3,7 +3,7 @@ import bitstring
 import socket
 import struct
 
-from message import Handshake, KeepAlive, UnChoke, Interested, Piece,\
+from src.domain.entity.message import Handshake, KeepAlive, UnChoke, Interested, Piece,\
     WrongMessageException, MessageDispatcher
 
 import yaml
