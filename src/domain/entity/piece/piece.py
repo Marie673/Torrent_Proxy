@@ -1,7 +1,7 @@
-import hashlib
 import math
-import time
 from typing import List
+import hashlib
+import time
 
 from block import Block, BLOCK_SIZE, State
 
@@ -12,16 +12,20 @@ log_config = 'config.yaml'
 logging.config.dictConfig(yaml.load(open(log_config).read(), Loader=yaml.SafeLoader))
 logger = getLogger('develop')
 
+PENDING_TIME = 5
+
 
 class Piece(object):
-    def __init__(self, piece_index: int, piece_size: int, piece_hash: str):
+    def __init__(self, piece_index: int, piece_size: int, piece_hash: str, file_path):
         self.exist = False
 
-        self.piece_index: int = piece_index
-        self.piece_size: int = piece_size
-        self.piece_hash: str = piece_hash
+        self.piece_index = piece_index
+        self.piece_size = piece_size
+        self.piece_hash = piece_hash
+
         self.is_full: bool = False
-        self.files = []
+        # pieceが保管されているディレクトリのパス
+        self.file_path = file_path + '/' + str(piece_index)
         self.number_of_blocks: int = int(math.ceil(float(piece_size) / BLOCK_SIZE))
 
         self.raw_data: bytes = b''
@@ -31,7 +35,7 @@ class Piece(object):
 
     def update_block_status(self):  # if block is pending for too long : set it free
         for i, block in enumerate(self.blocks):
-            if block.state == State.PENDING and (time.time() - block.last_seen) > 5:
+            if block.state == State.PENDING and (time.time() - block.last_seen) > PENDING_TIME:
                 self.blocks[i] = Block()
 
     def set_block(self, offset, data):
@@ -43,10 +47,13 @@ class Piece(object):
 
     def get_block(self, block_offset, block_length):
         if self.exist:
-            for path_file in self.files:
+            for path_file in self.file_path:
                 with open(path_file, 'r+b') as file:
                     data = file.read()
                     return data[block_offset:block_length]
+        else:
+            # TODO: 例外処理の追加　file is not full block
+            pass
 
         return self.raw_data[block_offset:block_length]
 
@@ -87,7 +94,6 @@ class Piece(object):
             for i in range(self.number_of_blocks):
                 self.blocks.append(Block())
 
-            # Last block of last piece, the special block
             if (self.piece_size % BLOCK_SIZE) > 0:
                 self.blocks[self.number_of_blocks - 1].block_size = self.piece_size % BLOCK_SIZE
 

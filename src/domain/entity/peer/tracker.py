@@ -3,9 +3,10 @@ import requests
 from bcoding import bdecode
 import socket
 from urllib.parse import urlparse
+import errno
 
-from lib.peer.message import UdpTrackerConnection, UdpTrackerAnnounce, UdpTrackerAnnounceOutput
-from lib.peer.peers_manager import PeersManager
+from message import UdpTrackerConnection, UdpTrackerAnnounce, UdpTrackerAnnounceOutput
+# from peers_manager import PeersManager
 
 import yaml
 import logging.config
@@ -158,7 +159,7 @@ class Tracker(object):
         sock.sendto(message, conn)
 
         try:
-            response = PeersManager.read_from_socket(sock)
+            response = Tracker.read_from_socket(sock)
         except socket.timeout as e:
             logger.debug("Timeout : %s" % e)
             return
@@ -173,3 +174,23 @@ class Tracker(object):
             logger.debug("Transaction or Action ID did not match")
 
         return response
+
+    @staticmethod
+    def read_from_socket(sock: socket) -> bytes:
+        data = b''
+
+        while True:
+            try:
+                buff = sock.recv(4096)
+                if len(buff) <= 0:
+                    break
+
+                data += buff
+
+            except socket.error as e:
+                err = e.args[0]
+                if err != errno.EAGAIN or err != errno.EWOULDBLOCK:
+                    logger.error('Wrong errno {}'.format(err))
+                break
+
+        return data

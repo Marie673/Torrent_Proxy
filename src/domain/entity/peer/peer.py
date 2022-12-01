@@ -173,9 +173,11 @@ class Peer(object):
             logger.debug('handle_keep_alive - %s' % self.ip)
         except WrongMessageException:
             return False
+        """
         except Exception:
             logger.exception("Error KeepALive, (need at least 4 bytes : {})".format(len(self.read_buffer)))
             return False
+        """
 
         self.read_buffer = self.read_buffer[keep_alive.total_length:]
         return True

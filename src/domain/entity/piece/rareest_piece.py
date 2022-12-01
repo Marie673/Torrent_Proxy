@@ -24,11 +24,8 @@ class RarestPieces(object):
             raise Exception("No more piece")
 
         # Piece complete
-        try:
-            if piece_index is not None:
-                self.rarest_pieces.__delitem__(piece_index)
-        except Exception:
-            logger.exception("Failed to remove rarest piece")
+        if piece_index is not None:
+            self.rarest_pieces.__delitem__(piece_index)
 
         # Peer's bitfield updated
         else:
