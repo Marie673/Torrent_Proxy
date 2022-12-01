@@ -1,54 +1,61 @@
 version: "3.5"
 services:
-    producer:
-        build: ./docker-settings/demo
-        image: cefore/practice-b
-        container_name: "producer"
-        hostname: "producer"
-        working_dir: "/cefore"
-        tty: true
-        volumes:
-            - ./bin/:/cefore/bin
-        networks:
-            upward:
-              ipv4_address: 10.0.1.102
-    router:
-        image: cefore/practice-b
-        container_name: "router"
-        hostname: "router"
-        working_dir: "/cefore"
-        tty: true
-        volumes:
-            - ./bin/:/cefore/bin
-        networks:
-            upward:
-              ipv4_address: 10.0.1.101
-            downward:
-              ipv4_address: 10.0.0.101
-    consumer:
-        image: cefore/practice-b
-        container_name: "consumer"
-        hostname: "consumer"
-        working_dir: "/cefore"
-        tty: true
-        volumes:
-            - ./bin/:/cefore/bin
-        networks:
-            downward:
-              ipv4_address: 10.0.0.102
+  producer:
+    # 流石にaptが遅すぎた
+    extra_hosts:
+      - "archive.ubuntu.com:185.125.190.36"
+
+    build: base
+    container_name: "producer"
+    hostname: "producer"
+    working_dir: "/cefore"
+    tty: true
+    volumes:
+      - ./bin/:/cefore/bin
+    networks:
+      upward:
+        ipv4_address: 10.0.1.102
+
+  router:
+    image: cefore/demo
+    container_name: "router"
+    hostname: "router"
+    working_dir: "/cefore"
+    tty: true
+    volumes:
+      - ./bin/:/cefore/bin
+    networks:
+      upward:
+        ipv4_address: 10.0.1.101
+      downward:
+        ipv4_address: 10.0.0.101
+
+  consumer:
+    image: cefore/demo
+    container_name: "consumer"
+    hostname: "consumer"
+    working_dir: "/cefore"
+    tty: true
+    volumes:
+      - ./bin/:/cefore/bin
+    networks:
+      downward:
+        ipv4_address: 10.0.0.102
+
 
 networks:
-    upward:
-      name: upward
-      driver: bridge
-      ipam:
-        driver: default
-        config:
-          - subnet: 10.0.1.0/24
-    downward:
-      name: downward
-      driver: bridge
-      ipam:
-        driver: default
-        config:
-          - subnet: 10.0.0.0/24
+  upward:
+    name: upward
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.0.1.0/24
+
+  downward:
+    name: downward
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.0.0.0/24
