@@ -123,7 +123,7 @@ class BitTorrent(Thread):
             peer.send_to_peer(message)
 
         if EVALUATION:
-            with open(EVALUATION_PATH, "a") as file:
+            with open(EVALUATION_PATH, "aw") as file:
                 data = str(datetime.datetime.now()) + f" piece_index: {piece_index}, status: send_request"
                 file.write(data)
 
