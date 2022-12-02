@@ -5,8 +5,8 @@ import socket
 from urllib.parse import urlparse
 import errno
 
-from message import UdpTrackerConnection, UdpTrackerAnnounce, UdpTrackerAnnounceOutput
-# from peers_manager import PeersManager
+from src.domain.entity.message import UdpTrackerConnection, UdpTrackerAnnounce, UdpTrackerAnnounceOutput
+from src.domain.entity.torrent import Torrent
 
 import yaml
 import logging.config
@@ -15,6 +15,9 @@ from logging import getLogger
 log_config = 'config.yaml'
 logging.config.dictConfig(yaml.load(open(log_config).read(), Loader=yaml.SafeLoader))
 logger = getLogger('develop')
+
+
+peer_id = '-AZ2200-6wfG2wk6wWLc'
 
 
 class SockAddr:
@@ -26,10 +29,13 @@ class SockAddr:
     def __hash__(self):
         return "%s:%d" % (self.ip, self.port)
 
+    def __str__(self):
+        return "%s:%d" % (self.ip, self.port)
+
 
 class Tracker(object):
     def __init__(self, torrent):
-        self.torrent = torrent
+        self.torrent: Torrent = torrent
         self.threads_list = []
         self.connected_peers = {}
         self.dict_sock_addr = {}
@@ -59,11 +65,11 @@ class Tracker(object):
     def http_scraper(self, tracker):
         params = {
             'info_hash': self.torrent.info_hash,
-            'peer_id': self.torrent.peer_id,
+            'peer_id': peer_id,
             'uploaded': 0,
             'downloaded': 0,
             'port': 6881,
-            'left': self.torrent.total_length,
+            'left': self.torrent.info.length,
             'event': 'started'
         }
 
