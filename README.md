@@ -1,4 +1,6 @@
 # Torrent_Proxy
+signal使うからUnix限定
+
 ※現在，全体を改良中
 
 - [Proxy](#Proxy)
