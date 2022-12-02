@@ -54,9 +54,6 @@ class BitTorrent(Thread):
                 data = str(datetime.datetime.now()) + " bittorrent process is start"
                 file.write(data)
 
-    def __hash__(self):
-        return self.info_hash
-
     def run(self) -> None:
         while not self.all_pieces_completed():
             if not self.com_mgr.has_unchocked_peers(self.info_hash):
