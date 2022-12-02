@@ -15,7 +15,7 @@ from typing import List
 CACHE_PATH = os.environ['HOME']+"/proxy_cache/"
 MAX_PEER_CONNECT = 200
 EVALUATION = True
-EVALUATION_PATH = os.environ['HOME']+"/evaluation/bittorrent/"
+EVALUATION_PATH = os.environ['HOME']+"/evaluation/bittorrent/test"
 
 
 class BitTorrent(Thread):
