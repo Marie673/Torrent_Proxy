@@ -12,7 +12,7 @@ from src.application.bittorrent.communication_manager import CommunicationManage
 from typing import List
 
 
-CACHE_PATH = "~/proxy_cache/"
+CACHE_PATH = os.environ['HOME']　+ "/proxy_cache/"
 MAX_PEER_CONNECT = 200
 EVALUATION = True
 EVALUATION_PATH = "~/evaluation/bittorrent/"
