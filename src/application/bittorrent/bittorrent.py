@@ -8,7 +8,7 @@ from src.domain.entity.peer import Peer
 from src.domain.entity.message import Request
 from src.domain.entity.tracker import Tracker
 from src.domain.entity.torrent import Torrent, Info, FileMode
-from communication_manager import CommunicationManager
+from src.application.bittorrent.communication_manager import CommunicationManager
 from typing import List
 
 
@@ -53,6 +53,9 @@ class BitTorrent(Thread):
             with open(EVALUATION_PATH, "a") as file:
                 data = str(datetime.datetime.now()) + " bittorrent process is start"
                 file.write(data)
+
+    def __hash__(self):
+        return self.info_hash
 
     def run(self) -> None:
         while not self.all_pieces_completed():

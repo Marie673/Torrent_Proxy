@@ -4,7 +4,7 @@ import hashlib
 import time
 import signal
 
-from block import Block, BLOCK_SIZE, State
+from src.domain.entity.piece.block import Block, BLOCK_SIZE, State
 
 import yaml
 import logging.config

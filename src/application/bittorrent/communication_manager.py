@@ -111,7 +111,8 @@ class CommunicationManager(Thread):
             peer.handle_request(new_message)
 
         elif isinstance(new_message, message.Piece):
-            peer.handle_piece(new_message)
+            data = peer.handle_piece(new_message)
+            notice(peer.info_hash, data)
 
         elif isinstance(new_message, message.Cancel):
             peer.handle_cancel()
@@ -121,4 +122,10 @@ class CommunicationManager(Thread):
 
         else:
             logging.error("Unknown message")
-            
+
+
+def notice(info_hash, data):
+    global threads
+    for thread in threads:
+        if info_hash in thread:
+            thread.receive_block_piece(data)
