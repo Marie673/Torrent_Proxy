@@ -1,5 +1,11 @@
 version: "3.5"
 services:
+  base:
+    extra_hosts:
+      - "archive.ubuntu.com:185.125.190.36"
+    build: base
+    container_name: "base"
+
   producer:
     # 流石にaptが遅すぎた
     extra_hosts:

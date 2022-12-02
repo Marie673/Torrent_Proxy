@@ -5,6 +5,7 @@ import errno
 
 from src.domain.entity.peer import Peer
 import src.domain.entity.message as message
+import src.bt as bt
 
 import logging
 
@@ -125,7 +126,6 @@ class CommunicationManager(Thread):
 
 
 def notice(info_hash, data):
-    global threads
-    for thread in threads:
+    for thread in bt.threads:
         if info_hash in thread.info_hash:
             thread.receive_block_piece(data)
