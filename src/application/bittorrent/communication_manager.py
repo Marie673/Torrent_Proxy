@@ -127,5 +127,5 @@ class CommunicationManager(Thread):
 def notice(info_hash, data):
     global threads
     for thread in threads:
-        if info_hash in thread:
+        if info_hash in thread.info_hash:
             thread.receive_block_piece(data)
