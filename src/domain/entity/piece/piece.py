@@ -33,7 +33,7 @@ class Piece(object):
         self.blocks: List[Block] = []
 
         self._init_blocks()
-        signal.signal(signal.SIGALRM, self.update_block_status())
+        signal.signal(signal.SIGALRM, self.update_block_status)
         signal.setitimer(signal.ITIMER_REAL, 1, 5)
 
     def update_block_status(self):  # if block is pending for too long : set it free
