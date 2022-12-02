@@ -1,5 +1,6 @@
 # Torrent_Proxy
 BitTorrentで共有されたコンテンツをCCNから利用可能にするプロキシの実装を行いました。
+
 ※現在，全体を改良中
 
 - [Proxy](#Proxy)
@@ -25,14 +26,18 @@ Proxyは，BitTorrentのピースを要求するInterestを受け付けるモジ
 ceforeをインストール・ビルドし、ceforeの機能を試すだけなら可能
 image:cefore/base　必要なコンポーネントが包含されているimage.
 
-* cefore/producer
+* cefore/producer:
 コンテンツ生産者
+
 一般にコンテンツサーバー
-* cefore/router
+* cefore/router:
 CCNルーター
-* cefore/consumer
+* cefore/consumer:
 コンテンツ消費者
+
 一般にクライアント
+
+以下のコードでdockerを立ち上げ可能
 ```bash
 cd cefore_demo
 ./setup.sh
