@@ -25,12 +25,12 @@ Proxyは，BitTorrentのピースを要求するInterestを受け付けるモジ
 ceforeをインストール・ビルドし、ceforeの機能を試すだけなら可能
 image:cefore/base　必要なコンポーネントが包含されているimage.
 
-# cefore/producer
+* cefore/producer
 コンテンツ生産者
 一般にコンテンツサーバー
-# cefore/router
+* cefore/router
 CCNルーター
-# cefore/consumer
+* cefore/consumer
 コンテンツ消費者
 一般にクライアント
 ```bash
