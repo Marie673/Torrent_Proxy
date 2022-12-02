@@ -1,17 +1,8 @@
 version: "3.5"
 services:
-  base:
-    extra_hosts:
-      - "archive.ubuntu.com:185.125.190.36"
-    build: base
-    container_name: "base"
 
   producer:
-    # 流石にaptが遅すぎた
-    extra_hosts:
-      - "archive.ubuntu.com:185.125.190.36"
-
-    build: base
+    image: cefore/base
     container_name: "producer"
     hostname: "producer"
     working_dir: "/cefore"
@@ -23,7 +14,7 @@ services:
         ipv4_address: 10.0.1.102
 
   router:
-    image: cefore/demo
+    image: cefore/base
     container_name: "router"
     hostname: "router"
     working_dir: "/cefore"
@@ -37,7 +28,7 @@ services:
         ipv4_address: 10.0.0.101
 
   consumer:
-    image: cefore/demo
+    image: cefore/base
     container_name: "consumer"
     hostname: "consumer"
     working_dir: "/cefore"
