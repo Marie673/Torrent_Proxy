@@ -26,5 +26,20 @@ Proxyは，BitTorrentのピースを要求するInterestを受け付けるモジ
 
 ### 使用方法
 現在、dockerによるデモの簡略化を進行中
-ceforeをインストールし
-```text
+ceforeをインストール・ビルドし、ceforeの機能を試すだけなら可能
+image:cefore/base　必要なコンポーネントが包含されているimage.
+
+# cefore/producer
+コンテンツ生産者
+一般にコンテンツサーバー
+# cefore/router
+CCNルーター
+# cefore/consumer
+コンテンツ消費者
+一般にクライアント
+```bash
+cd cefore_demo
+./setup.sh
+docker-compose up
+```
+
