@@ -35,7 +35,10 @@ class BitTorrent(Thread):
         self.info: Info = torrent.info
         self.info_hash = torrent.info_hash_hex
         self.file_path = CACHE_PATH + self.info.name
-        os.makedirs(self.file_path)
+        try:
+            os.makedirs(self.file_path)
+        except Exception:
+            pass
         # number_of_pieces の計算
         if torrent.file_mode == FileMode.single_file:
             self.number_of_pieces = int(self.info.length / self.info.piece_length)
