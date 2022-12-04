@@ -2,7 +2,9 @@ import datetime
 import os
 import random
 import time
+import threading
 from threading import Thread, Lock
+import ctypes
 import bitstring
 from src.domain.entity.piece.piece import Piece
 from src.domain.entity.peer import Peer
@@ -12,6 +14,13 @@ from src.domain.entity.torrent import Torrent, Info, FileMode
 from src.application.bittorrent.communication_manager import CommunicationManager
 from typing import List
 import src.bt as bt
+
+import yaml
+import logging.config
+from logging import getLogger
+log_config = 'config.yaml'
+logging.config.dictConfig(yaml.load(open(log_config).read(), Loader=yaml.SafeLoader))
+logger = getLogger('develop')
 
 
 CACHE_PATH = os.environ['HOME']+"/proxy_cache/"
@@ -62,21 +71,24 @@ class BitTorrent(Thread):
         self.timer = time.time()
 
     def run(self) -> None:
-        while not self.all_pieces_completed():
-            if time.time() - self.timer > 10:
-                self._update_bitfield_file()
-                self.timer = time.time()
-            if not self.com_mgr.has_unchocked_peers(self.info_hash) or \
-                    len(self.com_mgr.peers) < MAX_PEER_CONNECT:
-                self.add_peers_from_tracker()
-                continue
-
-            for index, piece in enumerate(self.pieces):
-                if piece.is_full:
+        try:
+            while (not self.all_pieces_completed()) and bt.thread_flag:
+                if time.time() - self.timer > 10:
+                    self._update_bitfield_file()
+                    self.timer = time.time()
+                if not self.com_mgr.has_unchocked_peers(self.info_hash) or \
+                        len(self.com_mgr.peers) < MAX_PEER_CONNECT:
+                    self.add_peers_from_tracker()
                     continue
-                self.request_piece(index)
 
-        self._update_bitfield_file()
+                for index, piece in enumerate(self.pieces):
+                    if piece.is_full:
+                        continue
+                    self.request_piece(index)
+
+            self._update_bitfield_file()
+        finally:
+            logger.debug("bittorrent process is down")
 
     def _generate_pieces(self) -> List[Piece]:
         """
@@ -157,10 +169,10 @@ class BitTorrent(Thread):
 
     def _update_bitfield_file(self):
         path = self.file_path + "/bitfield"
-        bt.m_lock.acquire()
-        with open(path, "w") as file:
-            file.write(str(self.bitfield))
-        bt.m_lock.release()
+        if bt.m_lock.acquire(block=False):
+            with open(path, "w") as file:
+                file.write(str(self.bitfield))
+            bt.m_lock.release()
 
     def receive_block_piece(self, receive_piece_data):
         piece_index, piece_offset, piece_data = receive_piece_data

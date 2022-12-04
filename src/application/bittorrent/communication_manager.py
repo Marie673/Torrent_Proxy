@@ -7,7 +7,12 @@ from src.domain.entity.peer import Peer
 import src.domain.entity.message as message
 import src.bt as bt
 
-import logging
+import yaml
+import logging.config
+from logging import getLogger
+log_config = 'config.yaml'
+logging.config.dictConfig(yaml.load(open(log_config).read(), Loader=yaml.SafeLoader))
+logger = getLogger('develop')
 
 
 class CommunicationManager(Thread):
@@ -17,25 +22,28 @@ class CommunicationManager(Thread):
         self.peers: list[Peer] = []
     
     def run(self) -> None:
-        while self.is_active:
-            read = [peer.socket for peer in self.peers]
-            read_list, _, _ = select.select(read, [], [], 1)
-            
-            for sock in read_list:
-                peer = self.get_peer_by_socket(sock)
-                if not peer.healthy:
-                    self.remove_peer(peer)
+        try:
+            while self.is_active and bt.thread_flag:
+                read = [peer.socket for peer in self.peers]
+                read_list, _, _ = select.select(read, [], [], 1)
 
-                try:
-                    payload = self._read_from_socket(sock)
-                except Exception as e:
-                    self.remove_peer(peer)
-                    continue
-                    
-                peer.read_buffer += payload
-                
-                for msg in peer.get_messages():
-                    self._process_new_message(msg, peer)
+                for sock in read_list:
+                    peer = self.get_peer_by_socket(sock)
+                    if not peer.healthy:
+                        self.remove_peer(peer)
+
+                    try:
+                        payload = self._read_from_socket(sock)
+                    except Exception as e:
+                        self.remove_peer(peer)
+                        continue
+
+                    peer.read_buffer += payload
+
+                    for msg in peer.get_messages():
+                        self._process_new_message(msg, peer)
+        finally:
+            logger.debug("down")
 
     def get_peer_by_socket(self, sock) -> Peer:
         for peer in self.peers:

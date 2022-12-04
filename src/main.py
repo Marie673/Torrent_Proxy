@@ -5,6 +5,13 @@ from src.domain.entity.torrent import Torrent
 import src.bt as bt
 from multiprocessing import Manager, Lock
 
+import yaml
+import logging.config
+from logging import getLogger
+log_config = 'config.yaml'
+logging.config.dictConfig(yaml.load(open(log_config).read(), Loader=yaml.SafeLoader))
+logger = getLogger('develop')
+
 
 m_lock = Lock()
 
@@ -32,13 +39,21 @@ def main():
         torrent = Torrent(path)
         path_dict[torrent.info_hash_hex] = torrent
 
-    while True:
-        for req_info_hash in req_list:
-            if req_info_hash in path_dict.keys():
-                torrent = path_dict[req_info_hash]
-                d_process = b.BitTorrent(torrent, com_mgr)
-                d_process.start()
-                bt.threads.append(d_process)
+    try:
+        while True:
+            for req_info_hash in req_list:
+                if req_info_hash in path_dict.keys():
+                    torrent = path_dict[req_info_hash]
+                    d_process = b.BitTorrent(torrent, com_mgr)
+                    d_process.start()
+                    bt.threads.append(d_process)
+    except KeyboardInterrupt:
+        logger.debug("catch the KeyboadInterrupt")
+        bt.thread_flag = False
+
+        com_mgr.join()
+        for t in bt.threads:
+            t.join()
 
 
 if __name__ == '__main__':
