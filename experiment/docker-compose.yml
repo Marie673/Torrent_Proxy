@@ -1,0 +1,69 @@
+version: '3.5'
+services:
+  bittorrent:
+    extra_hosts:
+      - "archive.ubuntu.com:185.125.190.36"
+    image: cefore/base
+    container_name: "bittorrent"
+    working_dir: "/test"
+    tty: true
+    volumes:
+      - ../src/:/test/src/
+      - ../test/:/test/test/
+      - ../evaluation/:/evaluation/
+    networks:
+      ip_net:
+        ipv4_address: 10.0.1.102 # 10.0.1.102
+      ccn_net:
+        ipv4_address: 10.0.2.102 # 10.0.1.102
+
+  client:
+    extra_hosts:
+      - "archive.ubuntu.com:185.125.190.36"
+    image: cefore/base
+    container_name: "client"
+    working_dir: "/client"
+    tty: true
+    volumes:
+      - ../src/:/client/src/
+      - ../test/:/client/test/
+      - ../evaluation/:/evaluation/
+    networks:
+      ccn_net:
+        ipv4_address: 10.0.2.202 # 10.0.1.102
+
+  producer:
+    extra_hosts:
+      - "archive.ubuntu.com:185.125.190.36"
+    # image: ubuntu-vnc-desktop[
+    image: queeno/ubuntu-desktop
+    # build: ./docker-ubuntu-desktop
+    container_name: "producer"
+    hostname: "producer"
+    working_dir: "/producer"
+    tty: true
+    volumes:
+      - ../evaluation/:/producer/evaluation
+    ports:
+      - "0.0.0.0:5901:5901"
+    networks:
+      ip_net:
+        ipv4_address: 10.0.1.202
+
+
+networks:
+  ip_net:
+    name: ip_net
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.0.1.0/24
+
+  ccn_net:
+    name: ccn_net
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.0.2.0/24

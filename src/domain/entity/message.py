@@ -144,7 +144,7 @@ class Handshake(Message):
     payload_length = 68
     total_length = payload_length
 
-    def __init__(self, info_hash, peer_id=b'-CF0001-000000000000'):
+    def __init__(self, info_hash, peer_id=b''):
         super(Handshake, self).__init__()
         assert len(info_hash) == 20
         assert len(peer_id) < 255

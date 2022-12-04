@@ -41,6 +41,16 @@ class Tracker(object):
         self.dict_sock_addr = {}
 
     def get_peers_from_trackers(self):
+        """
+        test code
+        """
+        s = SockAddr("10.0.1.202", 8999)
+        self.dict_sock_addr[s.__hash__()] = s
+
+        return self.dict_sock_addr
+        """
+        test
+        """
         for i, tracker in enumerate(self.torrent.announce_list):
 
             tracker_url = tracker[0]

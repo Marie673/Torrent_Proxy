@@ -18,10 +18,9 @@ class Peer(object):
     def __init__(self, info_hash, number_of_pieces, ip, port):
         self.info_hash = info_hash
         self.last_call = 0.0
-        self.has_handshaked = False
+        self.has_handshacked = False
         self.healthy = False
         self.read_buffer = b''
-        self.socket = None
         self.ip = ip
         self.port = port
         self.bit_field = bitstring.BitArray(number_of_pieces)
@@ -31,23 +30,26 @@ class Peer(object):
             'peer_choking': True,
             'peer_interested': False,
         }
-        self._connect()
+        try:
+            self.socket = self._connect()
+        except Exception as e:
+            print(e)
+            raise e
 
     def __hash__(self):
         return '{}:{}'.format(self.ip, self.port)
 
     def _connect(self):
         try:
-            self.socket = socket.create_connection((self.ip, self.port), timeout=2)
-            self.socket.setblocking(False)
+            sock = socket.create_connection((self.ip, self.port), timeout=2)
+            sock.setblocking(False)
             logger.debug("Connected to peer ip: {} - port: {}".format(self.ip, self.port))
             self.healthy = True
+            return sock
 
         except Exception as e:
             print("Failed to connect to peer (ip: %s - port: %s - %s)" % (self.ip, self.port, e.__str__()))
-            return False
-
-        return True
+            raise e
 
     def disconnect(self):
         self.socket.close()
@@ -57,7 +59,8 @@ class Peer(object):
             handshake = Handshake(self.info_hash)
             self.send_to_peer(handshake.to_bytes())
             return True
-        except Exception:
+        except Exception as e:
+            print(e)
             pass
 
         return False

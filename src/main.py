@@ -3,32 +3,42 @@ import src.application.bittorrent.communication_manager as c
 from src.application.interest_listener import InterestListener
 from src.domain.entity.torrent import Torrent
 import src.bt as bt
-from multiprocessing import Queue
+from multiprocessing import Manager, Lock
+
+
+m_lock = Lock()
 
 
 def main():
     bt.threads = []
-    req_q = Queue()
+    req_list = Manager().list()
 
     com_mgr = c.CommunicationManager()
-    interest_listener = InterestListener(req_q)
+    interest_listener = InterestListener(req_list)
 
     com_mgr.start()
     interest_listener.start()
 
-    path = 'ubuntu-22.10-desktop-amd64.iso.torrent'
-    torrent = Torrent(path)
+    paths = [
+        '/evaluation/torrent/128MB.torrent',
+        '/evaluation/torrent/256MB.torrent',
+        '/evaluation/torrent/512MB.torrent',
+        '/evaluation/torrent/1024MB.torrent',
+        '/evaluation/torrent/2048MB.torrent'
+    ]
 
-    t = b.BitTorrent(torrent, com_mgr)
-    t.start()
-    bt.threads.append(t)
+    path_dict = {}
+    for path in paths:
+        torrent = Torrent(path)
+        path_dict[torrent.info_hash_hex] = torrent
 
-    """queue = []
     while True:
-        for request in queue:
-            info_hash, piece_index = request
-            # ピースファイルが存在すればDataを送信
-            # 無ければBitTorrentで要求"""
+        for req_info_hash in req_list:
+            if req_info_hash in path_dict.keys():
+                torrent = path_dict[req_info_hash]
+                d_process = b.BitTorrent(torrent, com_mgr)
+                d_process.start()
+                bt.threads.append(d_process)
 
 
 if __name__ == '__main__':
