@@ -62,13 +62,12 @@ class InterestListener(Process):
         info_hash = prefix[2]
         piece_index = prefix[3]
         path = bt.CACHE_PATH + info_hash + "/" + piece_index
-        print(path)
         chunk = info.chunk_num
+        logger.debug(f"{path} {chunk}")
 
         if os.path.isfile(path):
             file_size = os.path.getsize(path)
             end_chunk_num = file_size // CHUNK_SIZE
-            print(end_chunk_num)
             seeker = chunk * CHUNK_SIZE
 
             if piece_index == "bitfield":
