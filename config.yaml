@@ -1,7 +1,7 @@
 version: 1
 formatters:
   simple:
-    format: '[%(asctime)s](%(name)s) %(filename)17s: %(lineno)-4s- PID: %(process)-4d - %(levelname)s - %(message)s'
+    format: '[%(asctime)s](%(name)s) %(filename)10s: %(lineno)-4s- PID: %(process)-4d - %(levelname)s - %(message)s'
     datefmt: '%Y-%m-%d %H:%M:%S'
 handlers:
   console:

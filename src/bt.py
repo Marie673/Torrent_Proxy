@@ -1,4 +1,8 @@
-from typing import List
-import src.application.bittorrent.bittorrent as bittorrent
+import os
+from multiprocessing import Lock
 
-threads: List[bittorrent.BitTorrent] = []
+threads = []
+thread_flag = True
+torrent_list = []
+CACHE_PATH = os.environ['HOME']+"/proxy_cache/"
+m_lock = Lock()

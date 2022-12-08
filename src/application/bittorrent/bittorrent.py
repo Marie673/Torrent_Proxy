@@ -1,7 +1,10 @@
 import datetime
 import os
 import random
-from threading import Thread
+import time
+import threading
+from threading import Thread, Lock
+import ctypes
 import bitstring
 from src.domain.entity.piece.piece import Piece
 from src.domain.entity.peer import Peer
@@ -10,12 +13,20 @@ from src.domain.entity.tracker import Tracker
 from src.domain.entity.torrent import Torrent, Info, FileMode
 from src.application.bittorrent.communication_manager import CommunicationManager
 from typing import List
+import src.bt as bt
+
+import yaml
+import logging.config
+from logging import getLogger
+log_config = 'config.yaml'
+logging.config.dictConfig(yaml.load(open(log_config).read(), Loader=yaml.SafeLoader))
+logger = getLogger('develop')
 
 
 CACHE_PATH = os.environ['HOME']+"/proxy_cache/"
-MAX_PEER_CONNECT = 200
+MAX_PEER_CONNECT = 1
 EVALUATION = True
-EVALUATION_PATH = os.environ['HOME']+"/evaluation/bittorrent/test"
+EVALUATION_PATH = "/evaluation/bittorrent/test"
 
 
 class BitTorrent(Thread):
@@ -33,8 +44,8 @@ class BitTorrent(Thread):
         self.com_mgr = communication_manager
         self.torrent = torrent
         self.info: Info = torrent.info
-        self.info_hash = torrent.info_hash_hex
-        self.file_path = CACHE_PATH + self.info.name
+        self.info_hash = torrent.info_hash
+        self.file_path = CACHE_PATH + self.torrent.info_hash_hex
         try:
             os.makedirs(self.file_path)
         except Exception:
@@ -54,19 +65,30 @@ class BitTorrent(Thread):
 
         if EVALUATION:
             with open(EVALUATION_PATH, "a") as file:
-                data = str(datetime.datetime.now()) + " bittorrent process is start"
+                data = str(datetime.datetime.now()) + " bittorrent process is start\n"
                 file.write(data)
+        self.lock = Lock()
+        self.timer = time.time()
 
     def run(self) -> None:
-        while not self.all_pieces_completed():
-            if not self.com_mgr.has_unchocked_peers(self.info_hash):
-                self.add_peers_from_tracker()
-                continue
-
-            for index, piece in enumerate(self.pieces):
-                if piece.is_full:
+        try:
+            while (not self.all_pieces_completed()) and bt.thread_flag:
+                if time.time() - self.timer > 10:
+                    self._update_bitfield_file()
+                    self.timer = time.time()
+                if not self.com_mgr.has_unchocked_peers(self.info_hash) or \
+                        len(self.com_mgr.peers) < MAX_PEER_CONNECT:
+                    self.add_peers_from_tracker()
                     continue
-                self.request_piece(index)
+
+                for index, piece in enumerate(self.pieces):
+                    if piece.is_full:
+                        continue
+                    self.request_piece(index)
+
+            self._update_bitfield_file()
+        finally:
+            logger.debug("bittorrent process is down")
 
     def _generate_pieces(self) -> List[Piece]:
         """
@@ -94,7 +116,7 @@ class BitTorrent(Thread):
         for peer_candidate in new_peer_candidates.values():
             def equivalence_detection():
                 for _peer in self.com_mgr.peers:
-                    if _peer.__hash__() is peer_candidate.__hash__():
+                    if _peer.ip == peer_candidate.ip:
                         return True
                 return False
             if equivalence_detection():
@@ -106,6 +128,8 @@ class BitTorrent(Thread):
 
             if len(self.com_mgr.peers) >= MAX_PEER_CONNECT:
                 return
+
+            time.sleep(1)
 
     def request_piece(self, piece_index):
         """
@@ -126,9 +150,11 @@ class BitTorrent(Thread):
             peer.send_to_peer(message)
 
         if EVALUATION:
-            with open(EVALUATION_PATH, "aw") as file:
+            self.lock.acquire()
+            with open(EVALUATION_PATH, "a") as file:
                 data = str(datetime.datetime.now()) + f" piece_index: {piece_index}, status: send_request"
                 file.write(data)
+            self.lock.release()
 
     def _get_random_peer_having_piece(self, piece_index) -> Peer:
         ready_peer = []
@@ -141,12 +167,12 @@ class BitTorrent(Thread):
 
         return random.choice(ready_peer) if ready_peer else None
 
-    def _update_bitfield(self, piece_index):
-        piece = self.pieces[piece_index]
-        if piece.is_full:
-            self.bitfield[piece_index] = 1
-        else:
-            self.bitfield[piece_index] = 0
+    def _update_bitfield_file(self):
+        path = self.file_path + "/bitfield"
+        if bt.m_lock.acquire(block=False):
+            with open(path, "w") as file:
+                file.write(str(self.bitfield))
+            bt.m_lock.release()
 
     def receive_block_piece(self, receive_piece_data):
         piece_index, piece_offset, piece_data = receive_piece_data
@@ -160,11 +186,14 @@ class BitTorrent(Thread):
         if piece.are_all_blocks_full():
             if piece.set_to_full():
                 self.complete_pieces += 1
+                self.bitfield[piece_index] = 1
                 piece.write_on_disk()
                 if EVALUATION:
+                    self.lock.acquire()
                     with open(EVALUATION_PATH, "a") as file:
                         data = str(datetime.datetime.now()) + f" piece_index: {piece_index}, status: complete"
                         file.write(data)
+                    self.lock.release()
                 return
 
     def get_block(self, piece_index, block_offset, block_length) -> Piece:

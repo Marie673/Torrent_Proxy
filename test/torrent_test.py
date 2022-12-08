@@ -3,6 +3,12 @@ import pytest
 from src.domain.entity.torrent import Torrent
 from src.application.bittorrent.bittorrent import BitTorrent, CommunicationManager
 from src.domain.entity.tracker import Tracker
+import os
+
+
+path = os.path.abspath(__file__)
+
+root = os.path.dirname(os.path.abspath(__file__))
 
 
 def torrent_test():
