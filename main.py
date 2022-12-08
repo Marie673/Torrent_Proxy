@@ -1,3 +1,5 @@
+import time
+
 import src.application.bittorrent.bittorrent as b
 import src.application.bittorrent.communication_manager as c
 from src.application.interest_listener import InterestListener
@@ -51,6 +53,8 @@ def main():
                     d_process = b.BitTorrent(torrent, com_mgr)
                     d_process.start()
                     bt.threads.append(d_process)
+
+            time.sleep(1)
 
     except KeyboardInterrupt:
         logger.debug("catch the KeyboadInterrupt")
