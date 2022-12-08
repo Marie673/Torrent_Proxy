@@ -122,7 +122,7 @@ class Peer(object):
         """
         :type have: message.Have
         """
-        logger.debug('handle_have - ip: %s - piece: %s' % (self.ip, have.piece_index))
+        # logger.debug('handle_have - ip: %s - piece: %s' % (self.ip, have.piece_index))
         self.bit_field[have.piece_index] = True
 
         if self.is_choking() and not self.state['am_interested']:
