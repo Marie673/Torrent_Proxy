@@ -27,11 +27,11 @@ def main():
     interest_listener.start()
 
     paths = [
-        '/evaluation/torrent/128MB.torrent',
-        '/evaluation/torrent/256MB.torrent',
-        '/evaluation/torrent/512MB.torrent',
-        '/evaluation/torrent/1024MB.torrent',
-        '/evaluation/torrent/2048MB.torrent'
+        '/root/evaluation/torrent_file/128MB.torrent',
+        '/root/evaluation/torrent_file/256MB.torrent',
+        '/root/evaluation/torrent_file/512MB.torrent',
+        '/root/evaluation/torrent_file/1024MB.torrent',
+        '/root/evaluation/torrent_file/2048MB.torrent'
     ]
 
     path_dict = {}
@@ -42,11 +42,16 @@ def main():
     try:
         while True:
             for req_info_hash in req_list:
+                for thread in bt.threads:
+                    if thread.info_has is req_info_hash:
+                        continue
+
                 if req_info_hash in path_dict.keys():
                     torrent = path_dict[req_info_hash]
                     d_process = b.BitTorrent(torrent, com_mgr)
                     d_process.start()
                     bt.threads.append(d_process)
+
     except KeyboardInterrupt:
         logger.debug("catch the KeyboadInterrupt")
         bt.thread_flag = False
