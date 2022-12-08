@@ -44,9 +44,13 @@ def main():
     try:
         while True:
             for req_info_hash in req_list:
-                for thread in bt.threads:
-                    if thread.info_has is req_info_hash:
-                        continue
+                def check(info_hash):
+                    for thread in bt.threads:
+                        if thread.info_hash_hex == info_hash:
+                            return True
+                    return False
+                if check(req_info_hash):
+                    continue
 
                 if req_info_hash in path_dict.keys():
                     torrent = path_dict[req_info_hash]
