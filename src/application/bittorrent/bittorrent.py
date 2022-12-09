@@ -73,7 +73,7 @@ class BitTorrent(Thread):
     def run(self) -> None:
         try:
             while (not self.all_pieces_completed()) and bt.thread_flag:
-                if time.time() - self.timer > 10:
+                if time.time() - self.timer > 5:
                     self._update_bitfield_file()
                     self.timer = time.time()
                 if not self.com_mgr.has_unchocked_peers(self.info_hash) or \
@@ -170,8 +170,8 @@ class BitTorrent(Thread):
     def _update_bitfield_file(self):
         path = self.file_path + "/bitfield"
         if bt.m_lock.acquire(block=False):
-            with open(path, "w") as file:
-                file.write(str(self.bitfield))
+            with open(path, "wb") as file:
+                file.write(self.bitfield.tobytes())
             bt.m_lock.release()
 
     def receive_block_piece(self, receive_piece_data):
