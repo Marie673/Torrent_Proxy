@@ -26,7 +26,7 @@ logger = getLogger('develop')
 CACHE_PATH = os.environ['HOME']+"/proxy_cache/"
 MAX_PEER_CONNECT = 1
 EVALUATION = True
-EVALUATION_PATH = "/evaluation/bittorrent/test"
+EVALUATION_PATH = "/bittorrent/evaluation/bittorrent/test"
 
 
 class BitTorrent(Thread):
