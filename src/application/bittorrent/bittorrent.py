@@ -26,7 +26,9 @@ logger = getLogger('develop')
 CACHE_PATH = os.environ['HOME']+"/proxy_cache/"
 MAX_PEER_CONNECT = 1
 EVALUATION = True
-EVALUATION_PATH = "/root/evaluation/bittorrent/test"
+
+EVALUATION_PATH = "/bittorrent/evaluation/bittorrent/test"
+
 
 
 class BitTorrent(Thread):
@@ -75,7 +77,7 @@ class BitTorrent(Thread):
     def run(self) -> None:
         try:
             while (not self.all_pieces_completed()) and bt.thread_flag:
-                if time.time() - self.timer > 10:
+                if time.time() - self.timer > 5:
                     self._update_bitfield_file()
                     self.timer = time.time()
                 if not self.com_mgr.has_unchocked_peers(self.info_hash) or \

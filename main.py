@@ -30,11 +30,11 @@ def main():
     interest_listener.start()
 
     paths = [
-        '/root/evaluation/torrent_file/128MB.torrent',
-        '/root/evaluation/torrent_file/256MB.torrent',
-        '/root/evaluation/torrent_file/512MB.torrent',
-        '/root/evaluation/torrent_file/1024MB.torrent',
-        '/root/evaluation/torrent_file/2048MB.torrent'
+        '/bittorrent/evaluation/torrent_file/128MB.torrent',
+        '/bittorrent//evaluation/torrent_file/256MB.torrent',
+        '/bittorrent//evaluation/torrent_file/512MB.torrent',
+        '/bittorrent//evaluation/torrent_file/1024MB.torrent',
+        '/bittorrent//evaluation/torrent_file/2048MB.torrent'
     ]
 
     path_dict = {}
