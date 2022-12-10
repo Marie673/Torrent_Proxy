@@ -26,7 +26,9 @@ logger = getLogger('develop')
 CACHE_PATH = os.environ['HOME']+"/proxy_cache/"
 MAX_PEER_CONNECT = 1
 EVALUATION = True
+
 EVALUATION_PATH = "/bittorrent/evaluation/bittorrent/test"
+
 
 
 class BitTorrent(Thread):
@@ -45,6 +47,7 @@ class BitTorrent(Thread):
         self.torrent = torrent
         self.info: Info = torrent.info
         self.info_hash = torrent.info_hash
+        self.info_hash_hex = torrent.info_hash_hex
         self.file_path = CACHE_PATH + self.torrent.info_hash_hex
         try:
             os.makedirs(self.file_path)
@@ -69,6 +72,7 @@ class BitTorrent(Thread):
                 file.write(data)
         self.lock = Lock()
         self.timer = time.time()
+        logger.debug(f"start {self.info_hash_hex} thread")
 
     def run(self) -> None:
         try:

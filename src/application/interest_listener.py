@@ -1,5 +1,8 @@
 import os.path
+import time
 from multiprocessing import Process
+
+import bitstring
 import cefpyco
 import src.bt as bt
 
@@ -37,18 +40,15 @@ class InterestListener(Process):
                         """
                         protocol = prefix[1]
                         info_hash = prefix[2]
-                        piece_index = prefix[3]
 
                         if protocol == 'BitTorrent':
-
-                            if piece_index == 'bitfield':
-                                self.send_data(info)
+                            if self.send_data(info):
+                                pass
+                            else:
                                 if info_hash in self.req_list:
                                     pass
                                 else:
                                     self.req_list.append(info_hash)
-                            else:
-                                self.send_data(info)
 
                 except Exception as e:
                     print(e)
@@ -62,18 +62,22 @@ class InterestListener(Process):
         info_hash = prefix[2]
         piece_index = prefix[3]
         path = bt.CACHE_PATH + info_hash + "/" + piece_index
-        print(path)
         chunk = info.chunk_num
+        #logger.debug(f"{path} {chunk}")
 
         if os.path.isfile(path):
             file_size = os.path.getsize(path)
             end_chunk_num = file_size // CHUNK_SIZE
-            print(end_chunk_num)
             seeker = chunk * CHUNK_SIZE
 
             if piece_index == "bitfield":
-                bt.m_lock.acquire()
                 cache_time = 0
+                with open(path, "rb") as file:
+                    data = file.read()
+                    own_bitfield = bitstring.BitArray(bytes=data)
+                    for i in own_bitfield:
+                        if i is False:
+                            return False
             else:
                 cache_time = 10000
             with open(path, "rb") as file:
@@ -86,8 +90,7 @@ class InterestListener(Process):
                     end_chunk_num=end_chunk_num,
                     cache_time=cache_time  # たしかs
                 )
-            if piece_index == "bitfield":
-                bt.m_lock.release()
+                # time.sleep(0.001)
             return True
         else:
             return False

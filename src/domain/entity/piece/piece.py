@@ -27,6 +27,7 @@ class Piece(object):
         self.is_full: bool = False
         # pieceが保管されているディレクトリのパス
         self.file_path = file_path + '/' + str(piece_index)
+
         self.number_of_blocks: int = int(math.ceil(float(piece_size) / BLOCK_SIZE))
 
         self.raw_data: bytes = b''

@@ -1,3 +1,6 @@
+#!/usr/bin/env python3
+import time
+
 import src.application.bittorrent.bittorrent as b
 import src.application.bittorrent.communication_manager as c
 from src.application.interest_listener import InterestListener
@@ -42,11 +45,22 @@ def main():
     try:
         while True:
             for req_info_hash in req_list:
+                def check(info_hash):
+                    for thread in bt.threads:
+                        if thread.info_hash_hex == info_hash:
+                            return True
+                    return False
+                if check(req_info_hash):
+                    continue
+
                 if req_info_hash in path_dict.keys():
                     torrent = path_dict[req_info_hash]
                     d_process = b.BitTorrent(torrent, com_mgr)
                     d_process.start()
                     bt.threads.append(d_process)
+
+            time.sleep(1)
+
     except KeyboardInterrupt:
         logger.debug("catch the KeyboadInterrupt")
         bt.thread_flag = False
