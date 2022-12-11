@@ -173,6 +173,7 @@ class BitTorrent(Thread):
 
         piece = self.pieces[piece_index]
         piece.set_block(piece_offset, piece_data)
+        logger.debug(f"bittorrent get piece")
 
         if piece.are_all_blocks_full():
             if piece.set_to_full():
