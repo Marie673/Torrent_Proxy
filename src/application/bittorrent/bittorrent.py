@@ -157,10 +157,8 @@ class BitTorrent(Thread):
                 continue
 
             if peer.is_eligible() and peer.is_unchoked() and peer.am_interested() and peer.has_piece(piece_index):
-                print(f"{peer.is_eligible()} {peer.is_unchoked()} {peer.am_interested()} "
-                      f"{peer.has_piece(piece_index)}")
                 ready_peer.append(peer)
-
+        print(ready_peer)
         return random.choice(ready_peer) if ready_peer else None
 
     def _update_bitfield_file(self):
