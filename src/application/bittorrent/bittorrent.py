@@ -134,7 +134,7 @@ class BitTorrent(Thread):
         make blocks request to many peers.
         """
         piece = self.pieces[piece_index]
-
+        gv.log(f"{piece_index}, request")
         for block_index in range(piece.number_of_blocks):
             peer = self._get_random_peer_having_piece(piece_index)
             if not peer:
@@ -145,8 +145,6 @@ class BitTorrent(Thread):
             piece_index, block_offset, block_length = block_data
             message = Request(piece_index, block_offset, block_length).to_bytes()
             peer.send_to_peer(message)
-
-        gv.log(f"{piece_index}, request")
 
     def _get_random_peer_having_piece(self, piece_index) -> Peer:
         ready_peer = []
