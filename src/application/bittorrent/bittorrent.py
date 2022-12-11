@@ -81,7 +81,6 @@ class BitTorrent(Thread):
                     if piece.is_full:
                         continue
                     self.request_piece(index)
-                    time.sleep(0.1)
 
             self._update_bitfield_file()
         finally:
