@@ -5,7 +5,7 @@ CHUNK_SIZE = 1024 * 4
 CACHE_PATH = "/proxy/proxy_cache/"
 MAX_PEER_CONNECT = 1
 EVALUATION = True
-EVALUATION_PATH = "/proxy/evaluation/bittorrent/test"
+EVALUATION_PATH = "/proxy/evaluation/proxy/test"
 
 threads = []
 thread_flag = True
