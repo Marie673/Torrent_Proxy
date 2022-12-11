@@ -36,12 +36,15 @@ class CommunicationManager(Thread):
                         payload = self._read_from_socket(sock)
                     except Exception as e:
                         self.remove_peer(peer)
+                        logger.error(e)
                         continue
 
                     peer.read_buffer += payload
 
                     for msg in peer.get_messages():
                         self._process_new_message(msg, peer)
+        except Exception as e:
+            logger.error(e)
         finally:
             logger.debug("down")
 
