@@ -139,9 +139,11 @@ class BitTorrent(Thread):
         for block_index in range(piece.number_of_blocks):
             peer = self._get_random_peer_having_piece(piece_index)
             if not peer:
+                print("test1")
                 return
             block_data = self.pieces[piece_index].get_empty_block()
             if not block_data:
+                print("test2")
                 continue
             piece_index, block_offset, block_length = block_data
             message = Request(piece_index, block_offset, block_length).to_bytes()
