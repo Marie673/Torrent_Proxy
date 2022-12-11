@@ -135,6 +135,7 @@ class BitTorrent(Thread):
         """
         piece = self.pieces[piece_index]
         gv.log(f"{piece_index}, request")
+        logger.debug(f"BitTorrent {piece_index} request")
         for block_index in range(piece.number_of_blocks):
             peer = self._get_random_peer_having_piece(piece_index)
             if not peer:
