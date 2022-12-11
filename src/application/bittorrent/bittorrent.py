@@ -139,11 +139,11 @@ class BitTorrent(Thread):
         for block_index in range(piece.number_of_blocks):
             peer = self._get_random_peer_having_piece(piece_index)
             if not peer:
-                print("test1")
+
                 return
             block_data = self.pieces[piece_index].get_empty_block()
             if not block_data:
-                print("test2")
+
                 continue
             piece_index, block_offset, block_length = block_data
             message = Request(piece_index, block_offset, block_length).to_bytes()
@@ -157,6 +157,8 @@ class BitTorrent(Thread):
                 continue
 
             if peer.is_eligible() and peer.is_unchoked() and peer.am_interested() and peer.has_piece(piece_index):
+                print(f"{peer.is_eligible()} {peer.is_unchoked()} {peer.am_interested()} "
+                      f"{peer.has_piece(piece_index)}")
                 ready_peer.append(peer)
 
         return random.choice(ready_peer) if ready_peer else None
