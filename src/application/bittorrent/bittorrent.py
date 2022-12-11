@@ -177,6 +177,7 @@ class BitTorrent(Thread):
 
         if piece.are_all_blocks_full():
             if piece.set_to_full():
+                logger.debug(f"bittorrent {piece_index} is full")
                 self.complete_pieces += 1
                 self.bitfield[piece_index] = 1
                 piece.write_on_disk()
