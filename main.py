@@ -5,7 +5,7 @@ import src.application.bittorrent.bittorrent as b
 import src.application.bittorrent.communication_manager as c
 from src.application.interest_listener import InterestListener
 from src.domain.entity.torrent import Torrent
-import src.bt as bt
+import src.global_value as bt
 from multiprocessing import Manager, Lock
 
 import yaml
@@ -30,11 +30,11 @@ def main():
     interest_listener.start()
 
     paths = [
-        '/bittorrent/evaluation/torrent_file/128MB.torrent',
-        '/bittorrent//evaluation/torrent_file/256MB.torrent',
-        '/bittorrent//evaluation/torrent_file/512MB.torrent',
-        '/bittorrent//evaluation/torrent_file/1024MB.torrent',
-        '/bittorrent//evaluation/torrent_file/2048MB.torrent'
+        '/proxy/evaluation/torrent_file/128MB.torrent',
+        '/proxy/evaluation/torrent_file/256MB.torrent',
+        '/proxy/evaluation/torrent_file/512MB.torrent',
+        '/proxy/evaluation/torrent_file/1024MB.torrent',
+        '/proxy/evaluation/torrent_file/2048MB.torrent'
     ]
 
     path_dict = {}

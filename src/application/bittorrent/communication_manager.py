@@ -5,7 +5,7 @@ import errno
 
 from src.domain.entity.peer import Peer
 import src.domain.entity.message as message
-import src.bt as bt
+import src.global_value as gv
 
 import yaml
 import logging.config
@@ -23,7 +23,7 @@ class CommunicationManager(Thread):
     
     def run(self) -> None:
         try:
-            while self.is_active and bt.thread_flag:
+            while self.is_active and gv.thread_flag:
                 read = [peer.socket for peer in self.peers]
                 read_list, _, _ = select.select(read, [], [], 1)
 
@@ -134,6 +134,6 @@ class CommunicationManager(Thread):
 
 
 def notice(info_hash, data):
-    for thread in bt.threads:
+    for thread in gv.threads:
         if info_hash in thread.info_hash:
             thread.receive_block_piece(data)

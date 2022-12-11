@@ -13,7 +13,7 @@ from src.domain.entity.tracker import Tracker
 from src.domain.entity.torrent import Torrent, Info, FileMode
 from src.application.bittorrent.communication_manager import CommunicationManager
 from typing import List
-import src.bt as bt
+import src.global_value as gv
 
 import yaml
 import logging.config
@@ -21,14 +21,6 @@ from logging import getLogger
 log_config = 'config.yaml'
 logging.config.dictConfig(yaml.load(open(log_config).read(), Loader=yaml.SafeLoader))
 logger = getLogger('develop')
-
-
-CACHE_PATH = os.environ['HOME']+"/proxy_cache/"
-MAX_PEER_CONNECT = 1
-EVALUATION = True
-
-EVALUATION_PATH = "/bittorrent/evaluation/bittorrent/test"
-
 
 
 class BitTorrent(Thread):
@@ -48,7 +40,7 @@ class BitTorrent(Thread):
         self.info: Info = torrent.info
         self.info_hash = torrent.info_hash
         self.info_hash_hex = torrent.info_hash_hex
-        self.file_path = CACHE_PATH + self.torrent.info_hash_hex
+        self.file_path = gv.CACHE_PATH + self.torrent.info_hash_hex
         try:
             os.makedirs(self.file_path)
         except Exception:
@@ -66,8 +58,8 @@ class BitTorrent(Thread):
         self.pieces = self._generate_pieces()
         self.complete_pieces = 0
 
-        if EVALUATION:
-            with open(EVALUATION_PATH, "a") as file:
+        if gv.EVALUATION:
+            with open(gv.EVALUATION_PATH, "a") as file:
                 data = str(datetime.datetime.now()) + " bittorrent process is start\n"
                 file.write(data)
         self.lock = Lock()
@@ -76,12 +68,12 @@ class BitTorrent(Thread):
 
     def run(self) -> None:
         try:
-            while (not self.all_pieces_completed()) and bt.thread_flag:
+            while (not self.all_pieces_completed()) and gv.thread_flag:
                 if time.time() - self.timer > 5:
                     self._update_bitfield_file()
                     self.timer = time.time()
                 if not self.com_mgr.has_unchocked_peers(self.info_hash) or \
-                        len(self.com_mgr.peers) < MAX_PEER_CONNECT:
+                        len(self.com_mgr.peers) < gv.MAX_PEER_CONNECT:
                     self.add_peers_from_tracker()
                     continue
 
@@ -130,7 +122,7 @@ class BitTorrent(Thread):
             if peer.do_handshake():
                 self.com_mgr.peers.append(peer)
 
-            if len(self.com_mgr.peers) >= MAX_PEER_CONNECT:
+            if len(self.com_mgr.peers) >= gv.MAX_PEER_CONNECT:
                 return
 
             time.sleep(1)
@@ -153,12 +145,7 @@ class BitTorrent(Thread):
             message = Request(piece_index, block_offset, block_length).to_bytes()
             peer.send_to_peer(message)
 
-        if EVALUATION:
-            self.lock.acquire()
-            with open(EVALUATION_PATH, "a") as file:
-                data = str(datetime.datetime.now()) + f" piece_index: {piece_index}, status: send_request"
-                file.write(data)
-            self.lock.release()
+        gv.log(f"{piece_index}, request")
 
     def _get_random_peer_having_piece(self, piece_index) -> Peer:
         ready_peer = []
@@ -173,10 +160,10 @@ class BitTorrent(Thread):
 
     def _update_bitfield_file(self):
         path = self.file_path + "/bitfield"
-        if bt.m_lock.acquire(block=False):
+        if gv.m_lock.acquire(block=False):
             with open(path, "wb") as file:
                 file.write(self.bitfield.tobytes())
-            bt.m_lock.release()
+            gv.m_lock.release()
 
     def receive_block_piece(self, receive_piece_data):
         piece_index, piece_offset, piece_data = receive_piece_data
@@ -192,12 +179,7 @@ class BitTorrent(Thread):
                 self.complete_pieces += 1
                 self.bitfield[piece_index] = 1
                 piece.write_on_disk()
-                if EVALUATION:
-                    self.lock.acquire()
-                    with open(EVALUATION_PATH, "a") as file:
-                        data = str(datetime.datetime.now()) + f" piece_index: {piece_index}, status: complete"
-                        file.write(data)
-                    self.lock.release()
+                gv.log(f"{piece_index}, piece")
                 return
 
     def get_block(self, piece_index, block_offset, block_length) -> Piece:
@@ -214,3 +196,4 @@ class BitTorrent(Thread):
                 return False
 
         return True
+
