@@ -4,7 +4,6 @@ import random
 import time
 import threading
 from threading import Thread, Lock
-import ctypes
 import bitstring
 from src.domain.entity.piece.piece import Piece
 from src.domain.entity.peer import Peer
@@ -15,12 +14,7 @@ from src.application.bittorrent.communication_manager import CommunicationManage
 from typing import List
 import src.global_value as gv
 
-import yaml
-import logging.config
-from logging import getLogger
-log_config = 'config.yaml'
-logging.config.dictConfig(yaml.load(open(log_config).read(), Loader=yaml.SafeLoader))
-logger = getLogger('develop')
+from logger import logger
 
 
 class BitTorrent(Thread):
@@ -43,8 +37,9 @@ class BitTorrent(Thread):
         self.file_path = gv.CACHE_PATH + self.torrent.info_hash_hex
         try:
             os.makedirs(self.file_path)
-        except Exception:
-            pass
+        except Exception as e:
+            logger.error(e)
+
         # number_of_pieces の計算
         if torrent.file_mode == FileMode.single_file:
             self.number_of_pieces = int(self.info.length / self.info.piece_length)

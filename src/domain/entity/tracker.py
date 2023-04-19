@@ -8,13 +8,7 @@ import errno
 from src.domain.entity.message import UdpTrackerConnection, UdpTrackerAnnounce, UdpTrackerAnnounceOutput
 from src.domain.entity.torrent import Torrent
 
-import yaml
-import logging.config
-from logging import getLogger
-
-log_config = 'config.yaml'
-logging.config.dictConfig(yaml.load(open(log_config).read(), Loader=yaml.SafeLoader))
-logger = getLogger('develop')
+from logger import logger
 
 
 peer_id = '-AZ2200-6wfG2wk6wWLc'

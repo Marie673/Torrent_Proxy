@@ -1,26 +1,22 @@
 import os.path
 import time
 from multiprocessing import Process
-
+from threading import Thread
+from bittorrent.bittorrent import BitTorrent
 import bitstring
 import cefpyco
 import src.global_value as gv
 
-import yaml
-import logging.config
-from logging import getLogger
-log_config = 'config.yaml'
-logging.config.dictConfig(yaml.load(open(log_config).read(), Loader=yaml.SafeLoader))
-logger = getLogger('develop')
+from logger import logger
 
 
-
-class InterestListener(Process):
-    def __init__(self, req_list: list):
+class InterestListener(Thread):
+    def __init__(self):
         super().__init__()
-        self.req_list = req_list
         self.cef_handle = cefpyco.CefpycoHandle()
         self.cef_handle.begin()
+
+        self.bittorrent_dict = {}
 
     def run(self) -> None:
         self.cef_handle.register("ccnx:/BitTorrent")
@@ -38,15 +34,11 @@ class InterestListener(Process):
                         """
                         protocol = prefix[1]
                         info_hash = prefix[2]
+                        piece_index = prefix[3]
+                        req_data = (info_hash, piece_index)
 
                         if protocol == 'BitTorrent':
-                            if self.send_data(info):
-                                pass
-                            else:
-                                if info_hash in self.req_list:
-                                    pass
-                                else:
-                                    self.req_list.append(info_hash)
+                            self.handle_bittorrent(req_data)
 
                 except Exception as e:
                     print(e)
@@ -55,42 +47,17 @@ class InterestListener(Process):
             logger.debug("Interest Listener is down")
             return
 
-    def send_data(self, info):
-        prefix = info.name.split('/')
-        info_hash = prefix[2]
-        piece_index = prefix[3]
-        path = gv.CACHE_PATH + info_hash + "/" + piece_index
-        chunk = info.chunk_num
-        #logger.debug(f"{path} {chunk}")
-        gv.log(f"{piece_index}, Interest, {chunk}")
-
-        if os.path.isfile(path):
-            file_size = os.path.getsize(path)
-            end_chunk_num = file_size // gv.CHUNK_SIZE
-            seeker = chunk * gv.CHUNK_SIZE
-
-            if piece_index == "bitfield":
-                cache_time = 0
-                with open(path, "rb") as file:
-                    data = file.read()
-                    own_bitfield = bitstring.BitArray(bytes=data)
-                    for i in own_bitfield:
-                        if i is False:
-                            return False
+    def handle_bittorrent(self, req_data):
+        (info_hash, piece_index) = req_data
+        if info_hash in self.bittorrent_dict:
+            b_process = self.bittorrent_dict[info_hash]
+            if piece_index == 'bitfield':
+                pass
             else:
-                cache_time = 10000
-            with open(path, "rb") as file:
-                file.seek(seeker)
-                payload = file.read(gv.CHUNK_SIZE)
-                self.cef_handle.send_data(
-                    name=info.name,
-                    payload=payload,
-                    chunk_num=chunk,
-                    end_chunk_num=end_chunk_num,
-                    cache_time=cache_time  # たしかs
-                )
-                gv.log(f"{piece_index}, Data, {chunk}")
-                # time.sleep(0.001)
-            return True
+                pass
+
         else:
-            return False
+            pass
+
+    def send_data(self, info):
+        pass
