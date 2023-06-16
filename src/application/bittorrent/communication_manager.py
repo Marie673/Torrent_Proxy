@@ -1,5 +1,5 @@
+import asyncio
 import select
-from threading import Thread
 import socket
 import errno
 
@@ -10,15 +10,16 @@ import src.global_value as gv
 from logger import logger
 
 
-class CommunicationManager(Thread):
+class CommunicationManager:
     def __init__(self):
-        super().__init__()
         self.is_active = True
         self.peers: list[Peer] = []
-    
-    def run(self) -> None:
+
+        asyncio.run(self.run())
+
+    async def run(self) -> None:
         try:
-            while self.is_active and gv.thread_flag:
+            while self.is_active:
                 read = [peer.socket for peer in self.peers]
                 read_list, _, _ = select.select(read, [], [], 1)
 
@@ -37,7 +38,9 @@ class CommunicationManager(Thread):
                     peer.read_buffer += payload
 
                     for msg in peer.get_messages():
-                        self._process_new_message(msg, peer)
+                        asyncio.run(
+                            self._process_new_message(msg, peer)
+                        )
         except Exception as e:
             logger.error(e)
         finally:
@@ -83,18 +86,18 @@ class CommunicationManager(Thread):
             except socket.error as e:
                 err = e.args[0]
                 if err != errno.EAGAIN or err != errno.EWOULDBLOCK:
-                    logging.debug("Wrong errno {}".format(err))
+                    logger.debug("Wrong errno {}".format(err))
                 break
             except Exception:
-                logging.exception("Recv failed")
+                logger.exception("Recv failed")
                 break
 
         return data
 
     @staticmethod
-    def _process_new_message(new_message: message.Message, peer: Peer):
+    async def _process_new_message(new_message: message.Message, peer: Peer) -> None:
         if isinstance(new_message, message.Handshake) or isinstance(new_message, message.KeepAlive):
-            logging.error("Handshake or KeepALive should have already been handled")
+            logger.error("Handshake or KeepALive should have already been handled")
 
         elif isinstance(new_message, message.Choke):
             peer.handle_choke()
@@ -128,7 +131,7 @@ class CommunicationManager(Thread):
             peer.handle_port_request()
 
         else:
-            logging.error("Unknown message")
+            logger.error("Unknown message")
 
 
 def notice(info_hash, data):

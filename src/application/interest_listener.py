@@ -2,10 +2,12 @@ import os.path
 import time
 from multiprocessing import Process
 from threading import Thread
-from bittorrent.bittorrent import BitTorrent
+from src.application.bittorrent.bittorrent import BitTorrent
 import bitstring
 import cefpyco
 import src.global_value as gv
+from src.main import com_manager
+
 
 from logger import logger
 
@@ -57,7 +59,9 @@ class InterestListener(Thread):
                 pass
 
         else:
-            pass
+            # torrentファイルを持っている前提
+            torrent = # torrent file
+            b_process = BitTorrent(torrent, com_manager)
 
     def send_data(self, info):
         pass

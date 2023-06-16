@@ -1,9 +1,9 @@
+import asyncio
 import datetime
 import os
 import random
 import time
-import threading
-from threading import Thread, Lock
+# from threading import Lock
 import bitstring
 from src.domain.entity.piece.piece import Piece
 from src.domain.entity.peer import Peer
@@ -17,7 +17,7 @@ import src.global_value as gv
 from logger import logger
 
 
-class BitTorrent(Thread):
+class BitTorrent:
     def __init__(self, torrent: Torrent, communication_manager: CommunicationManager):
         """
         トラッカーにアクセス
@@ -28,7 +28,6 @@ class BitTorrent(Thread):
         ↓
         コンテンツの交換
         """
-        super().__init__()
         self.com_mgr = communication_manager
         self.torrent = torrent
         self.info: Info = torrent.info
@@ -57,11 +56,11 @@ class BitTorrent(Thread):
             with open(gv.EVALUATION_PATH, "a") as file:
                 data = str(datetime.datetime.now()) + " bittorrent process is start\n"
                 file.write(data)
-        self.lock = Lock()
+        self.lock = asyncio.Lock()
         self.timer = time.time()
         logger.debug(f"start {self.info_hash_hex} thread")
 
-    def run(self) -> None:
+    async def run(self) -> None:
         try:
             while (not self.all_pieces_completed()) and gv.thread_flag:
                 if time.time() - self.timer > 5:

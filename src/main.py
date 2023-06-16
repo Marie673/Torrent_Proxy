@@ -1,13 +1,16 @@
 import global_value
-import application.bittorrent as bittorrent
-import application.interest_listener as listener
+from src.application.interest_listener import InterestListener
+from src.application.bittorrent.communication_manager import CommunicationManager
+
+
+com_manager = None
 
 
 def main():
-    b_process = bittorrent()
-    c_process = listener()
+    global com_manager
+    com_manager = CommunicationManager()
+    c_process = InterestListener()
 
-    b_process.start()
     c_process.start()
 
 
