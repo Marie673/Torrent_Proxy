@@ -1,6 +1,5 @@
 import os.path
 import time
-import cefpyco
 from threading import Thread
 from src.application.bittorrent.bittorrent import BitTorrent
 from src.domain.entity.torrent import Torrent
