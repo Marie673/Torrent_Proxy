@@ -56,6 +56,10 @@ class Piece(object):
 
         return self.raw_data[block_offset:block_length]
 
+    def get_piece(self):
+        piece = self.get_block(0, self.piece_size)
+        return piece
+
     def get_empty_block(self):
         if self.is_full:
             return None

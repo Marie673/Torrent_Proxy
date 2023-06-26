@@ -3,8 +3,8 @@ import datetime
 import os
 import random
 import time
-# from threading import Lock
 import bitstring
+
 from src.domain.entity.piece.piece import Piece
 from src.domain.entity.peer import Peer
 from src.domain.entity.message import Request
