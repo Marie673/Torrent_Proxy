@@ -52,6 +52,8 @@ class BitTorrent:
         self.pieces = self._generate_pieces()
         self.complete_pieces = 0
 
+        asyncio.run(self.run())
+
         if gv.EVALUATION:
             with open(gv.EVALUATION_PATH, "a") as file:
                 data = str(datetime.datetime.now()) + " bittorrent process is start\n"
