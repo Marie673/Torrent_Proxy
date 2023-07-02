@@ -1,0 +1,13 @@
+version: "3.5"
+
+services:
+  proxy:
+    build:
+      context: ../
+      dockerfile: ./docker/Dockerfile
+    container_name: proxy
+
+    volumes:
+      - ../:/Torrent_Proxy
+    tty: true
+    working_dir: "/Torrent_Proxy"

@@ -6,7 +6,7 @@ from src.domain.entity.torrent import Torrent
 import bitstring
 import cefpyco
 import src.global_value as gv
-from src.main import com_manager
+from src.global_value import com_manager
 
 
 from logger import logger
