@@ -30,6 +30,7 @@ class InterestListener:
                 logger.error(e)
             except KeyboardInterrupt:
                 logger.debug("Interest Listener is down")
+                return
             finally:
                 for task in self.bittorrent_task:
                     await task
