@@ -26,12 +26,15 @@ class InterestListener(Thread):
             try:
                 info = self.cef_handle.receive()
                 if info.is_succeeded and info.is_interest :
-                    self.handle_interest(info)
+                    task = self.handle_interest(info)
+                    self.bittorrent_task.append(task)
             except Exception as e:
                 logger.error(e)
             except KeyboardInterrupt:
                 logger.debug("Interest Listener is down")
-                return
+            finally:
+                for task in self.bittorrent_task:
+                    await task
 
     async def handle_interest(self, info):
         name = info.name
