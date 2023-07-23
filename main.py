@@ -5,8 +5,6 @@ from src.application.interest_listener import InterestListener
 
 
 def main():
-    res = subprocess.run(["cefnetdstart"], shell=True)
-
     c_process = InterestListener()
 
     c_process.start()
