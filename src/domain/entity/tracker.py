@@ -108,6 +108,7 @@ class Tracker(object):
                     self.dict_sock_addr[s.__hash__()] = s
                     """
             else:
+                logger.debug("test")
                 for p in list_peers['peers']:
                     ip: str = p['ip']
                     if ip.startswith('::ffff:') :
