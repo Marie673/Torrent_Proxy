@@ -32,7 +32,8 @@ class InterestListener:
                 logger.debug("Interest Listener is down")
             finally:
                 for task in self.bittorrent_task:
-                    await task
+                    pass
+                    # await task
 
     async def handle_interest(self, info):
         name = info.name
