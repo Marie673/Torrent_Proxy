@@ -78,6 +78,7 @@ class Tracker(object):
         try:
             answer_tracker = requests.get(tracker, params=params, timeout=5)
             list_peers: dict = bdecode(answer_tracker.content)
+            logger.debug(list_peers)
             # offset = 0
             if type(list_peers['peers']) is not dict:
                 '''
