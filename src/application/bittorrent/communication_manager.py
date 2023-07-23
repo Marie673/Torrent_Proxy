@@ -28,26 +28,25 @@ class CommunicationManager(Thread):
             logger.debug("down")
 
     def listener(self):
-        while self.is_active :
-            read = [peer.socket for peer in self.peers]
-            read_list, _, _ = select.select(read, [], [], 1)
+        read = [peer.socket for peer in self.peers]
+        read_list, _, _ = select.select(read, [], [], 1)
 
-            for sock in read_list :
-                peer = self.get_peer_by_socket(sock)
-                if not peer.healthy :
-                    self.remove_peer(peer)
+        for sock in read_list :
+            peer = self.get_peer_by_socket(sock)
+            if not peer.healthy :
+                self.remove_peer(peer)
 
-                try :
-                    payload = self._read_from_socket(sock)
-                except Exception as e :
-                    self.remove_peer(peer)
-                    logger.error(e)
-                    continue
+            try :
+                payload = self._read_from_socket(sock)
+            except Exception as e :
+                self.remove_peer(peer)
+                logger.error(e)
+                continue
 
-                peer.read_buffer += payload
+            peer.read_buffer += payload
 
-                for msg in peer.get_messages() :
-                    self._process_new_message(msg, peer)
+            for msg in peer.get_messages() :
+                self._process_new_message(msg, peer)
 
     def get_peer_by_socket(self, sock) -> Peer:
         for peer in self.peers:
