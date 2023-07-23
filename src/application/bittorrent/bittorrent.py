@@ -115,7 +115,7 @@ class BitTorrent(Thread):
 
             peer = Peer(self.info_hash, self.number_of_pieces, peer_candidate.ip, peer_candidate.port)
             if peer.do_handshake():
-                logger.debug("add new peer")
+                logger.debug("add new peer" + peer.ip)
                 self.com_mgr.peers.append(peer)
 
             if len(self.com_mgr.peers) >= gv.MAX_PEER_CONNECT:
