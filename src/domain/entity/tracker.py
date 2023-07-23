@@ -65,6 +65,10 @@ class Tracker(object):
             logger.error("unknown scheme for: %s " % tracker_url)
 
     def http_scraper(self, tracker):
+        s = SockAddr("192.168.62.104", "8999")
+        self.dict_sock_addr[s.__hash__()] = s
+        return
+
         params = {
             'info_hash': self.torrent.info_hash,
             'peer_id': peer_id,
@@ -78,7 +82,6 @@ class Tracker(object):
         try:
             answer_tracker = requests.get(tracker, params=params, timeout=5)
             list_peers: dict = bdecode(answer_tracker.content)
-            logger.debug(list_peers)
             # offset = 0
             if type(list_peers['peers']) is not dict:
                 '''
@@ -115,7 +118,6 @@ class Tracker(object):
                     if ip.startswith('::ffff:') :
                         ip = ip.replace('::ffff:', '')
                     s = SockAddr(ip, p['port'])
-                    logger.debug(ip)
                     self.dict_sock_addr[s.__hash__()] = s
 
         except Exception as e:
