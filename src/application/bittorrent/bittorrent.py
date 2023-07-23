@@ -70,14 +70,14 @@ class BitTorrent(Thread):
         self.timer = time.time()
         logger.debug(f"start {self.info_hash_hex} thread")
 
-    def run(self) -> None:
+    async def run(self) -> None:
         try:
             while True:
                 if not self.com_mgr.has_unchocked_peers(self.info_hash) or \
                         len(self.com_mgr.peers) < gv.MAX_PEER_CONNECT:
                     self.add_peers_from_tracker()
-                await asyncio.sleep(0)
                 time.sleep(10)
+                # await asyncio.sleep(10)
 
         except KeyboardInterrupt:
             logger.debug("bittorrent process: catch KeyboadInterrupt")

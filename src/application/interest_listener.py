@@ -70,7 +70,7 @@ class InterestListener:
             torrent_file_name = gv.TORRENT_FILE_PATH + info_hash + ".torrent"
             torrent = Torrent(torrent_file_name)
             b_process = BitTorrent(torrent)
-            b_process.run()
+            b_process.start()
             self.bittorrent_dict[info_hash] = b_process
 
         b_process: BitTorrent = self.bittorrent_dict[info_hash]
