@@ -1,13 +1,14 @@
 from multiprocessing import Lock
 import datetime
+import os
 
 CHUNK_SIZE = 1024 * 4
-CACHE_PATH = "/proxy/proxy_cache/"
+CACHE_PATH = os.environ["HOME"] + "/proxy_cache/"
 MAX_PEER_CONNECT = 1
 EVALUATION = True
-EVALUATION_PATH = "/proxy/evaluation/proxy/test"
+EVALUATION_PATH = os.environ["HOME"] + "/evaluation/proxy/test"
 
-TORRENT_FILE_PATH = "/proxy/torrent/"
+TORRENT_FILE_PATH = os.environ["HOME"] + "/torrent/"
 
 threads = []
 thread_flag = True
