@@ -24,7 +24,7 @@ class InterestListener:
         logger.debug("start interest_listener")
         while True:
             try:
-                info = await self.cef_handle.receive()
+                info = self.cef_handle.receive()
                 if info.is_succeeded and info.is_interest :
                     await self.handle_interest(info)
             except Exception as e:
