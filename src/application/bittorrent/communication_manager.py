@@ -33,6 +33,7 @@ class CommunicationManager(Thread):
 
         for sock in read_list :
             peer = self.get_peer_by_socket(sock)
+            logger.debug("peer")
             if not peer.healthy :
                 self.remove_peer(peer)
 
