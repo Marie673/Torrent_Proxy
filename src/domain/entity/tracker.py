@@ -35,27 +35,34 @@ class Tracker(object):
         self.dict_sock_addr = {}
 
     def get_peers_from_trackers(self):
+        if self.torrent.announce is not None:
+            tracker_url = self.torrent.announce
+            self.connect_tracker(tracker_url)
 
-        for i, tracker in enumerate(self.torrent.announce_list):
+        if self.torrent.announce_list is not None:
+            for i, tracker in enumerate(self.torrent.announce_list):
 
-            tracker_url = tracker[0]
+                tracker_url = tracker[0]
 
-            if str.startswith(tracker_url, "http"):
-                try:
-                    self.http_scraper(tracker_url)
-                except Exception as e:
-                    logger.error("HTTP scraping failed: %s " % e.__str__())
-
-            elif str.startswith(tracker_url, "udp"):
-                try:
-                    self.udp_scrapper(tracker_url)
-                except Exception as e:
-                    logger.error("UDP scraping failed: %s " % e.__str__())
-
-            else:
-                logger.error("unknown scheme for: %s " % tracker_url)
+                self.connect_tracker(tracker_url)
 
         return self.dict_sock_addr
+
+    def connect_tracker(self, tracker_url):
+        if str.startswith(tracker_url, "http") :
+            try :
+                self.http_scraper(tracker_url)
+            except Exception as e :
+                logger.error("HTTP scraping failed: %s " % e.__str__())
+
+        elif str.startswith(tracker_url, "udp") :
+            try :
+                self.udp_scrapper(tracker_url)
+            except Exception as e :
+                logger.error("UDP scraping failed: %s " % e.__str__())
+
+        else :
+            logger.error("unknown scheme for: %s " % tracker_url)
 
     def http_scraper(self, tracker):
         params = {
