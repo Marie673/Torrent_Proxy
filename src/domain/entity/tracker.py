@@ -78,7 +78,6 @@ class Tracker(object):
         try:
             answer_tracker = requests.get(tracker, params=params, timeout=5)
             list_peers: dict = bdecode(answer_tracker.content)
-            logger.debug(list_peers)
             # offset = 0
             if type(list_peers['peers']) is not dict:
                 '''
@@ -91,7 +90,9 @@ class Tracker(object):
                     - To unpack next 2 byets !H(big-endian, 2 bytes) is used.
                 '''
                 for i in range(len(list_peers['peers']) // 6):
-                    ip = list_peers['peers'][i]['ip']
+                    ip: str = list_peers['peers'][i]['ip']
+                    if ip.startswith('::ffff:'):
+                        ip = ip.replace('::ffff:', '')
                     port = list_peers['peers'][i]['port']
                     s = SockAddr(ip, port)
                     self.dict_sock_addr[s.__hash__()] = s
