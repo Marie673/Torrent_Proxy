@@ -19,7 +19,6 @@ class CommunicationManager(Thread):
     def run(self) -> None:
         try:
             while self.is_active:
-                print("test")
                 self.listener()
         except Exception as e:
             logger.error(e)
@@ -102,35 +101,44 @@ class CommunicationManager(Thread):
             logger.error("Handshake or KeepALive should have already been handled")
 
         elif isinstance(new_message, message.Choke):
+            logger.debug("Choke")
             peer.handle_choke()
 
         elif isinstance(new_message, message.UnChoke):
+            logger.debug("UnChoke")
             peer.handle_unchoke()
 
         elif isinstance(new_message, message.Interested):
+            logger.debug("Interested")
             peer.handle_interested()
 
         elif isinstance(new_message, message.NotInterested):
+            logger.debug("NotInterested")
             peer.handle_not_interested()
 
         elif isinstance(new_message, message.Have):
+            logger.debug("Have")
             peer.handle_have(new_message)
 
         elif isinstance(new_message, message.BitField):
+            logger.debug("BitField")
             peer.handle_bitfield(new_message)
 
         elif isinstance(new_message, message.Request):
+            logger.debug("Request")
             peer.handle_request(new_message)
 
         elif isinstance(new_message, message.Piece):
             data = peer.handle_piece(new_message)
-            logger.debug("get piece message")
+            logger.debug("Piece")
             self.bittorrent.receive_block_piece(data)
 
         elif isinstance(new_message, message.Cancel):
+            logger.debug("Cancel")
             peer.handle_cancel()
 
         elif isinstance(new_message, message.Port):
+            logger.debug("Port")
             peer.handle_port_request()
 
         else:
