@@ -130,7 +130,7 @@ class BitTorrent(Thread):
         make blocks request to many peers.
         """
         piece = self.pieces[piece_index]
-        logger(f"{piece_index}, request")
+        logger.debug(f"{piece_index}, request")
         logger.debug(f"BitTorrent {piece_index} request")
         for block_index in range(piece.number_of_blocks):
             peer = self._get_random_peer_having_piece(piece_index)
