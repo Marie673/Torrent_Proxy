@@ -14,7 +14,6 @@ thread_flag = True
 torrent_list = []
 m_lock = Lock()
 
-com_manager = None
 
 def log(msg):
     if not EVALUATION:
