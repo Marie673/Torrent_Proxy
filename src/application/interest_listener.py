@@ -48,10 +48,10 @@ class InterestListener:
         end_chunk_num = info.end_chunk_num
         interest_info = (name, prefix, chunk_num, end_chunk_num)
 
-        if prefix[0] != "ccnx":
+        if prefix[0] is not "ccnx":
             return
 
-        if prefix[1] == "BitTorrent":
+        if prefix[1] is "BitTorrent":
             logger.debug("handle Bittorrent")
             await self.handle_bittorrent(interest_info)
 
