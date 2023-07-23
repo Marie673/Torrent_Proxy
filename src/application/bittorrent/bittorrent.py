@@ -70,7 +70,7 @@ class BitTorrent(Thread):
         self.timer = time.time()
         logger.debug(f"start {self.info_hash_hex} thread")
 
-    async def run(self) -> None:
+    def run(self) -> None:
         try:
             while True:
                 if not self.com_mgr.has_unchocked_peers(self.info_hash) or \
