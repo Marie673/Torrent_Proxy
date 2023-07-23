@@ -65,7 +65,7 @@ class Tracker(object):
             logger.error("unknown scheme for: %s " % tracker_url)
 
     def http_scraper(self, tracker):
-        s = SockAddr("192.168.62.104", "8999")
+        s = SockAddr("192.168.62.104", 8999)
         self.dict_sock_addr[s.__hash__()] = s
         return
 
