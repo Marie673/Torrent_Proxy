@@ -28,7 +28,7 @@ class Peer(object):
         try:
             self.socket = self._connect()
         except Exception as e:
-            print(e)
+            logger.error(e)
             raise e
 
     def __hash__(self):

@@ -38,13 +38,14 @@ class CommunicationManager(Thread):
 
             try :
                 payload = self._read_from_socket(sock)
-                logger.debug(payload)
             except Exception as e :
                 self.remove_peer(peer)
                 logger.error(e)
                 continue
 
             peer.read_buffer += payload
+            if len(peer.read_buffer) > 1:
+                logger.debug(peer.read_buffer)
 
             for msg in peer.get_messages() :
                 self._process_new_message(msg, peer)
