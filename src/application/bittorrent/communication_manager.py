@@ -19,6 +19,7 @@ class CommunicationManager(Thread):
     def run(self) -> None:
         try:
             while self.is_active:
+                print("test")
                 self.listener()
         except Exception as e:
             logger.error(e)
