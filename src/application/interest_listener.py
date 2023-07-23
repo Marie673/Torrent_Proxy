@@ -58,6 +58,7 @@ class InterestListener:
     async def handle_bittorrent(self, interest_info):
         (name, prefix, chunk_num, end_chunk_num) = interest_info
         info_hash = prefix[2]
+        logger.debug(info_hash)
 
         if not info_hash in self.bittorrent_dict:
             # torrentファイルを持っている前提
