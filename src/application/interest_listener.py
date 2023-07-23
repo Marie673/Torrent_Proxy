@@ -49,7 +49,7 @@ class InterestListener:
         interest_info = (name, prefix, chunk_num, end_chunk_num)
 
         logger.debug(prefix)
-        if prefix[0] != "ccnx":
+        if prefix[0] != "ccnx:":
             return
 
         if prefix[1] == "BitTorrent":
