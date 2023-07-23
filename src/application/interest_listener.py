@@ -22,18 +22,18 @@ class InterestListener:
     async def run(self) -> None:
         self.cef_handle.register("ccnx:/BitTorrent")
         logger.debug("start interest_listener")
-        while True:
-            try:
-                info = self.cef_handle.receive()
-                if info.is_succeeded and info.is_interest :
-                    await self.handle_interest(info)
-            except Exception as e:
-                logger.error(e)
-            except KeyboardInterrupt:
-                logger.debug("Interest Listener is down")
-                return
-            finally:
-                pass
+        try:
+            while True:
+                try:
+                    info = self.cef_handle.receive()
+                    if info.is_succeeded and info.is_interest :
+                        await self.handle_interest(info)
+                except Exception as e:
+                    logger.error(e)
+        except KeyboardInterrupt:
+            logger.debug("Interest Listener is down")
+            return
+
 
     async def handle_interest(self, info):
         name = info.name
