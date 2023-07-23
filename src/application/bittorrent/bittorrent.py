@@ -123,7 +123,6 @@ class BitTorrent(Thread):
             if len(self.com_mgr.peers) >= gv.MAX_PEER_CONNECT:
                 return
 
-            time.sleep(1)
 
     def request_piece(self, piece_index):
         """
