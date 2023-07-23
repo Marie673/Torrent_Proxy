@@ -1,96 +1,100 @@
+import asyncio
 import os.path
 import time
-from multiprocessing import Process
-
-import bitstring
+from threading import Thread
+from src.application.bittorrent.bittorrent import BitTorrent
+from src.domain.entity.torrent import Torrent
 import cefpyco
 import src.global_value as gv
 
-import yaml
-import logging.config
-from logging import getLogger
-log_config = 'config.yaml'
-logging.config.dictConfig(yaml.load(open(log_config).read(), Loader=yaml.SafeLoader))
-logger = getLogger('develop')
+
+from logger import logger
 
 
-
-class InterestListener(Process):
-    def __init__(self, req_list: list):
+class InterestListener(Thread):
+    def __init__(self):
         super().__init__()
-        self.req_list = req_list
         self.cef_handle = cefpyco.CefpycoHandle()
         self.cef_handle.begin()
 
+        self.bittorrent_task = []
+        self.bittorrent_dict = {}
+
     def run(self) -> None:
         self.cef_handle.register("ccnx:/BitTorrent")
-        try:
-            while True:
-                try:
-                    info = self.cef_handle.receive()
-                    if info.is_succeeded and info.is_interest:
-                        prefix = info.name.split('/')
-                        """
-                        prefix[0] = ccnx:
-                        prefix[1] = BitTorrent
-                        prefix[2] = info_hash
-                        prefix[3] = piece_index
-                        """
-                        protocol = prefix[1]
-                        info_hash = prefix[2]
+        while True:
+            try:
+                info = self.cef_handle.receive()
+                if info.is_succeeded and info.is_interest :
+                    self.handle_interest(info)
+            except Exception as e:
+                logger.error(e)
+            except KeyboardInterrupt:
+                logger.debug("Interest Listener is down")
+                return
 
-                        if protocol == 'BitTorrent':
-                            if self.send_data(info):
-                                pass
-                            else:
-                                if info_hash in self.req_list:
-                                    pass
-                                else:
-                                    self.req_list.append(info_hash)
+    async def handle_interest(self, info):
+        name = info.name
+        prefix = name.split('/')
+        """
+        prefix[0] = ccnx:
+        prefix[1] = BitTorrent
+        prefix[2] = info_hash
+        """
+        chunk_num = info.chunk_num
+        end_chunk_num = info.end_chunk_num
+        interest_info = (name, prefix, chunk_num, end_chunk_num)
 
-                except Exception as e:
-                    print(e)
-
-        except KeyboardInterrupt:
-            logger.debug("Interest Listener is down")
+        if prefix[0] != "ccnx":
             return
 
-    def send_data(self, info):
-        prefix = info.name.split('/')
+        if prefix[1] == "BitTorrent":
+            task = asyncio.create_task(self.handle_bittorrent(interest_info))
+
+
+
+    async def handle_bittorrent(self, interest_info):
+        (name, prefix, chunk_num, end_chunk_num) = interest_info
         info_hash = prefix[2]
-        piece_index = prefix[3]
-        path = gv.CACHE_PATH + info_hash + "/" + piece_index
-        chunk = info.chunk_num
-        #logger.debug(f"{path} {chunk}")
-        gv.log(f"{piece_index}, Interest, {chunk}")
 
-        if os.path.isfile(path):
-            file_size = os.path.getsize(path)
-            end_chunk_num = file_size // gv.CHUNK_SIZE
-            seeker = chunk * gv.CHUNK_SIZE
+        if not info_hash in self.bittorrent_dict:
+            # torrentファイルを持っている前提
+            # torrentファイルの名前は、{$info_hash} + ".torrent"
+            torrent_file_name = gv.TORRENT_FILE_PATH + info_hash + ".torrent"
+            torrent = Torrent(torrent_file_name)
+            b_process = BitTorrent(torrent)
+            b_process.run()
+            self.bittorrent_dict[info_hash] = b_process
 
-            if piece_index == "bitfield":
-                cache_time = 0
-                with open(path, "rb") as file:
-                    data = file.read()
-                    own_bitfield = bitstring.BitArray(bytes=data)
-                    for i in own_bitfield:
-                        if i is False:
-                            return False
-            else:
-                cache_time = 10000
-            with open(path, "rb") as file:
-                file.seek(seeker)
-                payload = file.read(gv.CHUNK_SIZE)
-                self.cef_handle.send_data(
-                    name=info.name,
-                    payload=payload,
-                    chunk_num=chunk,
-                    end_chunk_num=end_chunk_num,
-                    cache_time=cache_time  # たしかs
-                )
-                gv.log(f"{piece_index}, Data, {chunk}")
-                # time.sleep(0.001)
-            return True
-        else:
-            return False
+        b_process: BitTorrent = self.bittorrent_dict[info_hash]
+
+        # 1ピース当たりのチャンク数
+        # ピースの最後を表現するときに、チャンクサイズで余りが出ても次のピースデータを含めない.
+        if b_process.piece_length % gv.CHUNK_SIZE == 0 :
+            chunks_per_piece = b_process.piece_length // gv.CHUNK_SIZE
+        else :
+            chunks_per_piece = (b_process.piece_length // gv.CHUNK_SIZE) + 1
+
+        # オフセットの計算
+        piece_index = chunk_num // chunks_per_piece
+        offset = (chunk_num  % chunks_per_piece) * gv.CHUNK_SIZE
+
+        # end_chunk_numの計算.
+        # chunk_numは0から数え始めるので、-1する.
+        end_chunk_num = chunks_per_piece * b_process.number_of_pieces - 1
+
+        try:
+            data: bytes = await asyncio.wait_for(
+                b_process.get_data(piece_index, offset, gv.CHUNK_SIZE)
+                , timeout=4
+            )
+        except asyncio.TimeoutError as e:
+            raise e
+
+        self.cef_handle.send_data(
+            name=name,
+            payload=data,
+            chunk_num=chunk_num,
+            end_chunk_num=end_chunk_num,
+            cache_time=60  # たしかs
+        )

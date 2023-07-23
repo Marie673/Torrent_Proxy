@@ -7,6 +7,8 @@ MAX_PEER_CONNECT = 1
 EVALUATION = True
 EVALUATION_PATH = "/proxy/evaluation/proxy/test"
 
+TORRENT_FILE_PATH = "/proxy/torrent/"
+
 threads = []
 thread_flag = True
 torrent_list = []

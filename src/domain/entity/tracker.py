@@ -8,13 +8,7 @@ import errno
 from src.domain.entity.message import UdpTrackerConnection, UdpTrackerAnnounce, UdpTrackerAnnounceOutput
 from src.domain.entity.torrent import Torrent
 
-import yaml
-import logging.config
-from logging import getLogger
-
-log_config = 'config.yaml'
-logging.config.dictConfig(yaml.load(open(log_config).read(), Loader=yaml.SafeLoader))
-logger = getLogger('develop')
+from logger import logger
 
 
 peer_id = '-AZ2200-6wfG2wk6wWLc'
@@ -41,16 +35,7 @@ class Tracker(object):
         self.dict_sock_addr = {}
 
     def get_peers_from_trackers(self):
-        """
-        test code
-        """
-        s = SockAddr("10.0.1.203", 8999)
-        self.dict_sock_addr[s.__hash__()] = s
 
-        return self.dict_sock_addr
-        """
-        test
-        """
         for i, tracker in enumerate(self.torrent.announce_list):
 
             tracker_url = tracker[0]
@@ -59,16 +44,16 @@ class Tracker(object):
                 try:
                     self.http_scraper(tracker_url)
                 except Exception as e:
-                    logging.error("HTTP scraping failed: %s " % e.__str__())
+                    logger.error("HTTP scraping failed: %s " % e.__str__())
 
             elif str.startswith(tracker_url, "udp"):
                 try:
                     self.udp_scrapper(tracker_url)
                 except Exception as e:
-                    logging.error("UDP scraping failed: %s " % e.__str__())
+                    logger.error("UDP scraping failed: %s " % e.__str__())
 
             else:
-                logging.error("unknown scheme for: %s " % tracker_url)
+                logger.error("unknown scheme for: %s " % tracker_url)
 
         return self.dict_sock_addr
 

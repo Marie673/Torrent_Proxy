@@ -1,11 +1,12 @@
+import asyncio
 import datetime
 import os
 import random
 import time
-import threading
-from threading import Thread, Lock
-import ctypes
 import bitstring
+
+from threading import Thread
+
 from src.domain.entity.piece.piece import Piece
 from src.domain.entity.peer import Peer
 from src.domain.entity.message import Request
@@ -15,16 +16,11 @@ from src.application.bittorrent.communication_manager import CommunicationManage
 from typing import List
 import src.global_value as gv
 
-import yaml
-import logging.config
-from logging import getLogger
-log_config = 'config.yaml'
-logging.config.dictConfig(yaml.load(open(log_config).read(), Loader=yaml.SafeLoader))
-logger = getLogger('develop')
+from logger import logger
 
 
 class BitTorrent(Thread):
-    def __init__(self, torrent: Torrent, communication_manager: CommunicationManager):
+    def __init__(self, torrent: Torrent) :
         """
         トラッカーにアクセス
         ↓
@@ -35,7 +31,9 @@ class BitTorrent(Thread):
         コンテンツの交換
         """
         super().__init__()
-        self.com_mgr = communication_manager
+        self.com_mgr = CommunicationManager(self)
+        self.com_mgr.start()
+
         self.torrent = torrent
         self.info: Info = torrent.info
         self.info_hash = torrent.info_hash
@@ -43,16 +41,20 @@ class BitTorrent(Thread):
         self.file_path = gv.CACHE_PATH + self.torrent.info_hash_hex
         try:
             os.makedirs(self.file_path)
-        except Exception:
-            pass
-        # number_of_pieces の計算
+        except Exception as e:
+            logger.error(e)
+
+        # 1ピースのサイズ
+        self.piece_length = self.info.piece_length
+        # ピース数 の計算
+        # シングルファイルと複数ファイルで計算方法が変わる. 複数ファイルの場合、ファイルのサイズの合計値が全体のデータサイズになる.
         if torrent.file_mode == FileMode.single_file:
-            self.number_of_pieces = int(self.info.length / self.info.piece_length)
+            self.number_of_pieces = int(self.info.length / self.piece_length)
         else:
             length: int = 0
             for file in self.info.files:
                 length += file.length
-            self.number_of_pieces = int(length / self.info.piece_length)
+            self.number_of_pieces = int(length / self.piece_length)
 
         self.bitfield = bitstring.BitArray(self.number_of_pieces)
         self.pieces = self._generate_pieces()
@@ -62,28 +64,20 @@ class BitTorrent(Thread):
             with open(gv.EVALUATION_PATH, "a") as file:
                 data = str(datetime.datetime.now()) + " bittorrent process is start\n"
                 file.write(data)
-        self.lock = Lock()
+        self.lock = asyncio.Lock()
         self.timer = time.time()
         logger.debug(f"start {self.info_hash_hex} thread")
 
     def run(self) -> None:
         try:
-            while (not self.all_pieces_completed()) and gv.thread_flag:
-                if time.time() - self.timer > 5:
-                    self._update_bitfield_file()
-                    self.timer = time.time()
+            while True:
                 if not self.com_mgr.has_unchocked_peers(self.info_hash) or \
                         len(self.com_mgr.peers) < gv.MAX_PEER_CONNECT:
                     self.add_peers_from_tracker()
                     continue
 
-                for index, piece in enumerate(self.pieces):
-                    if piece.is_full:
-                        continue
-                    self.request_piece(index)
-                    time.sleep(0.03)
-
-            self._update_bitfield_file()
+        except KeyboardInterrupt:
+            logger.debug("bittorrent process: catch KeyboadInterrupt")
         finally:
             logger.debug("bittorrent process is down")
 
@@ -134,7 +128,7 @@ class BitTorrent(Thread):
         make blocks request to many peers.
         """
         piece = self.pieces[piece_index]
-        gv.log(f"{piece_index}, request")
+        logger(f"{piece_index}, request")
         logger.debug(f"BitTorrent {piece_index} request")
         for block_index in range(piece.number_of_blocks):
             peer = self._get_random_peer_having_piece(piece_index)
@@ -160,13 +154,6 @@ class BitTorrent(Thread):
                 ready_peer.append(peer)
         return random.choice(ready_peer) if ready_peer else None
 
-    def _update_bitfield_file(self):
-        path = self.file_path + "/bitfield"
-        if gv.m_lock.acquire(block=False):
-            with open(path, "wb") as file:
-                file.write(self.bitfield.tobytes())
-            gv.m_lock.release()
-
     def receive_block_piece(self, receive_piece_data):
         piece_index, piece_offset, piece_data = receive_piece_data
 
@@ -183,16 +170,20 @@ class BitTorrent(Thread):
                 self.complete_pieces += 1
                 self.bitfield[piece_index] = 1
                 piece.write_on_disk()
-                gv.log(f"{piece_index}, piece")
+                logger(f"{piece_index}, piece")
                 return
 
-    def get_block(self, piece_index, block_offset, block_length) -> Piece:
+    async def get_data(self, piece_index, block_offset, block_length) -> bytes:
         piece = self.pieces[piece_index]
-        if piece_index == piece.piece_index:
-            if piece.is_full:
-                return piece.get_block(block_offset, block_length)
-        # TODO 例外クラス作る
-        raise Exception('Piece is not full')
+        if piece.is_full:
+            return piece.get_block(block_offset, block_length)
+
+        self.request_piece(piece_index)
+        while not piece.is_full:
+            await asyncio.sleep(0)
+
+        return piece.get_block(block_offset, block_length)
+
 
     def all_pieces_completed(self) -> bool:
         for piece in self.pieces:

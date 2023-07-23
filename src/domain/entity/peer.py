@@ -6,12 +6,7 @@ import struct
 from src.domain.entity.message import Handshake, KeepAlive, UnChoke, Interested, Piece,\
     WrongMessageException, MessageDispatcher
 
-import yaml
-import logging.config
-from logging import getLogger
-log_config = 'config.yaml'
-logging.config.dictConfig(yaml.load(open(log_config).read(), Loader=yaml.SafeLoader))
-logger = getLogger('develop')
+from logger import logger
 
 
 class Peer(object):

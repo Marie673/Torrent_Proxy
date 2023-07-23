@@ -3,12 +3,7 @@ import random
 import socket
 
 import bitstring as bitstring
-import yaml
-import logging.config
-from logging import getLogger
-log_config = 'config.yaml'
-logging.config.dictConfig(yaml.load(open(log_config).read(), Loader=yaml.SafeLoader))
-logger = getLogger('develop')
+from logger import logger
 
 HANDSHAKE_PROTOCOL = b'BitTorrent protocol'
 HANDSHAKE_PROTOCOL_LEN = len(HANDSHAKE_PROTOCOL)

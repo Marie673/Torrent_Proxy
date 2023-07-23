@@ -6,12 +6,7 @@ import signal
 
 from src.domain.entity.piece.block import Block, BLOCK_SIZE, State
 
-import yaml
-import logging.config
-from logging import getLogger
-log_config = 'config.yaml'
-logging.config.dictConfig(yaml.load(open(log_config).read(), Loader=yaml.SafeLoader))
-logger = getLogger('develop')
+from logger import logger
 
 PENDING_TIME = 5
 
@@ -60,6 +55,10 @@ class Piece(object):
             pass
 
         return self.raw_data[block_offset:block_length]
+
+    def get_piece(self):
+        piece = self.get_block(0, self.piece_size)
+        return piece
 
     def get_empty_block(self):
         if self.is_full:
