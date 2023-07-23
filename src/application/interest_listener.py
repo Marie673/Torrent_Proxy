@@ -25,9 +25,8 @@ class InterestListener:
             try:
                 info = self.cef_handle.receive()
                 if info.is_succeeded and info.is_interest :
-                    logger("get interest")
-                    # task = asyncio.create_task(self.handle_interest(info))
-                    # self.bittorrent_task.append(task)
+                    task = asyncio.create_task(self.handle_interest(info))
+                    self.bittorrent_task.append(task)
             except Exception as e:
                 logger.error(e)
             except KeyboardInterrupt:
@@ -35,8 +34,7 @@ class InterestListener:
                 return
             finally:
                 for task in self.bittorrent_task:
-                    pass
-                    # await task
+                    await task
 
     async def handle_interest(self, info):
         name = info.name
