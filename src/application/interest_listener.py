@@ -1,7 +1,6 @@
 import asyncio
 import os.path
 import time
-from threading import Thread
 from src.application.bittorrent.bittorrent import BitTorrent
 from src.domain.entity.torrent import Torrent
 import cefpyco
@@ -11,16 +10,15 @@ import src.global_value as gv
 from logger import logger
 
 
-class InterestListener(Thread):
+class InterestListener:
     def __init__(self):
-        super().__init__()
         self.cef_handle = cefpyco.CefpycoHandle()
         self.cef_handle.begin()
 
         self.bittorrent_task = []
         self.bittorrent_dict = {}
 
-    def run(self) -> None:
+    async def run(self) -> None:
         self.cef_handle.register("ccnx:/BitTorrent")
         while True:
             try:

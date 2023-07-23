@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
+import asyncio
+
 from src.application.interest_listener import InterestListener
 
 
 def main():
     c_process = InterestListener()
-
-    c_process.start()
+    asyncio.run(c_process.run())
 
 
 if __name__ == '__main__':
