@@ -24,6 +24,7 @@ class InterestListener:
         while True:
             try:
                 info = self.cef_handle.receive()
+                await asyncio.sleep(0)
                 if info.is_succeeded and info.is_interest :
                     task = asyncio.create_task(self.handle_interest(info))
                     self.bittorrent_task.append(task)
