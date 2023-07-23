@@ -50,7 +50,7 @@ class InterestListener:
             return
 
         if prefix[1] == "BitTorrent":
-            task = asyncio.create_task(self.handle_bittorrent(interest_info))
+            await self.handle_bittorrent(interest_info)
 
 
 
