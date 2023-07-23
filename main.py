@@ -1,6 +1,4 @@
 #!/usr/bin/env python3
-import subprocess
-
 from src.application.interest_listener import InterestListener
 
 
