@@ -73,6 +73,7 @@ class BitTorrent(Thread):
     def run(self) -> None:
         try:
             while True:
+                print("Test")
                 if not self.com_mgr.has_unchocked_peers(self.info_hash) or \
                         len(self.com_mgr.peers) < gv.MAX_PEER_CONNECT:
                     self.add_peers_from_tracker()
