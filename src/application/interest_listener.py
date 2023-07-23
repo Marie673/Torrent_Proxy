@@ -24,6 +24,7 @@ class InterestListener:
             try:
                 info = self.cef_handle.receive()
                 if info.is_succeeded and info.is_interest :
+                    logger("get interest")
                     task = asyncio.create_task(self.handle_interest(info))
                     self.bittorrent_task.append(task)
             except Exception as e:
