@@ -113,7 +113,7 @@ class Tracker(object):
                     if ip.startswith('::ffff:') :
                         ip = ip.replace('::ffff:', '')
                     s = SockAddr(ip, p['port'])
-                    print(s)
+                    logger.debug(ip)
                     self.dict_sock_addr[s.__hash__()] = s
 
         except Exception as e:
