@@ -54,7 +54,6 @@ class Torrent(object):
     def __init__(self, path: str):
         self.path: str = path  # torrentファイルが保存されているパス
         torrent: dict = self.load_from_path(self.path)
-        logger.debug(torrent)
 
 
         if 'announce' in torrent.keys():
