@@ -2,7 +2,7 @@ import enum
 import hashlib
 from typing import List
 from bcoding import bdecode, bencode
-import logging
+from logger import logger
 
 """
 ファイル構造
@@ -54,6 +54,8 @@ class Torrent(object):
     def __init__(self, path: str):
         self.path: str = path  # torrentファイルが保存されているパス
         torrent: dict = self.load_from_path(self.path)
+        logger.debug(torrent)
+
 
         if 'announce' in torrent.keys():
             self.announce = torrent['announce']
@@ -88,7 +90,7 @@ class Torrent(object):
 
     @staticmethod
     def load_from_path(path):
-        logging.debug('start load_from_path')
+        logger.debug('start load_from_path')
         with open(path, 'rb') as file:
             torrent = bdecode(file)
             return torrent
