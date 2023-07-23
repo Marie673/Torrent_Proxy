@@ -94,7 +94,6 @@ class Tracker(object):
                     if ip.startswith('::ffff:'):
                         ip = ip.replace('::ffff:', '')
                     port = list_peers['peers'][i]['port']
-                    logger.debug("ip:" + ip, " port:" + str(port))
                     s = SockAddr(ip, port)
                     self.dict_sock_addr[s.__hash__()] = s
                     """
@@ -110,7 +109,10 @@ class Tracker(object):
                     """
             else:
                 for p in list_peers['peers']:
-                    s = SockAddr(p['ip'], p['port'])
+                    ip: str = p['ip']
+                    if ip.startswith('::ffff:') :
+                        ip = ip.replace('::ffff:', '')
+                    s = SockAddr(ip, p['port'])
                     self.dict_sock_addr[s.__hash__()] = s
 
         except Exception as e:
