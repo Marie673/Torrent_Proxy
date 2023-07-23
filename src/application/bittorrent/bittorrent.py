@@ -60,10 +60,12 @@ class BitTorrent(Thread):
         self.pieces = self._generate_pieces()
         self.complete_pieces = 0
 
+        """
         if gv.EVALUATION:
             with open(gv.EVALUATION_PATH, "a") as file:
                 data = str(datetime.datetime.now()) + " bittorrent process is start\n"
                 file.write(data)
+        """
         self.lock = asyncio.Lock()
         self.timer = time.time()
         logger.debug(f"start {self.info_hash_hex} thread")
