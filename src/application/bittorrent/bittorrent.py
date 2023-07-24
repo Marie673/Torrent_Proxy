@@ -173,7 +173,7 @@ class BitTorrent(Thread):
                 self.complete_pieces += 1
                 self.bitfield[piece_index] = 1
                 piece.write_on_disk()
-                logger(f"{piece_index}, piece")
+                logger.debug(f"{piece_index}, piece")
                 return
 
     async def get_data(self, piece_index, block_offset, block_length) -> bytes:
