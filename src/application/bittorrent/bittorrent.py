@@ -152,7 +152,7 @@ class BitTorrent(Thread):
             if peer.info_hash is not self.info_hash:
                 continue
 
-            logger.debug(peer.is_eligible(), peer.is_unchoked(), peer.am_interested(), peer.has_piece(piece_index))
+            logger.debug(f"{peer.is_eligible()}, {peer.is_unchoked()}, {peer.am_interested()}, {peer.has_piece(piece_index)}")
             if peer.is_eligible() and peer.is_unchoked() and peer.am_interested() and peer.has_piece(piece_index):
                 ready_peer.append(peer)
         return random.choice(ready_peer) if ready_peer else None
