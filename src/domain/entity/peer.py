@@ -53,7 +53,7 @@ class Peer(object):
 
     def do_handshake(self):
         try:
-            handshake = Handshake(self.info_hash, peer_id=peer_id)
+            handshake = Handshake(self.info_hash, peer_id=bytes(peer_id, 'utf-8'))
             self.send_to_peer(handshake.to_bytes())
             return True
         except Exception as e:
