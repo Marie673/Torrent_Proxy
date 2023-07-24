@@ -44,8 +44,6 @@ class CommunicationManager(Thread):
                 continue
 
             peer.read_buffer += payload
-            if len(peer.read_buffer) > 1:
-                logger.debug(peer.read_buffer)
 
             for msg in peer.get_messages() :
                 self._process_new_message(msg, peer)
@@ -119,7 +117,7 @@ class CommunicationManager(Thread):
             peer.handle_not_interested()
 
         elif isinstance(new_message, message.Have):
-            logger.debug("Have")
+            # logger.debug("Have")
             peer.handle_have(new_message)
 
         elif isinstance(new_message, message.BitField):
