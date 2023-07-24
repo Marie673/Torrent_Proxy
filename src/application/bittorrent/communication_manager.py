@@ -30,6 +30,7 @@ class CommunicationManager(Thread):
     def listener(self):
         read = [peer.socket for peer in self.peers]
         read_list, _, _ = select.select(read, [], [], 1)
+        print(read_list)
 
         for sock in read_list :
             peer = self.get_peer_by_socket(sock)
