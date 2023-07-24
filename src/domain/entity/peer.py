@@ -9,6 +9,8 @@ from src.domain.entity.message import Handshake, KeepAlive, UnChoke, Interested,
 from logger import logger
 
 
+peer_id = '-AZ2200-6wfG2wk6wWLc'
+
 class Peer(object):
     def __init__(self, info_hash, number_of_pieces, ip, port):
         self.info_hash = info_hash
@@ -51,7 +53,7 @@ class Peer(object):
 
     def do_handshake(self):
         try:
-            handshake = Handshake(self.info_hash)
+            handshake = Handshake(self.info_hash, peer_id=peer_id)
             self.send_to_peer(handshake.to_bytes())
             return True
         except Exception as e:
