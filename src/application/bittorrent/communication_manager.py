@@ -130,7 +130,7 @@ class CommunicationManager(Thread):
 
         elif isinstance(new_message, message.Piece):
             data = peer.handle_piece(new_message)
-            logger.debug("Piece")
+            # logger.debug("Piece")
             self.bittorrent.receive_block_piece(data)
 
         elif isinstance(new_message, message.Cancel):
