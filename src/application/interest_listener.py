@@ -59,7 +59,7 @@ class InterestListener:
     async def handle_bittorrent(self, interest_info):
         (name, prefix, chunk_num, end_chunk_num) = interest_info
         info_hash = prefix[2]
-        logger.debug(info_hash)
+        # logger.debug(info_hash)
 
         if not info_hash in self.bittorrent_dict:
             # torrentファイルを持っている前提
@@ -95,7 +95,7 @@ class InterestListener:
         except asyncio.TimeoutError as e:
             raise e
 
-        logger.debug(f"send data:: index: {piece_index}, chunk: {chunk_num}")
+        # logger.debug(f"send data:: index: {piece_index}, chunk: {chunk_num}")
         self.cef_handle.send_data(
             name=name,
             payload=data,
