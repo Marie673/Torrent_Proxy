@@ -35,7 +35,6 @@ class InterestListener:
             logger.debug("Interest Listener is down")
             return
 
-
     async def handle_interest(self, info):
         name = info.name
         logger.debug(name)
@@ -54,10 +53,8 @@ class InterestListener:
             return
 
         if prefix[1] == "BitTorrent":
-            logger.debug("handle Bittorrent")
+            # logger.debug("handle Bittorrent")
             await self.handle_bittorrent(interest_info)
-
-
 
     async def handle_bittorrent(self, interest_info):
         (name, prefix, chunk_num, end_chunk_num) = interest_info
@@ -77,14 +74,14 @@ class InterestListener:
 
         # 1ピース当たりのチャンク数
         # ピースの最後を表現するときに、チャンクサイズで余りが出ても次のピースデータを含めない.
-        if b_process.piece_length % gv.CHUNK_SIZE == 0 :
+        if b_process.piece_length % gv.CHUNK_SIZE == 0:
             chunks_per_piece = b_process.piece_length // gv.CHUNK_SIZE
-        else :
+        else:
             chunks_per_piece = (b_process.piece_length // gv.CHUNK_SIZE) + 1
 
         # オフセットの計算
         piece_index = chunk_num // chunks_per_piece
-        offset = (chunk_num  % chunks_per_piece) * gv.CHUNK_SIZE
+        offset = (chunk_num % chunks_per_piece) * gv.CHUNK_SIZE
 
         # end_chunk_numの計算.
         # chunk_numは0から数え始めるので、-1する.
@@ -98,6 +95,7 @@ class InterestListener:
         except asyncio.TimeoutError as e:
             raise e
 
+        logger.debug(f"send data: {name}, chunk: {chunk_num}")
         self.cef_handle.send_data(
             name=name,
             payload=data,
