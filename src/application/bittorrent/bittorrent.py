@@ -124,7 +124,6 @@ class BitTorrent(Thread):
             if len(self.com_mgr.peers) >= gv.MAX_PEER_CONNECT:
                 return
 
-
     def request_piece(self, piece_index):
         """
         just send message. this function don't wait for response.
@@ -139,7 +138,7 @@ class BitTorrent(Thread):
                 return
             block_data = self.pieces[piece_index].get_empty_block()
             if not block_data:
-                logger.debug("not block data")
+                # logger.debug("not block data")
                 continue
             piece_index, block_offset, block_length = block_data
             message = Request(piece_index, block_offset, block_length).to_bytes()
@@ -152,7 +151,7 @@ class BitTorrent(Thread):
             if peer.info_hash is not self.info_hash:
                 continue
 
-            logger.debug(f"{peer.is_eligible()}, {peer.is_unchoked()}, {peer.am_interested()}, {peer.has_piece(piece_index)}")
+            # logger.debug(f"{peer.is_eligible()}, {peer.is_unchoked()}, {peer.am_interested()}, {peer.has_piece(piece_index)}")
             if peer.is_eligible() and peer.is_unchoked() and peer.am_interested() and peer.has_piece(piece_index):
                 ready_peer.append(peer)
         return random.choice(ready_peer) if ready_peer else None

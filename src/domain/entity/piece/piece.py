@@ -65,6 +65,11 @@ class Piece(object):
             return None
 
         for block_index, block in enumerate(self.blocks):
+            if block.state == State.PENDING:
+                if time.time() - block.last_seen > 4:
+                    block.state = State.FREE
+                    block.last_seen = time.time()
+
             if block.state == State.FREE:
                 self.blocks[block_index].state = State.PENDING
                 self.blocks[block_index].last_seen = time.time()
