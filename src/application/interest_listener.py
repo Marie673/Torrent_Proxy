@@ -37,7 +37,7 @@ class InterestListener:
 
     async def handle_interest(self, info):
         name = info.name
-        logger.debug(name)
+        # logger.debug(name)
         prefix = name.split('/')
         """
         prefix[0] = ccnx:
@@ -48,7 +48,7 @@ class InterestListener:
         end_chunk_num = info.end_chunk_num
         interest_info = (name, prefix, chunk_num, end_chunk_num)
 
-        logger.debug(prefix)
+        # logger.debug(prefix)
         if prefix[0] != "ccnx:":
             return
 
