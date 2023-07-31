@@ -27,7 +27,7 @@ class InterestListener:
                 try:
                     info = self.cef_handle.receive()
                     # logger.debug(info)
-                    if info.is_succeeded and info.is_interest :
+                    if info.is_succeeded and info.is_interest:
                         await self.handle_interest(info)
                 except Exception as e:
                     logger.error(e)
@@ -61,7 +61,7 @@ class InterestListener:
         info_hash = prefix[2]
         # logger.debug(info_hash)
 
-        if not info_hash in self.bittorrent_dict:
+        if info_hash not in self.bittorrent_dict:
             # torrentファイルを持っている前提
             # torrentファイルの名前は、{$info_hash} + ".torrent"
             torrent_file_name = gv.TORRENT_FILE_PATH + info_hash + ".torrent"
@@ -95,7 +95,7 @@ class InterestListener:
         except asyncio.TimeoutError as e:
             raise e
 
-        # logger.debug(f"send data:: index: {piece_index}, chunk: {chunk_num}")
+        logger.debug(f"send data:: index: {piece_index}, chunk: {chunk_num}")
         self.cef_handle.send_data(
             name=name,
             payload=data,

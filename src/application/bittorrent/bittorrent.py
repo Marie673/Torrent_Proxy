@@ -20,7 +20,7 @@ from logger import logger
 
 
 class BitTorrent(Thread):
-    def __init__(self, torrent: Torrent) :
+    def __init__(self, torrent: Torrent):
         """
         トラッカーにアクセス
         ↓
