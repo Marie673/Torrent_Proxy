@@ -110,8 +110,8 @@ class InterestListener:
 
         try:
             data: bytes = await asyncio.wait_for(
-                b_thread.get_data(piece_index, offset, gv.CHUNK_SIZE)
-                , timeout=4
+                b_thread.get_data(piece_index, offset, gv.CHUNK_SIZE),
+                timeout=4
             )
         except asyncio.TimeoutError as e:
             raise e
