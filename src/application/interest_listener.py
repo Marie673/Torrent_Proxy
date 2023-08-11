@@ -1,12 +1,13 @@
 import asyncio
 import os.path
 import time
+from multiprocessing import Process, Queue
+
 from src.application.bittorrent.bittorrent import BitTorrent
 from src.domain.entity.torrent import Torrent
 import cefpyco
+
 import src.global_value as gv
-
-
 from logger import logger
 
 
@@ -19,23 +20,52 @@ class InterestListener:
         self.bittorrent_task = []
         self.bittorrent_dict = {}
 
-    async def run(self) -> None:
+        self.queue = Queue()
+
+    def run(self) -> None:
         self.cef_handle.register("ccnx:/BitTorrent")
         logger.debug("start interest_listener")
+        translate_p = None
         try:
+            translate_p = Process(target=self.translator())
+            translate_p.start()
             while True:
                 try:
                     info = self.cef_handle.receive()
                     # logger.debug(info)
                     if info.is_succeeded and info.is_interest:
-                        await self.handle_interest(info)
+                        self.handle_interest(info)
                 except Exception as e:
                     logger.error(e)
         except KeyboardInterrupt:
             logger.debug("Interest Listener is down")
-            return
+        finally:
+            translate_p.kill()
 
-    async def handle_interest(self, info):
+        return
+
+    def translator(self):
+        async def routine():
+            while True:
+                while self.queue.qsize() > 0:
+                    req = self.queue.get()
+                    name, prefix, chunk_num, end_chunk_num = req
+                    info_hash = prefix[2]
+
+                    if info_hash not in self.bittorrent_dict:
+                        # torrentファイルを持っている前提
+                        # torrentファイルの名前は、{$info_hash} + ".torrent"
+                        torrent_file_name = gv.TORRENT_FILE_PATH + info_hash + ".torrent"
+                        torrent = Torrent(torrent_file_name)
+                        b_thread = BitTorrent(torrent)
+                        b_thread.start()
+                        self.bittorrent_dict[info_hash] = b_thread
+
+                    await self.handle_bittorrent(req)
+
+        asyncio.run(routine())
+
+    def handle_interest(self, info):
         name = info.name
         # logger.debug(name)
         prefix = name.split('/')
@@ -54,30 +84,21 @@ class InterestListener:
 
         if prefix[1] == "BitTorrent":
             # logger.debug("handle Bittorrent")
-            await self.handle_bittorrent(interest_info)
+            self.queue.put(interest_info)
 
     async def handle_bittorrent(self, interest_info):
         (name, prefix, chunk_num, end_chunk_num) = interest_info
         info_hash = prefix[2]
         # logger.debug(info_hash)
 
-        if info_hash not in self.bittorrent_dict:
-            # torrentファイルを持っている前提
-            # torrentファイルの名前は、{$info_hash} + ".torrent"
-            torrent_file_name = gv.TORRENT_FILE_PATH + info_hash + ".torrent"
-            torrent = Torrent(torrent_file_name)
-            b_process = BitTorrent(torrent)
-            b_process.start()
-            self.bittorrent_dict[info_hash] = b_process
-
-        b_process: BitTorrent = self.bittorrent_dict[info_hash]
+        b_thread: BitTorrent = self.bittorrent_dict[info_hash]
 
         # 1ピース当たりのチャンク数
         # ピースの最後を表現するときに、チャンクサイズで余りが出ても次のピースデータを含めない.
-        if b_process.piece_length % gv.CHUNK_SIZE == 0:
-            chunks_per_piece = b_process.piece_length // gv.CHUNK_SIZE
+        if b_thread.piece_length % gv.CHUNK_SIZE == 0:
+            chunks_per_piece = b_thread.piece_length // gv.CHUNK_SIZE
         else:
-            chunks_per_piece = (b_process.piece_length // gv.CHUNK_SIZE) + 1
+            chunks_per_piece = (b_thread.piece_length // gv.CHUNK_SIZE) + 1
 
         # オフセットの計算
         piece_index = chunk_num // chunks_per_piece
@@ -85,11 +106,11 @@ class InterestListener:
 
         # end_chunk_numの計算.
         # chunk_numは0から数え始めるので、-1する.
-        end_chunk_num = chunks_per_piece * b_process.number_of_pieces - 1
+        end_chunk_num = chunks_per_piece * b_thread.number_of_pieces - 1
 
         try:
             data: bytes = await asyncio.wait_for(
-                b_process.get_data(piece_index, offset, gv.CHUNK_SIZE)
+                b_thread.get_data(piece_index, offset, gv.CHUNK_SIZE)
                 , timeout=4
             )
         except asyncio.TimeoutError as e:
