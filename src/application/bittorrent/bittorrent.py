@@ -23,6 +23,10 @@ class AlreadyRequested(Exception):
     pass
 
 
+class PeersNotExist(Exception):
+    pass
+
+
 class BitTorrent(Thread):
     def __init__(self, torrent: Torrent):
         """
@@ -139,15 +143,16 @@ class BitTorrent(Thread):
 
         if piece.state == State.PENDING:
             raise AlreadyRequested('this piece is already requested.')
+        piece.state = State.PENDING
 
         logger.debug(f"BitTorrent {piece_index} request")
-        piece.state = State.PENDING
 
         for block_index in range(piece.number_of_blocks):
             peer = self._get_random_peer_having_piece(piece_index)
             if not peer:
                 logger.debug("not exist having peer")
-                return
+                piece.state = State.FREE
+                raise PeersNotExist("Peer is not Exist")
             block_data = self.pieces[piece_index].get_empty_block()
             if not block_data:
                 # logger.debug("not block data")
@@ -196,6 +201,8 @@ class BitTorrent(Thread):
             self.request_piece(piece_index)
         except AlreadyRequested:
             raise AlreadyRequested(f'the piece {piece_index} is already requested.')
+        except Exception as e:
+            raise e
 
         while not piece.is_full:
             await asyncio.sleep(0)
