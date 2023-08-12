@@ -7,7 +7,7 @@ from logger import logger
 def main():
     logger.debug("start")
     c_process = InterestListener()
-    asyncio.run(c_process.run())
+    c_process.run()
 
 
 if __name__ == '__main__':
