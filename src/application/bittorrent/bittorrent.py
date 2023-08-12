@@ -7,7 +7,7 @@ import bitstring
 
 from threading import Thread
 
-from src.domain.entity.piece.piece import Piece
+from src.domain.entity.piece.piece import Piece, State
 from src.domain.entity.peer import Peer
 from src.domain.entity.message import Request
 from src.domain.entity.tracker import Tracker
@@ -134,8 +134,15 @@ class BitTorrent(Thread):
         make blocks request to many peers.
         """
         piece = self.pieces[piece_index]
+        if piece.catch_timeout():
+            piece.state = State.FREE
+
+        if piece.state == State.PENDING:
+            raise AlreadyRequested('this piece is already requested.')
+
         logger.debug(f"BitTorrent {piece_index} request")
-        piece.update_block_status()
+        piece.state = State.PENDING
+
         for block_index in range(piece.number_of_blocks):
             peer = self._get_random_peer_having_piece(piece_index)
             if not peer:
@@ -188,6 +195,7 @@ class BitTorrent(Thread):
         try:
             self.request_piece(piece_index)
         except AlreadyRequested:
+            raise AlreadyRequested
 
         while not piece.is_full:
             await asyncio.sleep(0)

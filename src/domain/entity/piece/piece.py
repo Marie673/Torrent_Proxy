@@ -39,6 +39,16 @@ class Piece(object):
             if block.state == State.PENDING and (time.time() - block.last_seen) > PENDING_TIME:
                 self.blocks[i] = Block()
 
+    def catch_timeout(self):
+        flag = False
+
+        for i, block in enumerate(self.blocks):
+            if block.state == State.PENDING and (time.time() - block.last_seen) > PENDING_TIME:
+                self.blocks[i] = Block()
+                flag = True
+
+        return flag
+
     def set_block(self, offset, data):
         index = int(offset / BLOCK_SIZE)
 
