@@ -114,7 +114,8 @@ class InterestListener:
                 timeout=4
             )
         except asyncio.TimeoutError as e:
-            raise e
+            logger.error(e)
+            return
 
         logger.debug(f"send data:: index: {piece_index}, chunk: {chunk_num}")
         self.cef_handle.send_data(
