@@ -19,6 +19,10 @@ import src.global_value as gv
 from logger import logger
 
 
+class AlreadyRequested(Exception):
+    pass
+
+
 class BitTorrent(Thread):
     def __init__(self, torrent: Torrent):
         """
@@ -131,6 +135,7 @@ class BitTorrent(Thread):
         """
         piece = self.pieces[piece_index]
         logger.debug(f"BitTorrent {piece_index} request")
+        piece.update_block_status()
         for block_index in range(piece.number_of_blocks):
             peer = self._get_random_peer_having_piece(piece_index)
             if not peer:
@@ -180,7 +185,10 @@ class BitTorrent(Thread):
         if piece.is_full:
             return piece.get_block(block_offset, block_length)
 
-        self.request_piece(piece_index)
+        try:
+            self.request_piece(piece_index)
+        except AlreadyRequested:
+
         while not piece.is_full:
             await asyncio.sleep(0)
 

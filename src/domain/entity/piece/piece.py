@@ -15,6 +15,8 @@ class Piece(object):
     def __init__(self, piece_index: int, piece_size: int, piece_hash: str, file_path):
         self.exist = False
 
+        self.state = State.FREE
+
         self.piece_index = piece_index
         self.piece_size = piece_size
         self.piece_hash = piece_hash
@@ -32,7 +34,7 @@ class Piece(object):
         signal.signal(signal.SIGALRM, self.update_block_status)
         signal.setitimer(signal.ITIMER_REAL, 1, 5)
 
-    def update_block_status(self, signum, frame):  # if block is pending for too long : set it free
+    def update_block_status(self):  # if block is pending for too long : set it free
         for i, block in enumerate(self.blocks):
             if block.state == State.PENDING and (time.time() - block.last_seen) > PENDING_TIME:
                 self.blocks[i] = Block()
