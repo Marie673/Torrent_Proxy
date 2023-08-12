@@ -27,7 +27,7 @@ class InterestListener:
         logger.debug("start interest_listener")
         translate_p = None
         try:
-            translate_p = Process(target=self.translator())
+            translate_p = Process(target=self.translator)
             translate_p.start()
             while True:
                 try:
