@@ -195,7 +195,7 @@ class BitTorrent(Thread):
         try:
             self.request_piece(piece_index)
         except AlreadyRequested:
-            raise AlreadyRequested('the piece is already requested.')
+            raise AlreadyRequested(f'the piece {piece_index} is already requested.')
 
         while not piece.is_full:
             await asyncio.sleep(0)
