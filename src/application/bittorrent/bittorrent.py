@@ -43,6 +43,7 @@ class BitTorrent(Thread):
         self.com_mgr.start()
 
         self.torrent = torrent
+        logger.debug(torrent)
         self.info: Info = torrent.info
         self.info_hash = torrent.info_hash
         self.info_hash_hex = torrent.info_hash_hex
