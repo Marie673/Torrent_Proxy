@@ -113,10 +113,13 @@ class Piece(object):
         if self.number_of_blocks > 1:
             for i in range(self.number_of_blocks):
                 self.blocks.append(Block())
+
             logger.debug(f"{self.number_of_blocks}")
+
             if (self.piece_size % BLOCK_SIZE) > 0:
                 logger.debug("test")
                 self.blocks[self.number_of_blocks - 1].block_size = self.piece_size % BLOCK_SIZE
+
             time.sleep(5)
         else:
             self.blocks.append(Block(block_size=int(self.piece_size)))
