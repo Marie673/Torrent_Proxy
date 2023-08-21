@@ -120,7 +120,7 @@ class InterestListener:
             logger.error(e)
             return
 
-        logger.debug(f"send data:: index: {piece_index}, chunk: {chunk_num}")
+        # logger.debug(f"send data:: index: {piece_index}, chunk: {chunk_num}")
         self.cef_handle.send_data(
             name=name,
             payload=data,
