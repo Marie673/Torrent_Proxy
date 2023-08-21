@@ -99,6 +99,7 @@ class Piece(object):
     def set_to_full(self):
         data = self._merge_blocks()
         if not self._valid_blocks(data):
+            logger.error(f"invalid data: {self.piece_index}")
             self._init_blocks()
             return False
 
@@ -114,13 +115,9 @@ class Piece(object):
             for i in range(self.number_of_blocks):
                 self.blocks.append(Block())
 
-            logger.debug(f"{self.number_of_blocks}")
-
             if (self.piece_size % BLOCK_SIZE) > 0:
-                logger.debug("test")
                 self.blocks[self.number_of_blocks - 1].block_size = self.piece_size % BLOCK_SIZE
 
-            time.sleep(5)
         else:
             self.blocks.append(Block(block_size=int(self.piece_size)))
 
