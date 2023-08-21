@@ -125,7 +125,7 @@ class Torrent(object):
             pass
 
         try:
-            print(f'info_hash: ')
+            print(f'info_hash: {self.info_hash_hex}')
         except AttributeError:
             pass
 

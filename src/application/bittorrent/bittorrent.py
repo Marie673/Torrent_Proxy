@@ -43,7 +43,6 @@ class BitTorrent(Thread):
         self.com_mgr.start()
 
         self.torrent = torrent
-        logger.debug(torrent)
         self.info: Info = torrent.info
         self.info_hash = torrent.info_hash
         self.info_hash_hex = torrent.info_hash_hex
@@ -58,7 +57,10 @@ class BitTorrent(Thread):
         # ピース数 の計算
         # シングルファイルと複数ファイルで計算方法が変わる. 複数ファイルの場合、ファイルのサイズの合計値が全体のデータサイズになる.
         if torrent.file_mode == FileMode.single_file:
-            self.number_of_pieces = int(self.info.length / self.piece_length)
+            if self.info.length % self.piece_length == 0:
+                self.number_of_pieces = int(self.info.length / self.piece_length)
+            else:
+                self.number_of_pieces = int(self.info.length / self.piece_length) + 1
         else:
             length: int = 0
             for file in self.info.files:
