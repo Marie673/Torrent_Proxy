@@ -140,5 +140,6 @@ class Piece(object):
         return False
 
     def write_on_disk(self):
+        self.blocks = []
         with open(self.file_path, "wb") as file:
             file.write(self.raw_data)
