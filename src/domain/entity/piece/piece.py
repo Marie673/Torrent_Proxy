@@ -12,8 +12,6 @@ PENDING_TIME = 5
 
 class Piece(object):
     def __init__(self, piece_index: int, piece_size: int, piece_hash: str, file_path):
-        self.exist = False
-
         self.state = State.FREE
 
         self.piece_index = piece_index
@@ -56,9 +54,6 @@ class Piece(object):
             self.blocks[index].state = State.FULL
 
     def get_block(self, block_offset, block_length):
-        if not self.exist:
-            return None
-
         with open(self.file_path, 'r+b') as file:
             data = file.read()
             return data[block_offset:block_length]
