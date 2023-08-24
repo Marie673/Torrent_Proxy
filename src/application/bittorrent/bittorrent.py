@@ -163,7 +163,7 @@ class BitTorrent(Thread):
             piece_index, block_offset, block_length = block_data
             message = Request(piece_index, block_offset, block_length).to_bytes()
             peer.send_to_peer(message)
-            logger.debug(f"BitTorrent {piece_index} {block_offset} request")
+            # logger.debug(f"BitTorrent {piece_index} {block_offset} request")
 
     def _get_random_peer_having_piece(self, piece_index) -> Peer:
         ready_peer = []
@@ -197,18 +197,18 @@ class BitTorrent(Thread):
 
     async def get_data(self, piece_index, block_offset, block_length) -> bytes:
         piece = self.pieces[piece_index]
-        if piece.is_full:
-            return piece.get_block(block_offset, block_length)
+        if not piece.is_full:
+            try:
+                self.request_piece(piece_index)
+            except AlreadyRequested:
+                raise AlreadyRequested(f'the piece {piece_index} is already requested.')
+            except Exception as e:
+                raise e
 
-        try:
-            self.request_piece(piece_index)
-        except AlreadyRequested:
-            raise AlreadyRequested(f'the piece {piece_index} is already requested.')
-        except Exception as e:
-            raise e
-
-        while not piece.is_full:
-            await asyncio.sleep(0)
+            while not piece.is_full:
+                await asyncio.sleep(0)
+                if piece.catch_timeout():
+                    raise TimeoutError()
 
         return piece.get_block(block_offset, block_length)
 
