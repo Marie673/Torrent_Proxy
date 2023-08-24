@@ -163,7 +163,7 @@ class BitTorrent(Thread):
             piece_index, block_offset, block_length = block_data
             message = Request(piece_index, block_offset, block_length).to_bytes()
             peer.send_to_peer(message)
-            # logger.debug(f"BitTorrent {piece_index} {block_offset} request")
+            logger.debug(f"BitTorrent {piece_index} {block_offset} request")
 
     def _get_random_peer_having_piece(self, piece_index) -> Peer:
         ready_peer = []
