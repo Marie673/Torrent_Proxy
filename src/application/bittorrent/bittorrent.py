@@ -148,7 +148,7 @@ class BitTorrent(Thread):
             raise AlreadyRequested('this piece is already requested.')
         piece.state = State.PENDING
 
-        logger.debug(f"BitTorrent {piece_index} request")
+        # logger.debug(f"BitTorrent {piece_index} request")
 
         for block_index in range(piece.number_of_blocks):
             peer = self._get_random_peer_having_piece(piece_index)
