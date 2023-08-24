@@ -54,9 +54,10 @@ class Piece(object):
             self.blocks[index].state = State.FULL
 
     def get_block(self, block_offset, block_length):
-        with open(self.file_path, 'rb') as file:
-            data = file.read()
-            return data[block_offset:block_length]
+        with open(self.file_path, 'rb+') as file:
+            file.seek(block_offset)
+            data = file.read(block_length)
+            return data
 
     def get_piece(self):
         piece_data = self.get_block(0, self.piece_size)
