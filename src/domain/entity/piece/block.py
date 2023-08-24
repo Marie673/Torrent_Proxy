@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 BLOCK_SIZE = 2 ** 14
 
 

@@ -1,4 +1,5 @@
 import asyncio
+import math
 import os.path
 import time
 from multiprocessing import Process, Queue
@@ -73,6 +74,7 @@ class InterestListener:
         prefix[0] = ccnx:
         prefix[1] = BitTorrent
         prefix[2] = info_hash
+        prefix[3] = piece_index
         """
         chunk_num = info.chunk_num
         end_chunk_num = info.end_chunk_num
@@ -89,24 +91,18 @@ class InterestListener:
     async def handle_bittorrent(self, interest_info):
         (name, prefix, chunk_num, end_chunk_num) = interest_info
         info_hash = prefix[2]
+        piece_index = prefix[3]
         # logger.debug(info_hash)
 
         b_thread: BitTorrent = self.bittorrent_dict[info_hash]
-
-        # 1ピース当たりのチャンク数
-        # ピースの最後を表現するときに、チャンクサイズで余りが出ても次のピースデータを含めない.
-        if b_thread.piece_length % gv.CHUNK_SIZE == 0:
-            chunks_per_piece = b_thread.piece_length // gv.CHUNK_SIZE
-        else:
-            chunks_per_piece = (b_thread.piece_length // gv.CHUNK_SIZE) + 1
+        piece = b_thread.pieces[piece_index]
 
         # オフセットの計算
-        piece_index = chunk_num // chunks_per_piece
-        offset = (chunk_num % chunks_per_piece) * gv.CHUNK_SIZE
+        offset = chunk_num * gv.CHUNK_SIZE
 
         # end_chunk_numの計算.
         # chunk_numは0から数え始めるので、-1する.
-        end_chunk_num = chunks_per_piece * b_thread.number_of_pieces - 1
+        end_chunk_num = math.ceil(piece.piece_size / gv.CHUNK_SIZE) - 1
 
         try:
             data: bytes = await asyncio.wait_for(

@@ -2,7 +2,6 @@ import math
 from typing import List
 import hashlib
 import time
-import signal
 
 from src.domain.entity.piece.block import Block, BLOCK_SIZE, State
 
@@ -113,7 +112,8 @@ class Piece(object):
 
         if self.number_of_blocks > 1:
             for i in range(self.number_of_blocks):
-                self.blocks.append(Block())
+                new_block = Block()
+                self.blocks.append(new_block)
 
             if (self.piece_size % BLOCK_SIZE) > 0:
                 self.blocks[self.number_of_blocks - 1].block_size = self.piece_size % BLOCK_SIZE
