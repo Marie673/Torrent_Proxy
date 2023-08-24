@@ -91,7 +91,7 @@ class InterestListener:
     async def handle_bittorrent(self, interest_info):
         (name, prefix, chunk_num, end_chunk_num) = interest_info
         info_hash = prefix[2]
-        piece_index = prefix[3]
+        piece_index = int(prefix[3])
         # logger.debug(info_hash)
 
         b_thread: BitTorrent = self.bittorrent_dict[info_hash]
