@@ -211,7 +211,7 @@ class BitTorrent(Thread):
                     raise TimeoutError()
 
         piece_data = piece.get_block(block_offset, block_length)
-        logger.debug(f"{len(piece_data)}")
+        logger.debug(f"{block_offset} {block_length} {len(piece_data)}")
         return piece_data
 
     def all_pieces_completed(self) -> bool:
