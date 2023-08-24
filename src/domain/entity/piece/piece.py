@@ -56,20 +56,16 @@ class Piece(object):
             self.blocks[index].state = State.FULL
 
     def get_block(self, block_offset, block_length):
-        if self.exist:
-            for path_file in self.file_path:
-                with open(path_file, 'r+b') as file:
-                    data = file.read()
-                    return data[block_offset:block_length]
-        else:
-            # TODO: 例外処理の追加　file is not full block
-            pass
+        if not self.exist:
+            return None
 
-        return self.raw_data[block_offset:block_length]
+        with open(self.file_path, 'r+b') as file:
+            data = file.read()
+            return data[block_offset:block_length]
 
     def get_piece(self):
-        piece = self.get_block(0, self.piece_size)
-        return piece
+        piece_data = self.get_block(0, self.piece_size)
+        return piece_data
 
     def get_empty_block(self):
         if self.is_full:
@@ -140,6 +136,6 @@ class Piece(object):
         return False
 
     def write_on_disk(self):
-        del self.blocks
         with open(self.file_path, "wb") as file:
             file.write(self.raw_data)
+        del self.raw_data
