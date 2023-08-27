@@ -118,7 +118,8 @@ class InterestListener:
         (name, prefix, chunk_num, end_chunk_num) = interest_info
         info_hash = prefix[2]
         piece_index = int(prefix[3])
-        logger.debug(f"{info_hash} {piece_index}")
+        if chunk_num == 0:
+            logger.debug(f"{info_hash} {piece_index}")
 
         b_thread: BitTorrent = self.bittorrent_dict[info_hash]
         piece = b_thread.pieces[piece_index]
