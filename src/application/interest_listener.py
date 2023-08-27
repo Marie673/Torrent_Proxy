@@ -90,7 +90,7 @@ class InterestListener:
 
                     await self.handle_bittorrent(req)
 
-        asyncio.run(routine())
+        asyncio.run(routine(), debug=True)
 
     def handle_interest(self, info):
         name = info.name
