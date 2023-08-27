@@ -119,7 +119,7 @@ class InterestListener:
         info_hash = prefix[2]
         piece_index = int(prefix[3])
         if chunk_num == 0:
-            logger.debug(f"{info_hash}/{piece_index} is requested.")
+            print(f"{Color.BG_BLUE}{info_hash}/{piece_index} is requested.{Color.RESET}")
 
         b_thread: BitTorrent = self.bittorrent_dict[info_hash]
         piece = b_thread.pieces[piece_index]
@@ -151,3 +151,5 @@ class InterestListener:
             end_chunk_num=end_chunk_num,
             cache_time=60  # たしかs
         )
+        if chunk_num == 0:
+            print(f"send data: {Color.BG_RED}{info_hash}/{piece_index}.{Color.RESET}")
